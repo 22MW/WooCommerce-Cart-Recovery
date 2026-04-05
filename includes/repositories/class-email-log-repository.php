@@ -59,6 +59,25 @@ final class WCCR_Email_Log_Repository {
 		);
 	}
 
+	/**
+	 * Get all sent step numbers for a cart.
+	 *
+	 * @param int $cart_id Cart ID.
+	 * @return int[]
+	 */
+	public function get_sent_steps_for_cart( int $cart_id ): array {
+		global $wpdb;
+
+		$steps = $wpdb->get_col(
+			$wpdb->prepare(
+				"SELECT step FROM {$this->table} WHERE cart_id = %d AND status = 'sent' ORDER BY step ASC",
+				$cart_id
+			)
+		);
+
+		return array_map( 'absint', is_array( $steps ) ? $steps : array() );
+	}
+
 	public function get_last_error_for_cart( int $cart_id ): string {
 		global $wpdb;
 		$error = $wpdb->get_var(

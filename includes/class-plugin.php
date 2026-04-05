@@ -19,12 +19,13 @@ final class WCCR_Plugin {
 		$cart_repository      = new WCCR_Cart_Repository();
 		$email_log_repository = new WCCR_Email_Log_Repository();
 		$locale_resolver      = new WCCR_Locale_Resolver_Manager();
+		$email_eligibility    = new WCCR_Email_Eligibility_Service( $email_log_repository );
 		$cart_capture_service = new WCCR_Cart_Capture_Service( $cart_repository, $locale_resolver );
 		$recovery_service     = new WCCR_Recovery_Service( $cart_repository );
 		$pending_detector     = new WCCR_Pending_Order_Detector( $cart_repository, $locale_resolver, $settings_repository );
 		$coupon_service       = new WCCR_Coupon_Service();
 		$email_renderer       = new WCCR_Email_Renderer();
-		$email_scheduler      = new WCCR_Email_Scheduler( $cart_repository, $email_log_repository, $settings_repository, $coupon_service, $email_renderer, $recovery_service );
+		$email_scheduler      = new WCCR_Email_Scheduler( $cart_repository, $email_log_repository, $settings_repository, $email_eligibility, $coupon_service, $email_renderer, $recovery_service );
 		$detector             = new WCCR_Abandoned_Cart_Detector( $cart_repository, $settings_repository );
 		$cleanup_service      = new WCCR_Cleanup_Service( $cart_repository, $email_log_repository, $settings_repository );
 		$stats_service        = new WCCR_Stats_Service( $cart_repository, $email_log_repository );
@@ -40,7 +41,7 @@ final class WCCR_Plugin {
 
 		$admin = new WCCR_Admin_Menu(
 			$settings_page,
-			new WCCR_Abandoned_Carts_Page( $cart_repository, $email_log_repository, $settings_repository ),
+			new WCCR_Abandoned_Carts_Page( $cart_repository, $email_log_repository, $settings_repository, $email_eligibility ),
 			new WCCR_Stats_Page( $stats_service )
 		);
 		$admin->register_hooks();

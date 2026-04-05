@@ -173,6 +173,18 @@ final class WCCR_Cart_Repository {
 		return $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$this->table} ORDER BY id DESC LIMIT %d", $limit ), ARRAY_A );
 	}
 
+	public function get_abandoned_carts( int $limit = 200 ): array {
+		global $wpdb;
+
+		return $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT * FROM {$this->table} WHERE status = 'abandoned' AND email IS NOT NULL AND email != '' ORDER BY abandoned_at_gmt ASC LIMIT %d",
+				$limit
+			),
+			ARRAY_A
+		);
+	}
+
 	public function count_by_status( string $status ): int {
 		global $wpdb;
 		return (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$this->table} WHERE status = %s", $status ) );

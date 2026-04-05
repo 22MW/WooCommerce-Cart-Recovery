@@ -27,8 +27,7 @@ final class WCCR_Email_Renderer {
 
 		if ( function_exists( 'WC' ) && WC()->mailer() ) {
 			$mailer  = WC()->mailer();
-			$content = $mailer->wrap_message( $subject, $content );
-			return $mailer->style_inline( $content );
+			return $mailer->wrap_message( $subject, $content );
 		}
 
 		return $content;
