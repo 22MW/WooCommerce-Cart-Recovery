@@ -1,6 +1,9 @@
 <?php
 defined( 'ABSPATH' ) || exit;
 
+/**
+ * Capture checkout details from the classic WooCommerce checkout flow.
+ */
 final class WCCR_Classic_Checkout_Capture_Adapter {
 	public function __construct(
 		private WCCR_Cart_Capture_Service $cart_capture_service
@@ -12,10 +15,16 @@ final class WCCR_Classic_Checkout_Capture_Adapter {
 		add_action( 'woocommerce_store_api_checkout_update_order_from_request', array( $this, 'capture_blocks_order_request' ), 10, 2 );
 	}
 
+	/**
+	 * Capture cart updates from the classic cart page.
+	 */
 	public function capture_cart(): void {
 		$this->cart_capture_service->capture_current_cart( null, null, 'classic' );
 	}
 
+	/**
+	 * Capture checkout contact details from serialized posted data.
+	 */
 	public function capture_checkout_email( string $posted_data ): void {
 		parse_str( $posted_data, $data );
 		$name = trim( trim( (string) ( $data['billing_first_name'] ?? '' ) ) . ' ' . trim( (string) ( $data['billing_last_name'] ?? '' ) ) );
@@ -26,6 +35,12 @@ final class WCCR_Classic_Checkout_Capture_Adapter {
 		);
 	}
 
+	/**
+	 * Capture checkout contact details from Checkout Blocks order updates.
+	 *
+	 * @param mixed $order   Order object.
+	 * @param mixed $request REST request.
+	 */
 	public function capture_blocks_order_request( $order, $request ): void {
 		$email = null;
 		$name  = null;

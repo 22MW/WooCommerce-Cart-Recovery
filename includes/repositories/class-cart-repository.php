@@ -1,6 +1,9 @@
 <?php
 defined( 'ABSPATH' ) || exit;
 
+/**
+ * Repository for abandoned cart persistence and recovery queries.
+ */
 final class WCCR_Cart_Repository {
 	private string $table;
 
@@ -9,70 +12,63 @@ final class WCCR_Cart_Repository {
 		$this->table = $wpdb->prefix . 'wccr_abandoned_carts';
 	}
 
+	/**
+	 * Create or update the currently open cart for the session/customer.
+	 *
+	 * @param string      $session_key    WooCommerce session key.
+	 * @param int|null    $user_id        Current user ID.
+	 * @param string|null $email          Captured email.
+	 * @param string|null $customer_name  Captured customer name.
+	 * @param string      $locale         Resolved locale.
+	 * @param array       $cart_payload   Serialized cart items.
+	 * @param float       $cart_total     Cart total.
+	 * @param string      $currency       Cart currency.
+	 * @param string      $source         Capture source.
+	 */
 	public function upsert_active_cart( string $session_key, ?int $user_id, ?string $email, ?string $customer_name, string $locale, array $cart_payload, float $cart_total, string $currency, string $source = 'classic' ): void {
-		global $wpdb;
-
-		$cart_hash   = hash( 'sha256', wp_json_encode( $cart_payload ) . '|' . $cart_total );
+		$cart_hash   = $this->build_cart_hash( $cart_payload, $cart_total );
 		$existing_id = $this->find_open_cart_id( $session_key, $email );
 		$existing    = $existing_id ? $this->find_by_id( $existing_id ) : null;
 		$now_gmt     = gmdate( 'Y-m-d H:i:s' );
-		$data        = array(
-			'session_key'       => $session_key,
-			'user_id'           => $user_id,
-			'email'             => $email,
-			'customer_name'     => $customer_name,
-			'locale'            => $locale,
-			'cart_hash'         => $cart_hash,
-			'cart_payload'      => wp_json_encode( $cart_payload ),
-			'cart_total'        => $cart_total,
-			'currency'          => $currency,
-			'source'            => $source,
-			'updated_at_gmt'    => $now_gmt,
-		);
+		$data        = $this->build_cart_row_data( $session_key, $user_id, $email, $customer_name, $locale, $cart_payload, $cart_total, $currency, $source, $cart_hash, $now_gmt );
 
 		if ( $existing ) {
-			$current_status = (string) ( $existing['status'] ?? '' );
-			$current_hash   = (string) ( $existing['cart_hash'] ?? '' );
-
-			if ( in_array( $current_status, array( 'abandoned', 'clicked' ), true ) && $current_hash === $cart_hash ) {
-				$wpdb->update( $this->table, $data, array( 'id' => absint( $existing_id ) ) );
-				return;
-			}
-
-			$data['status']            = 'active';
-			$data['last_activity_gmt'] = $now_gmt;
-			$data['abandoned_at_gmt']  = null;
-			$data['clicked_at_gmt']    = null;
-			$data['recovered_at_gmt']  = null;
-			$data['recovered_order_id'] = null;
-			$wpdb->update( $this->table, $data, array( 'id' => absint( $existing_id ) ) );
+			$this->update_existing_open_cart( absint( $existing_id ), $existing, $data, $cart_hash, $now_gmt );
 			return;
 		}
 
-		$data['status']            = 'active';
-		$data['last_activity_gmt'] = $now_gmt;
-		$data['created_at_gmt'] = $now_gmt;
-		$wpdb->insert( $this->table, $data );
+		$this->insert_new_active_cart( $data, $now_gmt );
 	}
 
+	/**
+	 * Mark stale active carts as abandoned.
+	 */
 	public function mark_abandoned_older_than( int $minutes ): int {
 		global $wpdb;
 
 		$threshold = gmdate( 'Y-m-d H:i:s', time() - ( $minutes * MINUTE_IN_SECONDS ) );
+		$now_gmt   = gmdate( 'Y-m-d H:i:s' );
+
 		return (int) $wpdb->query(
 			$wpdb->prepare(
 				"UPDATE {$this->table} SET status = 'abandoned', abandoned_at_gmt = %s, updated_at_gmt = %s WHERE status = 'active' AND email IS NOT NULL AND email != '' AND last_activity_gmt < %s",
-				gmdate( 'Y-m-d H:i:s' ),
-				gmdate( 'Y-m-d H:i:s' ),
+				$now_gmt,
+				$now_gmt,
 				$threshold
 			)
 		);
 	}
 
+	/**
+	 * Return abandoned carts ready for a concrete step.
+	 *
+	 * @return array<int, array<string, mixed>>
+	 */
 	public function get_abandoned_ready_for_step( int $step, int $delay_minutes ): array {
 		global $wpdb;
 
 		$threshold = gmdate( 'Y-m-d H:i:s', time() - ( $delay_minutes * MINUTE_IN_SECONDS ) );
+
 		return $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT c.* FROM {$this->table} c
@@ -86,6 +82,11 @@ final class WCCR_Cart_Repository {
 		);
 	}
 
+	/**
+	 * Find a cart row by ID.
+	 *
+	 * @return array<string, mixed>|null
+	 */
 	public function find_by_id( int $id ): ?array {
 		global $wpdb;
 
@@ -93,11 +94,11 @@ final class WCCR_Cart_Repository {
 		return $row ?: null;
 	}
 
+	/**
+	 * Mark a cart as recovered without order linkage.
+	 */
 	public function mark_recovered( int $id ): void {
-		global $wpdb;
-
-		$wpdb->update(
-			$this->table,
+		$this->update_status(
 			array(
 				'status'           => 'recovered',
 				'recovered_at_gmt' => gmdate( 'Y-m-d H:i:s' ),
@@ -107,11 +108,11 @@ final class WCCR_Cart_Repository {
 		);
 	}
 
+	/**
+	 * Mark a cart as recovered and attach the resulting order.
+	 */
 	public function mark_recovered_order( int $id, int $order_id ): void {
-		global $wpdb;
-
-		$wpdb->update(
-			$this->table,
+		$this->update_status(
 			array(
 				'status'             => 'recovered',
 				'recovered_at_gmt'   => gmdate( 'Y-m-d H:i:s' ),
@@ -122,11 +123,11 @@ final class WCCR_Cart_Repository {
 		);
 	}
 
+	/**
+	 * Mark a cart as clicked after recovery URL usage.
+	 */
 	public function mark_clicked( int $id ): void {
-		global $wpdb;
-
-		$wpdb->update(
-			$this->table,
+		$this->update_status(
 			array(
 				'status'         => 'clicked',
 				'clicked_at_gmt' => gmdate( 'Y-m-d H:i:s' ),
@@ -136,11 +137,11 @@ final class WCCR_Cart_Repository {
 		);
 	}
 
+	/**
+	 * Mark all carts in a session as abandoned.
+	 */
 	public function mark_session_abandoned( string $session_key ): void {
-		global $wpdb;
-
-		$wpdb->update(
-			$this->table,
+		$this->update_status(
 			array(
 				'status'           => 'abandoned',
 				'abandoned_at_gmt' => gmdate( 'Y-m-d H:i:s' ),
@@ -150,26 +151,33 @@ final class WCCR_Cart_Repository {
 		);
 	}
 
+	/**
+	 * Mark carts in a session as recovered.
+	 */
 	public function mark_session_recovered( string $session_key, int $order_id ): void {
-		global $wpdb;
-
-		$wpdb->update(
-			$this->table,
+		$this->update_status(
 			array(
-				'status'           => 'recovered',
-				'recovered_at_gmt' => gmdate( 'Y-m-d H:i:s' ),
+				'status'             => 'recovered',
+				'recovered_at_gmt'   => gmdate( 'Y-m-d H:i:s' ),
 				'recovered_order_id' => $order_id,
-				'updated_at_gmt'   => gmdate( 'Y-m-d H:i:s' ),
+				'updated_at_gmt'     => gmdate( 'Y-m-d H:i:s' ),
 			),
 			array( 'session_key' => $session_key )
 		);
 	}
 
+	/**
+	 * Count clicked carts, including recovered carts that were clicked first.
+	 */
 	public function count_clicked(): int {
 		global $wpdb;
+
 		return (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$this->table} WHERE status IN ('clicked','recovered') AND clicked_at_gmt IS NOT NULL" );
 	}
 
+	/**
+	 * Delete rows older than the retention threshold.
+	 */
 	public function delete_old_rows( int $days ): int {
 		global $wpdb;
 
@@ -177,39 +185,24 @@ final class WCCR_Cart_Repository {
 		return (int) $wpdb->query( $wpdb->prepare( "DELETE FROM {$this->table} WHERE updated_at_gmt < %s", $threshold ) );
 	}
 
+	/**
+	 * Delete rows with missing email.
+	 */
 	public function delete_rows_without_email(): int {
 		global $wpdb;
 
 		return (int) $wpdb->query( "DELETE FROM {$this->table} WHERE email IS NULL OR email = ''" );
 	}
 
-	public function list_recent( int $limit = 100 ): array {
-		global $wpdb;
-
-		return $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$this->table} ORDER BY id DESC LIMIT %d", $limit ), ARRAY_A );
-	}
-
+	/**
+	 * Return recent recovery items for admin listing.
+	 *
+	 * @return array<int, array<string, mixed>>
+	 */
 	public function list_recovery_items( string $sort = 'recent', int $limit = 100 ): array {
 		global $wpdb;
 
-		$order_by = 'id DESC';
-		switch ( $sort ) {
-			case 'oldest':
-				$order_by = 'id ASC';
-				break;
-			case 'abandoned':
-				$order_by = 'abandoned_at_gmt DESC, id DESC';
-				break;
-			case 'email':
-				$order_by = 'email ASC, id DESC';
-				break;
-			case 'status':
-				$order_by = "FIELD(status, 'abandoned', 'clicked', 'recovered') ASC, id DESC";
-				break;
-			case 'purchased':
-				$order_by = 'recovered_order_id DESC, id DESC';
-				break;
-		}
+		$order_by = $this->get_list_order_by( $sort );
 
 		return $wpdb->get_results(
 			$wpdb->prepare(
@@ -220,6 +213,11 @@ final class WCCR_Cart_Repository {
 		);
 	}
 
+	/**
+	 * Return abandoned carts for queue processing.
+	 *
+	 * @return array<int, array<string, mixed>>
+	 */
 	public function get_abandoned_carts( int $limit = 200 ): array {
 		global $wpdb;
 
@@ -232,22 +230,36 @@ final class WCCR_Cart_Repository {
 		);
 	}
 
+	/**
+	 * Count carts by status.
+	 */
 	public function count_by_status( string $status ): int {
 		global $wpdb;
+
 		return (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$this->table} WHERE status = %s", $status ) );
 	}
 
+	/**
+	 * Sum recovered revenue.
+	 */
 	public function sum_recovered_revenue(): float {
 		global $wpdb;
+
 		return (float) $wpdb->get_var( "SELECT COALESCE(SUM(cart_total),0) FROM {$this->table} WHERE status = 'recovered'" );
 	}
 
+	/**
+	 * Delete a single cart row by ID.
+	 */
 	public function delete_by_id( int $id ): void {
 		global $wpdb;
 
 		$wpdb->delete( $this->table, array( 'id' => $id ), array( '%d' ) );
 	}
 
+	/**
+	 * Remove historical duplicates while preserving the best row per cart/email.
+	 */
 	public function delete_historical_duplicates(): int {
 		global $wpdb;
 
@@ -265,7 +277,114 @@ final class WCCR_Cart_Repository {
 			return 0;
 		}
 
+		$deleted = 0;
+		foreach ( $this->group_rows_for_deduplication( $rows ) as $items ) {
+			$deleted += $this->delete_group_duplicates( $items );
+		}
+
+		return $deleted;
+	}
+
+	/**
+	 * Build normalized row data for cart persistence.
+	 *
+	 * @return array<string, mixed>
+	 */
+	private function build_cart_row_data( string $session_key, ?int $user_id, ?string $email, ?string $customer_name, string $locale, array $cart_payload, float $cart_total, string $currency, string $source, string $cart_hash, string $now_gmt ): array {
+		return array(
+			'session_key'    => $session_key,
+			'user_id'        => $user_id,
+			'email'          => $email,
+			'customer_name'  => $customer_name,
+			'locale'         => $locale,
+			'cart_hash'      => $cart_hash,
+			'cart_payload'   => wp_json_encode( $cart_payload ),
+			'cart_total'     => $cart_total,
+			'currency'       => $currency,
+			'source'         => $source,
+			'updated_at_gmt' => $now_gmt,
+		);
+	}
+
+	/**
+	 * Update an existing open cart.
+	 *
+	 * @param array<string, mixed> $existing Existing database row.
+	 * @param array<string, mixed> $data     Replacement values.
+	 */
+	private function update_existing_open_cart( int $existing_id, array $existing, array $data, string $cart_hash, string $now_gmt ): void {
+		global $wpdb;
+
+		$current_status = (string) ( $existing['status'] ?? '' );
+		$current_hash   = (string) ( $existing['cart_hash'] ?? '' );
+
+		if ( in_array( $current_status, array( 'abandoned', 'clicked' ), true ) && $current_hash === $cart_hash ) {
+			$wpdb->update( $this->table, $data, array( 'id' => $existing_id ) );
+			return;
+		}
+
+		$data['status']              = 'active';
+		$data['last_activity_gmt']   = $now_gmt;
+		$data['abandoned_at_gmt']    = null;
+		$data['clicked_at_gmt']      = null;
+		$data['recovered_at_gmt']    = null;
+		$data['recovered_order_id']  = null;
+
+		$wpdb->update( $this->table, $data, array( 'id' => $existing_id ) );
+	}
+
+	/**
+	 * Insert a brand-new active cart row.
+	 *
+	 * @param array<string, mixed> $data Row values.
+	 */
+	private function insert_new_active_cart( array $data, string $now_gmt ): void {
+		global $wpdb;
+
+		$data['status']            = 'active';
+		$data['last_activity_gmt'] = $now_gmt;
+		$data['created_at_gmt']    = $now_gmt;
+
+		$wpdb->insert( $this->table, $data );
+	}
+
+	/**
+	 * Centralize status updates.
+	 *
+	 * @param array<string, mixed> $data  Update data.
+	 * @param array<string, mixed> $where Update condition.
+	 */
+	private function update_status( array $data, array $where ): void {
+		global $wpdb;
+
+		$wpdb->update( $this->table, $data, $where );
+	}
+
+	/**
+	 * Return the SQL ORDER BY clause for the admin listing.
+	 */
+	private function get_list_order_by( string $sort ): string {
+		$allowed = array(
+			'recent'    => 'id DESC',
+			'oldest'    => 'id ASC',
+			'abandoned' => 'abandoned_at_gmt DESC, id DESC',
+			'email'     => 'email ASC, id DESC',
+			'status'    => "FIELD(status, 'abandoned', 'clicked', 'recovered') ASC, id DESC",
+			'purchased' => 'recovered_order_id DESC, id DESC',
+		);
+
+		return $allowed[ $sort ] ?? $allowed['recent'];
+	}
+
+	/**
+	 * Group duplicate candidate rows by email and cart hash.
+	 *
+	 * @param array<int, array<string, mixed>> $rows Candidate rows.
+	 * @return array<string, array<int, array<string, mixed>>>
+	 */
+	private function group_rows_for_deduplication( array $rows ): array {
 		$grouped = array();
+
 		foreach ( $rows as $row ) {
 			$key = strtolower( (string) $row['email'] ) . '|' . (string) $row['cart_hash'];
 			if ( ! isset( $grouped[ $key ] ) ) {
@@ -275,38 +394,47 @@ final class WCCR_Cart_Repository {
 			$grouped[ $key ][] = $row;
 		}
 
-		$deleted = 0;
-		foreach ( $grouped as $items ) {
-			if ( count( $items ) < 2 ) {
-				continue;
-			}
+		return $grouped;
+	}
 
-			usort(
-				$items,
-				function ( array $left, array $right ): int {
-					$priority_left  = $this->get_status_priority( (string) $left['status'], absint( $left['recovered_order_id'] ?? 0 ) );
-					$priority_right = $this->get_status_priority( (string) $right['status'], absint( $right['recovered_order_id'] ?? 0 ) );
+	/**
+	 * Delete duplicate rows within a grouped set.
+	 *
+	 * @param array<int, array<string, mixed>> $items Grouped rows.
+	 */
+	private function delete_group_duplicates( array $items ): int {
+		if ( count( $items ) < 2 ) {
+			return 0;
+		}
 
-					if ( $priority_left !== $priority_right ) {
-						return $priority_right <=> $priority_left;
-					}
+		usort(
+			$items,
+			function ( array $left, array $right ): int {
+				$priority_left  = $this->get_status_priority( (string) $left['status'], absint( $left['recovered_order_id'] ?? 0 ) );
+				$priority_right = $this->get_status_priority( (string) $right['status'], absint( $right['recovered_order_id'] ?? 0 ) );
 
-					return strcmp( (string) $right['updated_at_gmt'], (string) $left['updated_at_gmt'] );
+				if ( $priority_left !== $priority_right ) {
+					return $priority_right <=> $priority_left;
 				}
-			);
 
-			$keep = array_shift( $items );
-			unset( $keep );
-
-			foreach ( $items as $item ) {
-				$this->delete_by_id( absint( $item['id'] ) );
-				++$deleted;
+				return strcmp( (string) $right['updated_at_gmt'], (string) $left['updated_at_gmt'] );
 			}
+		);
+
+		array_shift( $items );
+
+		$deleted = 0;
+		foreach ( $items as $item ) {
+			$this->delete_by_id( absint( $item['id'] ) );
+			++$deleted;
 		}
 
 		return $deleted;
 	}
 
+	/**
+	 * Find an open cart by session first and email second.
+	 */
 	private function find_open_cart_id( string $session_key, ?string $email ): int {
 		global $wpdb;
 
@@ -332,6 +460,16 @@ final class WCCR_Cart_Repository {
 		);
 	}
 
+	/**
+	 * Calculate a stable cart hash from payload and total.
+	 */
+	private function build_cart_hash( array $cart_payload, float $cart_total ): string {
+		return hash( 'sha256', wp_json_encode( $cart_payload ) . '|' . $cart_total );
+	}
+
+	/**
+	 * Return status priority for duplicate resolution.
+	 */
 	private function get_status_priority( string $status, int $order_id ): int {
 		if ( 'recovered' === $status && $order_id > 0 ) {
 			return 3;

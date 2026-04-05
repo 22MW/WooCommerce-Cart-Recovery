@@ -1,6 +1,9 @@
 <?php
 defined( 'ABSPATH' ) || exit;
 
+/**
+ * Main plugin composition root.
+ */
 final class WCCR_Plugin {
 	private static ?self $instance = null;
 
@@ -12,6 +15,9 @@ final class WCCR_Plugin {
 		return self::$instance;
 	}
 
+	/**
+	 * Bootstrap services, hooks and scheduled events.
+	 */
 	public function init(): void {
 		WCCR_Installer::create_tables();
 
@@ -58,15 +64,24 @@ final class WCCR_Plugin {
 		add_action( 'wccr_cleanup_old_data', array( $cleanup_service, 'run' ) );
 	}
 
+	/**
+	 * Register custom cron schedules.
+	 *
+	 * @param array<string, array<string, int|string>> $schedules Existing schedules.
+	 * @return array<string, array<string, int|string>>
+	 */
 	public function register_cron_schedules( array $schedules ): array {
 		$schedules['wccr_every_minute'] = array(
 			'interval' => MINUTE_IN_SECONDS,
-			'display'  => __( 'Every minute', 'woocommerce-cart-recovery' ),
+			'display'  => __( 'Every minute', 'vfwoo_woocommerce-cart-recovery' ),
 		);
 
 		return $schedules;
 	}
 
+	/**
+	 * Ensure plugin cron events are scheduled with the expected frequency.
+	 */
 	private function ensure_cron_events(): void {
 		$detect_event = wp_get_scheduled_event( 'wccr_detect_abandoned_carts' );
 		if ( ! $detect_event || 'wccr_every_minute' !== $detect_event->schedule ) {

@@ -1,6 +1,9 @@
 <?php
 defined( 'ABSPATH' ) || exit;
 
+/**
+ * Repository for email send and failure logs.
+ */
 final class WCCR_Email_Log_Repository {
 	private string $table;
 
@@ -9,6 +12,9 @@ final class WCCR_Email_Log_Repository {
 		$this->table = $wpdb->prefix . 'wccr_email_log';
 	}
 
+	/**
+	 * Insert a successful send log row.
+	 */
 	public function insert_sent( int $cart_id, int $step, string $locale, string $subject, ?string $coupon_code ): void {
 		global $wpdb;
 
@@ -27,6 +33,9 @@ final class WCCR_Email_Log_Repository {
 		);
 	}
 
+	/**
+	 * Insert a failed send log row.
+	 */
 	public function insert_failed( int $cart_id, int $step, string $locale, string $subject, string $error_message ): void {
 		global $wpdb;
 
@@ -44,11 +53,17 @@ final class WCCR_Email_Log_Repository {
 		);
 	}
 
+	/**
+	 * Count all sent emails.
+	 */
 	public function count_sent(): int {
 		global $wpdb;
 		return (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$this->table} WHERE status = 'sent'" );
 	}
 
+	/**
+	 * Count sent emails for a single cart.
+	 */
 	public function count_sent_for_cart( int $cart_id ): int {
 		global $wpdb;
 		return (int) $wpdb->get_var(
@@ -90,6 +105,9 @@ final class WCCR_Email_Log_Repository {
 		return is_string( $error ) ? $error : '';
 	}
 
+	/**
+	 * Return the most recent coupon code logged for a cart.
+	 */
 	public function get_last_coupon_code_for_cart( int $cart_id ): string {
 		global $wpdb;
 
@@ -103,12 +121,18 @@ final class WCCR_Email_Log_Repository {
 		return is_string( $coupon_code ) ? $coupon_code : '';
 	}
 
+	/**
+	 * Delete all log rows for a cart.
+	 */
 	public function delete_for_cart( int $cart_id ): void {
 		global $wpdb;
 
 		$wpdb->delete( $this->table, array( 'cart_id' => $cart_id ), array( '%d' ) );
 	}
 
+	/**
+	 * Delete log rows older than the configured threshold.
+	 */
 	public function delete_old_rows( int $days ): int {
 		global $wpdb;
 		$threshold = gmdate( 'Y-m-d H:i:s', time() - ( $days * DAY_IN_SECONDS ) );

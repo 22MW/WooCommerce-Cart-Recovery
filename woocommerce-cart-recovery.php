@@ -3,20 +3,20 @@
  * Plugin Name:       WooCommerce Cart Recovery
  * Plugin URI:        https://example.com/plugins/woocommerce-cart-recovery
  * Description:       Recover abandoned WooCommerce carts and pending orders with scheduled reminders, native coupons and locale-aware emails.
- * Version:           0.1.7
+ * Version:           0.1.8
  * Requires at least: 6.7
  * Requires PHP:      8.1
  * Author:            22MW
  * License:           GPL-2.0-or-later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
- * Text Domain:       woocommerce-cart-recovery
+ * Text Domain:       vfwoo_woocommerce-cart-recovery
  * Domain Path:       /languages
  * WC requires at least: 9.0
  */
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'WCCR_VERSION', '0.1.7' );
+define( 'WCCR_VERSION', '0.1.8' );
 define( 'WCCR_PLUGIN_FILE', __FILE__ );
 define( 'WCCR_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'WCCR_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
@@ -63,7 +63,7 @@ add_action(
 		add_action(
 			'init',
 			static function (): void {
-				load_plugin_textdomain( 'woocommerce-cart-recovery', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
+				load_plugin_textdomain( 'vfwoo_woocommerce-cart-recovery', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
 				WCCR_Plugin::instance()->init();
 			}
 		);

@@ -12,6 +12,17 @@ The format is based on Keep a Changelog, and this project follows a simple `MAJO
 
 ### Fixed
 
+## [0.1.8] - 2026-04-05
+
+### Changed
+- Changed the plugin text domain to `vfwoo_woocommerce-cart-recovery`.
+- Refactored the main recovery admin screen and cart repository into smaller documented methods.
+- Documented admin JavaScript and key PHP services with inline PHPDoc/JSDoc.
+
+### Fixed
+- Hardened admin delete handling with explicit capability checks and nonce validation.
+- Tightened admin sorting and duplicate cleanup structure to better follow WordPress-safe patterns.
+
 ## [0.1.7] - 2026-04-05
 
 ### Changed

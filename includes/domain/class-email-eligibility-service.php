@@ -73,13 +73,13 @@ final class WCCR_Email_Eligibility_Service {
 
 	public function get_reason_label( string $reason ): string {
 		$labels = array(
-			'not_abandoned'       => __( 'Not abandoned', 'woocommerce-cart-recovery' ),
-			'missing_abandoned_at'=> __( 'Missing abandoned date', 'woocommerce-cart-recovery' ),
-			'all_steps_sent'      => __( 'All steps sent', 'woocommerce-cart-recovery' ),
-			'step_disabled'       => __( 'Step disabled', 'woocommerce-cart-recovery' ),
-			'invalid_abandoned_at'=> __( 'Invalid abandoned date', 'woocommerce-cart-recovery' ),
-			'waiting_delay'       => __( 'Waiting delay', 'woocommerce-cart-recovery' ),
-			'eligible_now'        => __( 'Ready to send', 'woocommerce-cart-recovery' ),
+			'not_abandoned'       => __( 'Not abandoned', 'vfwoo_woocommerce-cart-recovery' ),
+			'missing_abandoned_at'=> __( 'Missing abandoned date', 'vfwoo_woocommerce-cart-recovery' ),
+			'all_steps_sent'      => __( 'All steps sent', 'vfwoo_woocommerce-cart-recovery' ),
+			'step_disabled'       => __( 'Step disabled', 'vfwoo_woocommerce-cart-recovery' ),
+			'invalid_abandoned_at'=> __( 'Invalid abandoned date', 'vfwoo_woocommerce-cart-recovery' ),
+			'waiting_delay'       => __( 'Waiting delay', 'vfwoo_woocommerce-cart-recovery' ),
+			'eligible_now'        => __( 'Ready to send', 'vfwoo_woocommerce-cart-recovery' ),
 		);
 
 		return $labels[ $reason ] ?? $reason;

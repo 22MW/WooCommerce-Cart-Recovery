@@ -1,6 +1,9 @@
 <?php
 defined( 'ABSPATH' ) || exit;
 
+/**
+ * Capture checkout details from WooCommerce Checkout Blocks.
+ */
 final class WCCR_Blocks_Checkout_Capture_Adapter {
 	public function __construct(
 		private WCCR_Cart_Capture_Service $cart_capture_service
@@ -13,6 +16,12 @@ final class WCCR_Blocks_Checkout_Capture_Adapter {
 		add_action( 'wp_ajax_nopriv_wccr_capture_checkout_contact', array( $this, 'ajax_capture_checkout_contact' ) );
 	}
 
+	/**
+	 * Capture contact details from Store API customer updates.
+	 *
+	 * @param mixed $customer Store API customer object.
+	 * @param mixed $request  Store API request.
+	 */
 	public function capture_from_store_api( $customer, $request ): void {
 		$email = '';
 		$name  = null;
@@ -30,6 +39,9 @@ final class WCCR_Blocks_Checkout_Capture_Adapter {
 		$this->cart_capture_service->capture_current_cart( $email ?: null, $name, 'blocks' );
 	}
 
+	/**
+	 * Enqueue the early checkout capture script.
+	 */
 	public function enqueue_capture_script(): void {
 		if ( ! function_exists( 'is_checkout' ) || ! is_checkout() ) {
 			return;
@@ -53,6 +65,9 @@ final class WCCR_Blocks_Checkout_Capture_Adapter {
 		);
 	}
 
+	/**
+	 * Persist contact details from AJAX capture.
+	 */
 	public function ajax_capture_checkout_contact(): void {
 		check_ajax_referer( 'wccr_capture_checkout_contact', 'nonce' );
 

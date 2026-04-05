@@ -1,6 +1,9 @@
 <?php
 defined( 'ABSPATH' ) || exit;
 
+/**
+ * Cleanup routines for old and inconsistent plugin data.
+ */
 final class WCCR_Cleanup_Service {
 	public function __construct(
 		private WCCR_Cart_Repository $cart_repository,
@@ -8,6 +11,9 @@ final class WCCR_Cleanup_Service {
 		private WCCR_Settings_Repository $settings_repository
 	) {}
 
+	/**
+	 * Run the scheduled cleanup process.
+	 */
 	public function run(): void {
 		$settings = $this->settings_repository->get();
 		$days     = absint( $settings['cleanup_days'] ?? 90 );
