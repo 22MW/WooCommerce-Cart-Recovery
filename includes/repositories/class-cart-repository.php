@@ -173,6 +173,18 @@ final class WCCR_Cart_Repository {
 		return $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$this->table} ORDER BY id DESC LIMIT %d", $limit ), ARRAY_A );
 	}
 
+	public function list_recovery_items( int $limit = 100 ): array {
+		global $wpdb;
+
+		return $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT * FROM {$this->table} WHERE status IN ('abandoned','clicked','recovered') ORDER BY id DESC LIMIT %d",
+				$limit
+			),
+			ARRAY_A
+		);
+	}
+
 	public function get_abandoned_carts( int $limit = 200 ): array {
 		global $wpdb;
 

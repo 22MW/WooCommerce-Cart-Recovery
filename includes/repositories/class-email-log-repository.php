@@ -90,6 +90,19 @@ final class WCCR_Email_Log_Repository {
 		return is_string( $error ) ? $error : '';
 	}
 
+	public function get_last_coupon_code_for_cart( int $cart_id ): string {
+		global $wpdb;
+
+		$coupon_code = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT coupon_code FROM {$this->table} WHERE cart_id = %d AND coupon_code IS NOT NULL AND coupon_code != '' ORDER BY id DESC LIMIT 1",
+				$cart_id
+			)
+		);
+
+		return is_string( $coupon_code ) ? $coupon_code : '';
+	}
+
 	public function delete_old_rows( int $days ): int {
 		global $wpdb;
 		$threshold = gmdate( 'Y-m-d H:i:s', time() - ( $days * DAY_IN_SECONDS ) );

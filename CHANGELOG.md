@@ -12,6 +12,19 @@ The format is based on Keep a Changelog, and this project follows a simple `MAJO
 
 ### Fixed
 
+## [0.1.6] - 2026-04-05
+
+### Added
+- Added recovery view helpers for coupon code and copy URL actions.
+- Added admin JavaScript for copying recovery URLs.
+
+### Changed
+- Updated the recovery list to hide active carts.
+- Improved clicked status display with clear Yes/No output and date when available.
+
+### Fixed
+- Simplified the recovery list so it focuses on abandoned, clicked and recovered carts only.
+
 ## [0.1.5] - 2026-04-05
 
 ### Added

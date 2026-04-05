@@ -34,5 +34,6 @@ final class WCCR_Admin_Menu {
 		}
 
 		wp_enqueue_style( 'wccr-admin', WCCR_PLUGIN_URL . 'assets/css/admin.css', array(), WCCR_VERSION );
+		wp_enqueue_script( 'wccr-admin', WCCR_PLUGIN_URL . 'assets/js/admin.js', array(), WCCR_VERSION, true );
 	}
 }
