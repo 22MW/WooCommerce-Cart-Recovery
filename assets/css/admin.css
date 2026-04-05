@@ -1,0 +1,31 @@
+.wccr-admin .wccr-stats-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+	gap: 16px;
+	margin-top: 20px;
+}
+
+.wccr-admin .wccr-card {
+	background: #fff;
+	border: 1px solid #dcdcde;
+	border-radius: 12px;
+	padding: 20px;
+	margin-top: 20px;
+}
+
+.wccr-admin .wccr-card strong {
+	display: block;
+	font-size: 28px;
+	line-height: 1.2;
+	margin-bottom: 6px;
+	overflow-wrap: anywhere;
+	word-break: break-word;
+}
+
+.wccr-admin .wccr-run-now-form {
+	background: #fff;
+	border: 1px solid #dcdcde;
+	border-radius: 12px;
+	padding: 16px 20px;
+	margin: 16px 0 24px;
+}
