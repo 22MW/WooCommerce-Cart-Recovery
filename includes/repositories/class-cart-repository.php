@@ -12,7 +12,9 @@ final class WCCR_Cart_Repository {
 	public function upsert_active_cart( string $session_key, ?int $user_id, ?string $email, ?string $customer_name, string $locale, array $cart_payload, float $cart_total, string $currency, string $source = 'classic' ): void {
 		global $wpdb;
 
-		$existing_id = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$this->table} WHERE session_key = %s AND status IN ('active','abandoned','clicked') ORDER BY id DESC LIMIT 1", $session_key ) );
+		$cart_hash   = hash( 'sha256', wp_json_encode( $cart_payload ) . '|' . $cart_total );
+		$existing_id = $this->find_open_cart_id( $session_key, $email );
+		$existing    = $existing_id ? $this->find_by_id( $existing_id ) : null;
 		$now_gmt     = gmdate( 'Y-m-d H:i:s' );
 		$data        = array(
 			'session_key'       => $session_key,
@@ -20,21 +22,35 @@ final class WCCR_Cart_Repository {
 			'email'             => $email,
 			'customer_name'     => $customer_name,
 			'locale'            => $locale,
-			'cart_hash'         => hash( 'sha256', wp_json_encode( $cart_payload ) . '|' . $cart_total ),
+			'cart_hash'         => $cart_hash,
 			'cart_payload'      => wp_json_encode( $cart_payload ),
 			'cart_total'        => $cart_total,
 			'currency'          => $currency,
-			'status'            => 'active',
 			'source'            => $source,
-			'last_activity_gmt' => $now_gmt,
 			'updated_at_gmt'    => $now_gmt,
 		);
 
-		if ( $existing_id ) {
+		if ( $existing ) {
+			$current_status = (string) ( $existing['status'] ?? '' );
+			$current_hash   = (string) ( $existing['cart_hash'] ?? '' );
+
+			if ( in_array( $current_status, array( 'abandoned', 'clicked' ), true ) && $current_hash === $cart_hash ) {
+				$wpdb->update( $this->table, $data, array( 'id' => absint( $existing_id ) ) );
+				return;
+			}
+
+			$data['status']            = 'active';
+			$data['last_activity_gmt'] = $now_gmt;
+			$data['abandoned_at_gmt']  = null;
+			$data['clicked_at_gmt']    = null;
+			$data['recovered_at_gmt']  = null;
+			$data['recovered_order_id'] = null;
 			$wpdb->update( $this->table, $data, array( 'id' => absint( $existing_id ) ) );
 			return;
 		}
 
+		$data['status']            = 'active';
+		$data['last_activity_gmt'] = $now_gmt;
 		$data['created_at_gmt'] = $now_gmt;
 		$wpdb->insert( $this->table, $data );
 	}
@@ -205,5 +221,30 @@ final class WCCR_Cart_Repository {
 	public function sum_recovered_revenue(): float {
 		global $wpdb;
 		return (float) $wpdb->get_var( "SELECT COALESCE(SUM(cart_total),0) FROM {$this->table} WHERE status = 'recovered'" );
+	}
+
+	private function find_open_cart_id( string $session_key, ?string $email ): int {
+		global $wpdb;
+
+		$session_id = (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT id FROM {$this->table} WHERE session_key = %s AND status IN ('active','abandoned','clicked') ORDER BY id DESC LIMIT 1",
+				$session_key
+			)
+		);
+		if ( $session_id ) {
+			return $session_id;
+		}
+
+		if ( empty( $email ) ) {
+			return 0;
+		}
+
+		return (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT id FROM {$this->table} WHERE email = %s AND status IN ('active','abandoned','clicked') ORDER BY id DESC LIMIT 1",
+				$email
+			)
+		);
 	}
 }

@@ -12,6 +12,17 @@ The format is based on Keep a Changelog, and this project follows a simple `MAJO
 
 ### Fixed
 
+## [0.1.7] - 2026-04-05
+
+### Changed
+- Improved recovery coupon codes to use clearer labels in the generated code itself.
+- Improved email subject and body variable rendering with better customer name fallback.
+
+### Fixed
+- Fixed duplicate recovery rows caused by re-capturing the same open cart.
+- Fixed recovery carts so unchanged clicked or abandoned carts do not restart their timing.
+- Fixed recovery coupons for checkout flow by removing email-restriction conflicts.
+
 ## [0.1.6] - 2026-04-05
 
 ### Added

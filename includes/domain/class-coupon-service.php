@@ -11,17 +11,13 @@ final class WCCR_Coupon_Service {
 			return null;
 		}
 
-		$code   = 'WCCR-' . strtoupper( wp_generate_password( 10, false, false ) );
+		$code   = $this->build_coupon_code( $step_settings );
 		$coupon = new WC_Coupon();
 		$coupon->set_code( $code );
 		$coupon->set_discount_type( 'fixed_cart' === $step_settings['discount_type'] ? 'fixed_cart' : 'percent' );
 		$coupon->set_amount( (float) ( $step_settings['discount_amount'] ?? 0 ) );
 		$coupon->set_usage_limit( 1 );
 		$coupon->set_date_expires( time() + max( 1, $expiry_days ) * DAY_IN_SECONDS );
-
-		if ( ! empty( $cart['email'] ) ) {
-			$coupon->set_email_restrictions( array( sanitize_email( $cart['email'] ) ) );
-		}
 
 		$coupon->save();
 		do_action( 'wccr_coupon_generated', $code, $cart, $step_settings );
@@ -52,5 +48,19 @@ final class WCCR_Coupon_Service {
 		}
 
 		return $label . ' - ' . $coupon_code;
+	}
+
+	private function build_coupon_code( array $step_settings ): string {
+		$discount_type   = (string) ( $step_settings['discount_type'] ?? 'percent' );
+		$discount_amount = (float) ( $step_settings['discount_amount'] ?? 0 );
+		$suffix          = strtoupper( wp_generate_password( 4, false, false ) );
+
+		if ( 'fixed_cart' === $discount_type ) {
+			$amount_label = wc_format_decimal( $discount_amount, 0 ) . 'EUR';
+		} else {
+			$amount_label = wc_format_decimal( $discount_amount, 0 ) . 'P';
+		}
+
+		return 'CartRecover-' . $amount_label . '-' . $suffix;
 	}
 }

@@ -12,7 +12,8 @@ final class WCCR_Email_Renderer {
 		$cart_items    = $this->get_cart_items( $cart );
 		$cart_total    = wc_price( (float) $cart['cart_total'], array( 'currency' => $cart['currency'] ) );
 		$coupon_label  = $this->coupon_service->get_coupon_label( $step_settings, (string) $cart['currency'], $coupon_code );
-		$subject       = $this->replace_template_variables(
+		$subject       = $this->cleanup_rendered_template(
+			$this->replace_template_variables(
 			(string) ( $step_settings['subject'] ?? $site_name ),
 			$recovery_url,
 			$coupon_code,
@@ -20,8 +21,11 @@ final class WCCR_Email_Renderer {
 			$cart_total,
 			$site_name,
 			$customer_name
+			),
+			'text'
 		);
-		$body          = $this->replace_template_variables(
+		$body          = $this->cleanup_rendered_template(
+			$this->replace_template_variables(
 			(string) ( $step_settings['body'] ?? '' ),
 			$recovery_url,
 			$coupon_code,
@@ -29,6 +33,8 @@ final class WCCR_Email_Renderer {
 			$cart_total,
 			$site_name,
 			$customer_name
+			),
+			'html'
 		);
 		$discount_text = $this->coupon_service->get_coupon_label( $step_settings, (string) $cart['currency'] );
 
@@ -106,5 +112,20 @@ final class WCCR_Email_Renderer {
 			),
 			$template
 		);
+	}
+
+	private function cleanup_rendered_template( string $template, string $context = 'text' ): string {
+		$template = preg_replace( '/\s+/', ' ', $template ) ?: $template;
+		$template = str_replace( array( 'Hi ,', 'Hello ,' ), array( 'Hi,', 'Hello,' ), $template );
+		$template = preg_replace( '/^[\s,\-:;]+/u', '', $template ) ?: $template;
+		$template = preg_replace( '/\(\s*\)/u', '', $template ) ?: $template;
+		$template = trim( $template );
+
+		if ( 'html' === $context ) {
+			return $template;
+		}
+
+		$template = sanitize_text_field( $template );
+		return '' !== $template ? ucfirst( $template ) : '';
 	}
 }
