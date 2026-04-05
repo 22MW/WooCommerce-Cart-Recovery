@@ -31,7 +31,7 @@ final class WCCR_Abandoned_Carts_Page {
 						<td><?php echo esc_html( $cart['status'] ); ?></td>
 						<td><?php echo esc_html( absint( $eligibility['current_step'] ?? 0 ) ?: '-' ); ?></td>
 						<td><?php echo esc_html( $this->email_log_repository->count_sent_for_cart( absint( $cart['id'] ) ) ); ?></td>
-						<td><?php echo esc_html( $this->email_log_repository->get_last_coupon_code_for_cart( absint( $cart['id'] ) ) ?: '-' ); ?></td>
+						<td><?php echo esc_html( $this->get_coupon_label( $cart ) ); ?></td>
 						<td><?php echo esc_html( $this->email_eligibility_service->format_gmt_for_display( (string) ( $eligibility['eligible_at_gmt'] ?? '' ) ) ); ?></td>
 						<td><?php echo esc_html( $this->email_eligibility_service->get_reason_label( (string) ( $eligibility['reason'] ?? '' ) ) ); ?></td>
 						<td><?php echo esc_html( $this->get_clicked_label( $cart ) ); ?></td>
@@ -69,6 +69,33 @@ final class WCCR_Abandoned_Carts_Page {
 		return ! empty( $cart['recovered_order_id'] ) && 'recovered' === ( $cart['status'] ?? '' )
 			? __( 'Yes', 'woocommerce-cart-recovery' )
 			: __( 'No', 'woocommerce-cart-recovery' );
+	}
+
+	private function get_coupon_label( array $cart ): string {
+		$coupon_code = $this->email_log_repository->get_last_coupon_code_for_cart( absint( $cart['id'] ?? 0 ) );
+
+		if ( '' === $coupon_code ) {
+			return '-';
+		}
+
+		$coupon = new WC_Coupon( $coupon_code );
+		if ( ! $coupon->get_id() ) {
+			return $coupon_code;
+		}
+
+		$amount   = (float) $coupon->get_amount();
+		$currency = (string) ( $cart['currency'] ?? get_woocommerce_currency() );
+		if ( 'fixed_cart' === $coupon->get_discount_type() ) {
+			$label = html_entity_decode(
+				wp_strip_all_tags( wc_price( $amount, array( 'currency' => $currency ) ) ),
+				ENT_QUOTES,
+				get_bloginfo( 'charset' )
+			) . ' off';
+		} else {
+			$label = wc_format_decimal( $amount, 0 ) . '% off';
+		}
+
+		return $label . ' - ' . $coupon_code;
 	}
 
 	private function get_clicked_label( array $cart ): string {

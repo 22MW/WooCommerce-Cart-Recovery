@@ -28,4 +28,29 @@ final class WCCR_Coupon_Service {
 
 		return $code;
 	}
+
+	public function get_coupon_label( array $step_settings, string $currency, ?string $coupon_code = null ): string {
+		$discount_type   = (string) ( $step_settings['discount_type'] ?? 'none' );
+		$discount_amount = (float) ( $step_settings['discount_amount'] ?? 0 );
+
+		if ( 'none' === $discount_type || $discount_amount <= 0 ) {
+			return (string) $coupon_code;
+		}
+
+		if ( 'fixed_cart' === $discount_type ) {
+			$label = html_entity_decode(
+				wp_strip_all_tags( wc_price( $discount_amount, array( 'currency' => $currency ) ) ),
+				ENT_QUOTES,
+				get_bloginfo( 'charset' )
+			) . ' off';
+		} else {
+			$label = wc_format_decimal( $discount_amount, 0 ) . '% off';
+		}
+
+		if ( empty( $coupon_code ) ) {
+			return $label;
+		}
+
+		return $label . ' - ' . $coupon_code;
+	}
 }

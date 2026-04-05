@@ -17,8 +17,8 @@ final class WCCR_Settings_Repository {
 					'discount_type'    => 'none',
 					'discount_amount'  => 0,
 					'min_cart_total'   => 0,
-					'subject'          => __( 'You left something in your cart', 'woocommerce-cart-recovery' ),
-					'body'             => __( 'Hi, your cart is still available. Click the button below to complete your order: {recovery_link}', 'woocommerce-cart-recovery' ),
+					'subject'          => __( '{customer_name}, you left something in your cart', 'woocommerce-cart-recovery' ),
+					'body'             => __( 'Hi {customer_name}, your cart is still available. Click the button below to complete your order: {recovery_link}', 'woocommerce-cart-recovery' ),
 				),
 				2 => array(
 					'enabled'          => 1,
@@ -26,8 +26,8 @@ final class WCCR_Settings_Repository {
 					'discount_type'    => 'percent',
 					'discount_amount'  => 5,
 					'min_cart_total'   => 0,
-					'subject'          => __( 'Your cart is waiting for you', 'woocommerce-cart-recovery' ),
-					'body'             => __( 'Complete your purchase here: {recovery_link}. Coupon: {coupon_code}', 'woocommerce-cart-recovery' ),
+					'subject'          => __( '{customer_name}, your cart is waiting for you', 'woocommerce-cart-recovery' ),
+					'body'             => __( 'Hi {customer_name}, complete your purchase here: {recovery_link}. Discount: {coupon_label}. Code: {coupon_code}', 'woocommerce-cart-recovery' ),
 				),
 				3 => array(
 					'enabled'          => 1,
@@ -35,8 +35,8 @@ final class WCCR_Settings_Repository {
 					'discount_type'    => 'percent',
 					'discount_amount'  => 10,
 					'min_cart_total'   => 0,
-					'subject'          => __( 'Last reminder for your cart', 'woocommerce-cart-recovery' ),
-					'body'             => __( 'Your cart can still be recovered here: {recovery_link}. Coupon: {coupon_code}', 'woocommerce-cart-recovery' ),
+					'subject'          => __( '{customer_name}, last reminder for your cart', 'woocommerce-cart-recovery' ),
+					'body'             => __( 'Hi {customer_name}, your cart can still be recovered here: {recovery_link}. Discount: {coupon_label}. Code: {coupon_code}', 'woocommerce-cart-recovery' ),
 				),
 			),
 		);

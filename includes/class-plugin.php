@@ -24,7 +24,7 @@ final class WCCR_Plugin {
 		$recovery_service     = new WCCR_Recovery_Service( $cart_repository );
 		$pending_detector     = new WCCR_Pending_Order_Detector( $cart_repository, $locale_resolver, $settings_repository );
 		$coupon_service       = new WCCR_Coupon_Service();
-		$email_renderer       = new WCCR_Email_Renderer();
+		$email_renderer       = new WCCR_Email_Renderer( $coupon_service );
 		$email_scheduler      = new WCCR_Email_Scheduler( $cart_repository, $email_log_repository, $settings_repository, $email_eligibility, $coupon_service, $email_renderer, $recovery_service );
 		$detector             = new WCCR_Abandoned_Cart_Detector( $cart_repository, $settings_repository );
 		$cleanup_service      = new WCCR_Cleanup_Service( $cart_repository, $email_log_repository, $settings_repository );

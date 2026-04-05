@@ -2,24 +2,35 @@
 defined( 'ABSPATH' ) || exit;
 
 final class WCCR_Email_Renderer {
-	public function render( array $cart, array $step_settings, string $recovery_url, ?string $coupon_code ): string {
+	public function __construct(
+		private WCCR_Coupon_Service $coupon_service
+	) {}
+
+	public function render( array $cart, array $step_settings, string $recovery_url, ?string $coupon_code ): array {
 		$site_name     = get_bloginfo( 'name' );
 		$customer_name = $this->get_customer_name( $cart );
 		$cart_items    = $this->get_cart_items( $cart );
 		$cart_total    = wc_price( (float) $cart['cart_total'], array( 'currency' => $cart['currency'] ) );
-		$subject       = sanitize_text_field( (string) ( $step_settings['subject'] ?? $site_name ) );
-		$body = (string) ( $step_settings['body'] ?? '' );
-		$body = str_replace(
-			array( '{recovery_link}', '{coupon_code}', '{cart_total}', '{site_name}', '{customer_name}' ),
-			array(
-				esc_url( $recovery_url ),
-				esc_html( (string) $coupon_code ),
-				wp_kses_post( $cart_total ),
-				esc_html( $site_name ),
-				esc_html( $customer_name ),
-			),
-			$body
+		$coupon_label  = $this->coupon_service->get_coupon_label( $step_settings, (string) $cart['currency'], $coupon_code );
+		$subject       = $this->replace_template_variables(
+			(string) ( $step_settings['subject'] ?? $site_name ),
+			$recovery_url,
+			$coupon_code,
+			$coupon_label,
+			$cart_total,
+			$site_name,
+			$customer_name
 		);
+		$body          = $this->replace_template_variables(
+			(string) ( $step_settings['body'] ?? '' ),
+			$recovery_url,
+			$coupon_code,
+			$coupon_label,
+			$cart_total,
+			$site_name,
+			$customer_name
+		);
+		$discount_text = $this->coupon_service->get_coupon_label( $step_settings, (string) $cart['currency'] );
 
 		ob_start();
 		include WCCR_PLUGIN_DIR . 'templates/emails/base-email.php';
@@ -27,10 +38,13 @@ final class WCCR_Email_Renderer {
 
 		if ( function_exists( 'WC' ) && WC()->mailer() ) {
 			$mailer  = WC()->mailer();
-			return $mailer->wrap_message( $subject, $content );
+			$content = $mailer->wrap_message( $subject, $content );
 		}
 
-		return $content;
+		return array(
+			'subject' => sanitize_text_field( $subject ),
+			'message' => $content,
+		);
 	}
 
 	private function get_customer_name( array $cart ): string {
@@ -77,5 +91,20 @@ final class WCCR_Email_Renderer {
 		}
 
 		return $items;
+	}
+
+	private function replace_template_variables( string $template, string $recovery_url, ?string $coupon_code, string $coupon_label, string $cart_total, string $site_name, string $customer_name ): string {
+		return str_replace(
+			array( '{recovery_link}', '{coupon_code}', '{coupon_label}', '{cart_total}', '{site_name}', '{customer_name}' ),
+			array(
+				esc_url( $recovery_url ),
+				esc_html( (string) $coupon_code ),
+				esc_html( $coupon_label ),
+				wp_kses_post( $cart_total ),
+				esc_html( $site_name ),
+				esc_html( $customer_name ),
+			),
+			$template
+		);
 	}
 }

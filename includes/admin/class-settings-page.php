@@ -100,7 +100,7 @@ final class WCCR_Settings_Page {
 						<p><label><?php esc_html_e( 'Minimum cart total', 'woocommerce-cart-recovery' ); ?> <input type="number" step="0.01" name="steps[<?php echo esc_attr( $step ); ?>][min_cart_total]" value="<?php echo esc_attr( $step_settings['min_cart_total'] ?? 0 ); ?>"></label></p>
 						<p><label><?php esc_html_e( 'Subject', 'woocommerce-cart-recovery' ); ?><br><input type="text" class="large-text" name="steps[<?php echo esc_attr( $step ); ?>][subject]" value="<?php echo esc_attr( $step_settings['subject'] ?? '' ); ?>"></label></p>
 						<p><label><?php esc_html_e( 'Body', 'woocommerce-cart-recovery' ); ?><br><textarea class="large-text" rows="6" name="steps[<?php echo esc_attr( $step ); ?>][body]"><?php echo esc_textarea( $step_settings['body'] ?? '' ); ?></textarea></label></p>
-						<p class="description"><?php esc_html_e( 'Available variables: {recovery_link}, {coupon_code}, {cart_total}, {site_name}', 'woocommerce-cart-recovery' ); ?></p>
+						<p class="description"><?php esc_html_e( 'Available variables: {recovery_link}, {coupon_code}, {coupon_label}, {cart_total}, {site_name}, {customer_name}', 'woocommerce-cart-recovery' ); ?></p>
 					</div>
 				<?php endforeach; ?>
 

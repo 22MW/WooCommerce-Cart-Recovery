@@ -33,11 +33,17 @@ final class WCCR_Email_Scheduler {
 	}
 
 	private function send_step_email( array $cart, int $step, array $step_settings, int $coupon_expiry_days ): void {
+		$email = array(
+			'subject' => sanitize_text_field( (string) ( $step_settings['subject'] ?? '' ) ),
+			'message' => '',
+		);
+
 		try {
-			$subject      = sanitize_text_field( (string) ( $step_settings['subject'] ?? '' ) );
 			$coupon_code  = $this->coupon_service->maybe_generate_coupon( $cart, $step_settings, $coupon_expiry_days );
 			$recovery_url = $this->recovery_service->build_recovery_url( absint( $cart['id'] ), $coupon_code );
-			$message      = $this->email_renderer->render( $cart, $step_settings, $recovery_url, $coupon_code );
+			$email        = $this->email_renderer->render( $cart, $step_settings, $recovery_url, $coupon_code );
+			$subject      = sanitize_text_field( (string) ( $email['subject'] ?? '' ) );
+			$message      = (string) ( $email['message'] ?? '' );
 			$headers      = array( 'Content-Type: text/html; charset=UTF-8' );
 
 			do_action( 'wccr_before_recovery_email_send', $cart, $step, $subject );
@@ -54,7 +60,7 @@ final class WCCR_Email_Scheduler {
 				absint( $cart['id'] ),
 				$step,
 				(string) $cart['locale'],
-				sanitize_text_field( (string) ( $step_settings['subject'] ?? '' ) ),
+				sanitize_text_field( (string) ( $email['subject'] ?? $step_settings['subject'] ?? '' ) ),
 				$throwable->getMessage()
 			);
 		}

@@ -8,6 +8,20 @@ defined( 'ABSPATH' ) || exit;
 
 <?php echo wpautop( wp_kses_post( $body ) ); ?>
 
+<?php if ( ! empty( $coupon_code ) && ! empty( $discount_text ) ) : ?>
+	<p>
+		<?php
+		echo esc_html(
+			sprintf(
+				/* translators: %s: discount label */
+				__( 'Complete your order with %s.', 'woocommerce-cart-recovery' ),
+				$discount_text
+			)
+		);
+		?>
+	</p>
+<?php endif; ?>
+
 <?php if ( ! empty( $cart_items ) ) : ?>
 	<h2><?php esc_html_e( 'Your cart summary', 'woocommerce-cart-recovery' ); ?></h2>
 	<table cellspacing="0" cellpadding="6" style="width:100%;border:1px solid #e5e5e5;" border="1">
@@ -35,7 +49,7 @@ defined( 'ABSPATH' ) || exit;
 			<?php if ( ! empty( $coupon_code ) ) : ?>
 				<tr>
 					<th scope="row" colspan="2" style="text-align:left;"><?php esc_html_e( 'Discount code', 'woocommerce-cart-recovery' ); ?></th>
-					<td style="text-align:left;"><strong><?php echo esc_html( $coupon_code ); ?></strong></td>
+					<td style="text-align:left;"><strong><?php echo esc_html( $coupon_code ); ?></strong><?php if ( ! empty( $discount_text ) ) : ?><?php echo esc_html( ' (' . $discount_text . ')' ); ?><?php endif; ?></td>
 				</tr>
 			<?php endif; ?>
 		</tfoot>
