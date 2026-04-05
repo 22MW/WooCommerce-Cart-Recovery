@@ -12,6 +12,15 @@ The format is based on Keep a Changelog, and this project follows a simple `MAJO
 
 ### Fixed
 
+## [0.1.10] - 2026-04-05
+
+### Added
+- Added translation files for the general catalog and `es_ES`.
+
+### Changed
+- Localized admin JavaScript labels through WordPress.
+- Localized recovery status badges in the admin cards.
+
 ## [0.1.9] - 2026-04-05
 
 ### Changed

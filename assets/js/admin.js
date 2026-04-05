@@ -5,6 +5,21 @@
 	'use strict';
 
 	/**
+	 * Return a localized admin label with fallback.
+	 *
+	 * @param {string} key          Translation key.
+	 * @param {string} defaultValue Fallback value.
+	 * @return {string}
+	 */
+	function getLabel( key, defaultValue ) {
+		if ( 'undefined' === typeof WCCRAdminI18n || ! WCCRAdminI18n[ key ] ) {
+			return defaultValue;
+		}
+
+		return WCCRAdminI18n[ key ];
+	}
+
+	/**
 	 * Temporarily replace button text after an action.
 	 *
 	 * @param {HTMLButtonElement} button       Action button.
@@ -33,7 +48,7 @@
 
 		if ( navigator.clipboard && navigator.clipboard.writeText ) {
 			navigator.clipboard.writeText( url ).then( function () {
-				flashButtonText( button, 'Copied', 'Copy URL' );
+				flashButtonText( button, getLabel( 'copiedLabel', 'Copied' ), getLabel( 'copyLabel', 'Copy URL' ) );
 			} );
 			return;
 		}
@@ -44,7 +59,7 @@
 		textarea.select();
 		document.execCommand( 'copy' );
 		document.body.removeChild( textarea );
-		flashButtonText( button, 'Copied', 'Copy URL' );
+		flashButtonText( button, getLabel( 'copiedLabel', 'Copied' ), getLabel( 'copyLabel', 'Copy URL' ) );
 	}
 
 	/**
@@ -74,7 +89,7 @@
 			return;
 		}
 
-		if ( ! window.confirm( 'Delete this recovery item?' ) ) {
+		if ( ! window.confirm( getLabel( 'deleteConfirm', 'Delete this recovery item?' ) ) ) {
 			event.preventDefault();
 		}
 	}

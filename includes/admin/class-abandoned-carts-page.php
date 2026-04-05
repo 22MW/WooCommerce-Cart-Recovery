@@ -163,7 +163,7 @@ final class WCCR_Abandoned_Carts_Page {
 				<p class="wccr-recovery-item__total"><?php echo esc_html( $total ); ?></p>
 			</div>
 			<span class="wccr-status-badge wccr-status-badge--<?php echo esc_attr( sanitize_html_class( $status ) ); ?>">
-				<?php echo esc_html( ucfirst( $status ) ); ?>
+				<?php echo esc_html( $this->get_status_label( $status ) ); ?>
 			</span>
 		</div>
 		<?php
@@ -296,6 +296,20 @@ final class WCCR_Abandoned_Carts_Page {
 	private function get_coupon_label( array $cart ): string {
 		$coupon_code = $this->email_log_repository->get_last_coupon_code_for_cart( absint( $cart['id'] ?? 0 ) );
 		return '' !== $coupon_code ? $coupon_code : '-';
+	}
+
+	/**
+	 * Translate a stored cart status into an admin label.
+	 */
+	private function get_status_label( string $status ): string {
+		$labels = array(
+			'active'    => __( 'Active', 'vfwoo_woocommerce-cart-recovery' ),
+			'abandoned' => __( 'Abandoned', 'vfwoo_woocommerce-cart-recovery' ),
+			'clicked'   => __( 'Clicked', 'vfwoo_woocommerce-cart-recovery' ),
+			'recovered' => __( 'Recovered', 'vfwoo_woocommerce-cart-recovery' ),
+		);
+
+		return $labels[ $status ] ?? $status;
 	}
 
 	/**

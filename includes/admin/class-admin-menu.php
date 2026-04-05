@@ -43,5 +43,14 @@ final class WCCR_Admin_Menu {
 
 		wp_enqueue_style( 'wccr-admin', WCCR_PLUGIN_URL . 'assets/css/admin.css', array(), WCCR_VERSION );
 		wp_enqueue_script( 'wccr-admin', WCCR_PLUGIN_URL . 'assets/js/admin.js', array(), WCCR_VERSION, true );
+		wp_localize_script(
+			'wccr-admin',
+			'WCCRAdminI18n',
+			array(
+				'copyLabel'       => __( 'Copy URL', 'vfwoo_woocommerce-cart-recovery' ),
+				'copiedLabel'     => __( 'Copied', 'vfwoo_woocommerce-cart-recovery' ),
+				'deleteConfirm'   => __( 'Delete this recovery item?', 'vfwoo_woocommerce-cart-recovery' ),
+			)
+		);
 	}
 }
