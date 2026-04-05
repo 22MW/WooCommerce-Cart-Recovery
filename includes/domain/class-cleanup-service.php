@@ -13,6 +13,7 @@ final class WCCR_Cleanup_Service {
 		$days     = absint( $settings['cleanup_days'] ?? 90 );
 
 		$this->cart_repository->delete_rows_without_email();
+		$this->cart_repository->delete_historical_duplicates();
 		$this->cart_repository->delete_old_rows( $days );
 		$this->email_log_repository->delete_old_rows( $days );
 

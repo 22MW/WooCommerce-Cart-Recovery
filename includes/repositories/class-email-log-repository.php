@@ -103,6 +103,12 @@ final class WCCR_Email_Log_Repository {
 		return is_string( $coupon_code ) ? $coupon_code : '';
 	}
 
+	public function delete_for_cart( int $cart_id ): void {
+		global $wpdb;
+
+		$wpdb->delete( $this->table, array( 'cart_id' => $cart_id ), array( '%d' ) );
+	}
+
 	public function delete_old_rows( int $days ): int {
 		global $wpdb;
 		$threshold = gmdate( 'Y-m-d H:i:s', time() - ( $days * DAY_IN_SECONDS ) );

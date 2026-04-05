@@ -33,4 +33,15 @@
 			button.textContent = 'Copy URL';
 		}, 1500 );
 	} );
+
+	document.addEventListener( 'submit', function ( event ) {
+		var form = event.target.closest( '.wccr-delete-form' );
+		if ( ! form ) {
+			return;
+		}
+
+		if ( ! window.confirm( 'Delete this recovery item?' ) ) {
+			event.preventDefault();
+		}
+	} );
 }() );

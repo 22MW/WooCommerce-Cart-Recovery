@@ -19,12 +19,11 @@ final class WCCR_Admin_Menu {
 			__( 'Cart Recovery', 'woocommerce-cart-recovery' ),
 			'manage_woocommerce',
 			'wccr-cart-recovery',
-			array( $this->stats_page, 'render' ),
+			array( $this->carts_page, 'render' ),
 			'dashicons-cart'
 		);
 
-		add_submenu_page( 'wccr-cart-recovery', __( 'Statistics', 'woocommerce-cart-recovery' ), __( 'Statistics', 'woocommerce-cart-recovery' ), 'manage_woocommerce', 'wccr-cart-recovery', array( $this->stats_page, 'render' ) );
-		add_submenu_page( 'wccr-cart-recovery', __( 'Abandoned Carts', 'woocommerce-cart-recovery' ), __( 'Abandoned Carts', 'woocommerce-cart-recovery' ), 'manage_woocommerce', 'wccr-carts', array( $this->carts_page, 'render' ) );
+		add_submenu_page( 'wccr-cart-recovery', __( 'Cart Recovery', 'woocommerce-cart-recovery' ), __( 'Cart Recovery', 'woocommerce-cart-recovery' ), 'manage_woocommerce', 'wccr-cart-recovery', array( $this->carts_page, 'render' ) );
 		add_submenu_page( 'wccr-cart-recovery', __( 'Settings', 'woocommerce-cart-recovery' ), __( 'Settings', 'woocommerce-cart-recovery' ), 'manage_woocommerce', 'wccr-settings', array( $this->settings_page, 'render' ) );
 	}
 

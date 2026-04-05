@@ -41,7 +41,7 @@ final class WCCR_Plugin {
 
 		$admin = new WCCR_Admin_Menu(
 			$settings_page,
-			new WCCR_Abandoned_Carts_Page( $cart_repository, $email_log_repository, $settings_repository, $email_eligibility ),
+			new WCCR_Abandoned_Carts_Page( $cart_repository, $email_log_repository, $settings_repository, $email_eligibility, $stats_service ),
 			new WCCR_Stats_Page( $stats_service )
 		);
 		$admin->register_hooks();

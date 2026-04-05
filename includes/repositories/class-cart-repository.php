@@ -189,12 +189,31 @@ final class WCCR_Cart_Repository {
 		return $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$this->table} ORDER BY id DESC LIMIT %d", $limit ), ARRAY_A );
 	}
 
-	public function list_recovery_items( int $limit = 100 ): array {
+	public function list_recovery_items( string $sort = 'recent', int $limit = 100 ): array {
 		global $wpdb;
+
+		$order_by = 'id DESC';
+		switch ( $sort ) {
+			case 'oldest':
+				$order_by = 'id ASC';
+				break;
+			case 'abandoned':
+				$order_by = 'abandoned_at_gmt DESC, id DESC';
+				break;
+			case 'email':
+				$order_by = 'email ASC, id DESC';
+				break;
+			case 'status':
+				$order_by = "FIELD(status, 'abandoned', 'clicked', 'recovered') ASC, id DESC";
+				break;
+			case 'purchased':
+				$order_by = 'recovered_order_id DESC, id DESC';
+				break;
+		}
 
 		return $wpdb->get_results(
 			$wpdb->prepare(
-				"SELECT * FROM {$this->table} WHERE status IN ('abandoned','clicked','recovered') ORDER BY id DESC LIMIT %d",
+				"SELECT * FROM {$this->table} WHERE status IN ('abandoned','clicked','recovered') ORDER BY {$order_by} LIMIT %d",
 				$limit
 			),
 			ARRAY_A
@@ -223,6 +242,71 @@ final class WCCR_Cart_Repository {
 		return (float) $wpdb->get_var( "SELECT COALESCE(SUM(cart_total),0) FROM {$this->table} WHERE status = 'recovered'" );
 	}
 
+	public function delete_by_id( int $id ): void {
+		global $wpdb;
+
+		$wpdb->delete( $this->table, array( 'id' => $id ), array( '%d' ) );
+	}
+
+	public function delete_historical_duplicates(): int {
+		global $wpdb;
+
+		$rows = $wpdb->get_results(
+			"SELECT id, email, cart_hash, status, recovered_order_id, updated_at_gmt
+			FROM {$this->table}
+			WHERE status IN ('abandoned','clicked','recovered')
+			AND email IS NOT NULL AND email != ''
+			AND cart_hash IS NOT NULL AND cart_hash != ''
+			ORDER BY email ASC, cart_hash ASC, id DESC",
+			ARRAY_A
+		);
+
+		if ( empty( $rows ) ) {
+			return 0;
+		}
+
+		$grouped = array();
+		foreach ( $rows as $row ) {
+			$key = strtolower( (string) $row['email'] ) . '|' . (string) $row['cart_hash'];
+			if ( ! isset( $grouped[ $key ] ) ) {
+				$grouped[ $key ] = array();
+			}
+
+			$grouped[ $key ][] = $row;
+		}
+
+		$deleted = 0;
+		foreach ( $grouped as $items ) {
+			if ( count( $items ) < 2 ) {
+				continue;
+			}
+
+			usort(
+				$items,
+				function ( array $left, array $right ): int {
+					$priority_left  = $this->get_status_priority( (string) $left['status'], absint( $left['recovered_order_id'] ?? 0 ) );
+					$priority_right = $this->get_status_priority( (string) $right['status'], absint( $right['recovered_order_id'] ?? 0 ) );
+
+					if ( $priority_left !== $priority_right ) {
+						return $priority_right <=> $priority_left;
+					}
+
+					return strcmp( (string) $right['updated_at_gmt'], (string) $left['updated_at_gmt'] );
+				}
+			);
+
+			$keep = array_shift( $items );
+			unset( $keep );
+
+			foreach ( $items as $item ) {
+				$this->delete_by_id( absint( $item['id'] ) );
+				++$deleted;
+			}
+		}
+
+		return $deleted;
+	}
+
 	private function find_open_cart_id( string $session_key, ?string $email ): int {
 		global $wpdb;
 
@@ -246,5 +330,21 @@ final class WCCR_Cart_Repository {
 				$email
 			)
 		);
+	}
+
+	private function get_status_priority( string $status, int $order_id ): int {
+		if ( 'recovered' === $status && $order_id > 0 ) {
+			return 3;
+		}
+
+		if ( 'clicked' === $status ) {
+			return 2;
+		}
+
+		if ( 'abandoned' === $status ) {
+			return 1;
+		}
+
+		return 0;
 	}
 }
