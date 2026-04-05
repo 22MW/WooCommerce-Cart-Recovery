@@ -1,6 +1,9 @@
 <?php
 defined( 'ABSPATH' ) || exit;
 
+/**
+ * Detect unpaid WooCommerce orders that should enter the recovery flow.
+ */
 final class WCCR_Pending_Order_Detector {
 	public function __construct(
 		private WCCR_Cart_Repository $cart_repository,
@@ -8,6 +11,9 @@ final class WCCR_Pending_Order_Detector {
 		private WCCR_Settings_Repository $settings_repository
 	) {}
 
+	/**
+	 * Register order hooks used by the recovery flow.
+	 */
 	public function register_hooks(): void {
 		add_action( 'woocommerce_checkout_order_processed', array( $this, 'link_recovered_order' ), 30, 1 );
 		add_action( 'woocommerce_order_status_failed', array( $this, 'capture_failed_order' ), 20, 1 );
@@ -15,6 +21,9 @@ final class WCCR_Pending_Order_Detector {
 		add_action( 'woocommerce_order_status_completed', array( $this, 'mark_order_recovered' ), 20, 1 );
 	}
 
+	/**
+	 * Sync stale pending or failed orders into the recovery table.
+	 */
 	public function sync_stale_pending_orders(): void {
 		$settings = $this->settings_repository->get();
 		$minutes  = max( 1, absint( $settings['abandon_after_minutes'] ?? 60 ) );
@@ -34,10 +43,16 @@ final class WCCR_Pending_Order_Detector {
 		}
 	}
 
+	/**
+	 * Capture a failed order immediately.
+	 */
 	public function capture_failed_order( int $order_id ): void {
 		$this->capture_unpaid_order( $order_id, false );
 	}
 
+	/**
+	 * Capture an unpaid order if it should be treated as abandoned.
+	 */
 	private function capture_unpaid_order( int $order_id, bool $respect_age ): void {
 		$order = wc_get_order( $order_id );
 		if ( ! $order || ! in_array( $order->get_status(), array( 'pending', 'failed' ), true ) ) {
@@ -93,6 +108,9 @@ final class WCCR_Pending_Order_Detector {
 		$this->cart_repository->mark_session_abandoned( 'order_' . $order->get_id() );
 	}
 
+	/**
+	 * Mark a linked recovery cart as recovered once the order is paid.
+	 */
 	public function mark_order_recovered( int $order_id ): void {
 		$order = wc_get_order( $order_id );
 		if ( ! $order ) {
@@ -106,6 +124,9 @@ final class WCCR_Pending_Order_Detector {
 		}
 	}
 
+	/**
+	 * Link a newly created order to the clicked recovery cart in session.
+	 */
 	public function link_recovered_order( int $order_id ): void {
 		if ( ! function_exists( 'WC' ) || ! WC()->session ) {
 			return;

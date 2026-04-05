@@ -1,6 +1,9 @@
 <?php
 defined( 'ABSPATH' ) || exit;
 
+/**
+ * Process the recovery email queue.
+ */
 final class WCCR_Email_Scheduler {
 	public function __construct(
 		private WCCR_Cart_Repository $cart_repository,
@@ -12,6 +15,9 @@ final class WCCR_Email_Scheduler {
 		private WCCR_Recovery_Service $recovery_service
 	) {}
 
+	/**
+	 * Iterate eligible abandoned carts and send the next email step.
+	 */
 	public function process_queue(): void {
 		$settings = $this->settings_repository->get();
 		$carts    = $this->cart_repository->get_abandoned_carts();
@@ -32,6 +38,12 @@ final class WCCR_Email_Scheduler {
 		}
 	}
 
+	/**
+	 * Send a single recovery email step and log the outcome.
+	 *
+	 * @param array<string, mixed> $cart          Cart row.
+	 * @param array<string, mixed> $step_settings Step settings.
+	 */
 	private function send_step_email( array $cart, int $step, array $step_settings, int $coupon_expiry_days ): void {
 		$email = array(
 			'subject' => sanitize_text_field( (string) ( $step_settings['subject'] ?? '' ) ),

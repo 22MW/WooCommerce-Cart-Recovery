@@ -85,6 +85,9 @@ final class WCCR_Email_Eligibility_Service {
 		return $labels[ $reason ] ?? $reason;
 	}
 
+	/**
+	 * Convert a GMT timestamp into the local display format used in admin.
+	 */
 	public function format_gmt_for_display( string $datetime_gmt ): string {
 		if ( '' === $datetime_gmt || '0000-00-00 00:00:00' === $datetime_gmt ) {
 			return '-';

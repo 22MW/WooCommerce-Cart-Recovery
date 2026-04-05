@@ -1,12 +1,18 @@
 <?php
 defined( 'ABSPATH' ) || exit;
 
+/**
+ * Capture the current WooCommerce cart once a valid email is known.
+ */
 final class WCCR_Cart_Capture_Service {
 	public function __construct(
 		private WCCR_Cart_Repository $cart_repository,
 		private WCCR_Locale_Resolver_Manager $locale_resolver
 	) {}
 
+	/**
+	 * Persist the current cart snapshot for the current customer/session.
+	 */
 	public function capture_current_cart( ?string $email = null, ?string $customer_name = null, string $source = 'classic' ): void {
 		if ( ! function_exists( 'WC' ) || ! WC()->cart || ! WC()->session ) {
 			return;
@@ -57,6 +63,9 @@ final class WCCR_Cart_Capture_Service {
 		);
 	}
 
+	/**
+	 * Derive the current customer name from user or checkout data.
+	 */
 	private function get_current_customer_name(): string {
 		if ( is_user_logged_in() ) {
 			$user = wp_get_current_user();

@@ -1,7 +1,16 @@
 <?php
 defined( 'ABSPATH' ) || exit;
 
+/**
+ * Generate and describe recovery coupons.
+ */
 final class WCCR_Coupon_Service {
+	/**
+	 * Create a one-time coupon for a recovery step when discount settings apply.
+	 *
+	 * @param array<string, mixed> $cart          Cart row.
+	 * @param array<string, mixed> $step_settings Step settings.
+	 */
 	public function maybe_generate_coupon( array $cart, array $step_settings, int $expiry_days ): ?string {
 		if ( empty( $step_settings['discount_type'] ) || 'none' === $step_settings['discount_type'] ) {
 			return null;
@@ -25,6 +34,11 @@ final class WCCR_Coupon_Service {
 		return $code;
 	}
 
+	/**
+	 * Return a human-friendly label for a configured discount and optional code.
+	 *
+	 * @param array<string, mixed> $step_settings Step settings.
+	 */
 	public function get_coupon_label( array $step_settings, string $currency, ?string $coupon_code = null ): string {
 		$discount_type   = (string) ( $step_settings['discount_type'] ?? 'none' );
 		$discount_amount = (float) ( $step_settings['discount_amount'] ?? 0 );
@@ -50,6 +64,11 @@ final class WCCR_Coupon_Service {
 		return $label . ' - ' . $coupon_code;
 	}
 
+	/**
+	 * Build the real coupon code stored in WooCommerce.
+	 *
+	 * @param array<string, mixed> $step_settings Step settings.
+	 */
 	private function build_coupon_code( array $step_settings ): string {
 		$discount_type   = (string) ( $step_settings['discount_type'] ?? 'percent' );
 		$discount_amount = (float) ( $step_settings['discount_amount'] ?? 0 );

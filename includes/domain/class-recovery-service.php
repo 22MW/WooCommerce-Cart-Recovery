@@ -1,15 +1,24 @@
 <?php
 defined( 'ABSPATH' ) || exit;
 
+/**
+ * Restore saved carts from secure recovery URLs.
+ */
 final class WCCR_Recovery_Service {
 	public function __construct(
 		private WCCR_Cart_Repository $cart_repository
 	) {}
 
+	/**
+	 * Register public recovery hooks.
+	 */
 	public function init(): void {
 		add_action( 'template_redirect', array( $this, 'maybe_restore_cart' ) );
 	}
 
+	/**
+	 * Build the public recovery URL for a cart and optional coupon.
+	 */
 	public function build_recovery_url( int $cart_id, ?string $coupon_code = null ): string {
 		$token = wp_hash( $cart_id . '|' . wp_salt( 'auth' ) );
 		$args  = array(
@@ -27,10 +36,13 @@ final class WCCR_Recovery_Service {
 		);
 	}
 
+	/**
+	 * Restore the cart when a valid recovery link is visited.
+	 */
 	public function maybe_restore_cart(): void {
-		$cart_id = absint( $_GET['wccr_recover'] ?? 0 );
-		$token   = sanitize_text_field( wp_unslash( $_GET['wccr_token'] ?? '' ) );
-		$coupon  = sanitize_text_field( wp_unslash( $_GET['wccr_coupon'] ?? '' ) );
+		$cart_id = isset( $_GET['wccr_recover'] ) ? absint( wp_unslash( $_GET['wccr_recover'] ) ) : 0;
+		$token   = isset( $_GET['wccr_token'] ) ? sanitize_text_field( wp_unslash( $_GET['wccr_token'] ) ) : '';
+		$coupon  = isset( $_GET['wccr_coupon'] ) ? sanitize_text_field( wp_unslash( $_GET['wccr_coupon'] ) ) : '';
 
 		if ( ! $cart_id || ! $token || ! hash_equals( wp_hash( $cart_id . '|' . wp_salt( 'auth' ) ), $token ) ) {
 			return;

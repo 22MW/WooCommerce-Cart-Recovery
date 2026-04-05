@@ -1,11 +1,21 @@
 <?php
 defined( 'ABSPATH' ) || exit;
 
+/**
+ * Build email subject and HTML content for recovery emails.
+ */
 final class WCCR_Email_Renderer {
 	public function __construct(
 		private WCCR_Coupon_Service $coupon_service
 	) {}
 
+	/**
+	 * Render subject and message for a recovery email.
+	 *
+	 * @param array<string, mixed> $cart          Cart row.
+	 * @param array<string, mixed> $step_settings Step settings.
+	 * @return array{subject:string,message:string}
+	 */
 	public function render( array $cart, array $step_settings, string $recovery_url, ?string $coupon_code ): array {
 		$site_name     = get_bloginfo( 'name' );
 		$customer_name = $this->get_customer_name( $cart );
@@ -53,6 +63,11 @@ final class WCCR_Email_Renderer {
 		);
 	}
 
+	/**
+	 * Resolve the best available customer name for the email.
+	 *
+	 * @param array<string, mixed> $cart Cart row.
+	 */
 	private function get_customer_name( array $cart ): string {
 		$stored_name = trim( (string) ( $cart['customer_name'] ?? '' ) );
 		if ( '' !== $stored_name ) {
@@ -73,6 +88,12 @@ final class WCCR_Email_Renderer {
 		return '' !== $name ? $name : (string) $user->display_name;
 	}
 
+	/**
+	 * Build the cart summary rows used in the email template.
+	 *
+	 * @param array<string, mixed> $cart Cart row.
+	 * @return array<int, array{name:string,quantity:int,total:string}>
+	 */
 	private function get_cart_items( array $cart ): array {
 		$payload = json_decode( (string) ( $cart['cart_payload'] ?? '' ), true );
 		if ( ! is_array( $payload ) ) {
@@ -99,6 +120,9 @@ final class WCCR_Email_Renderer {
 		return $items;
 	}
 
+	/**
+	 * Replace supported template variables in subject/body strings.
+	 */
 	private function replace_template_variables( string $template, string $recovery_url, ?string $coupon_code, string $coupon_label, string $cart_total, string $site_name, string $customer_name ): string {
 		return str_replace(
 			array( '{recovery_link}', '{coupon_code}', '{coupon_label}', '{cart_total}', '{site_name}', '{customer_name}' ),
@@ -114,6 +138,9 @@ final class WCCR_Email_Renderer {
 		);
 	}
 
+	/**
+	 * Clean rendered text after variable replacement.
+	 */
 	private function cleanup_rendered_template( string $template, string $context = 'text' ): string {
 		$template = preg_replace( '/\s+/', ' ', $template ) ?: $template;
 		$template = str_replace( array( 'Hi ,', 'Hello ,' ), array( 'Hi,', 'Hello,' ), $template );

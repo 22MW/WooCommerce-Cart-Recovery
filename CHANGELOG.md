@@ -12,6 +12,14 @@ The format is based on Keep a Changelog, and this project follows a simple `MAJO
 
 ### Fixed
 
+## [0.1.9] - 2026-04-05
+
+### Changed
+- Added PHPDoc and small WPCS-oriented cleanup across the `domain` layer.
+
+### Fixed
+- Hardened recovery request input handling in the recovery service.
+
 ## [0.1.8] - 2026-04-05
 
 ### Changed
