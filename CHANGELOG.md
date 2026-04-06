@@ -12,6 +12,16 @@ The format is based on Keep a Changelog, and this project follows a simple `MAJO
 
 ### Fixed
 
+## [0.1.20] - 2026-04-06
+
+### Added
+- Added multilingual email settings with per-locale tabs for each recovery step subject and body.
+
+### Changed
+- Recovery emails now resolve subject and body by the cart locale, with fallback to the site default locale.
+- Email rendering now switches locale at send time so plugin strings follow the language captured with the cart.
+- Discount labels and placeholder comments were updated to keep translation extraction clean.
+
 ## [0.1.19] - 2026-04-06
 
 ### Changed

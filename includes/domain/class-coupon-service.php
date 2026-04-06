@@ -52,10 +52,16 @@ final class WCCR_Coupon_Service {
 				wp_strip_all_tags( wc_price( $discount_amount, array( 'currency' => $currency ) ) ),
 				ENT_QUOTES,
 				get_bloginfo( 'charset' )
-			) . ' off';
+			);
 		} else {
-			$label = wc_format_decimal( $discount_amount, 0 ) . '% off';
+			$label = wc_format_decimal( $discount_amount, 0 ) . '%';
 		}
+
+		$label = sprintf(
+			/* translators: %s: formatted discount label. */
+			__( '%s off', 'vfwoo_woocommerce-cart-recovery' ),
+			$label
+		);
 
 		if ( empty( $coupon_code ) ) {
 			return $label;

@@ -6,7 +6,7 @@ $text_align = is_rtl() ? 'right' : 'left';
 
 <div class="email-introduction">
 	<?php if ( ! empty( $customer_name ) ) : ?>
-		<p><?php echo esc_html( sprintf( __( 'Hello %s,', 'vfwoo_woocommerce-cart-recovery' ), $customer_name ) ); ?></p>
+		<p><?php echo esc_html( sprintf( /* translators: %s: customer name */ __( 'Hello %s,', 'vfwoo_woocommerce-cart-recovery' ), $customer_name ) ); ?></p>
 	<?php endif; ?>
 
 	<?php echo wpautop( wp_kses_post( $body ) ); ?>

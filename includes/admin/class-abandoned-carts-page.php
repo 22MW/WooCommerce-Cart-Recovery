@@ -305,7 +305,7 @@ final class WCCR_Abandoned_Carts_Page {
 		$items = $this->get_email_step_items( $cart, $step, $log );
 		?>
 		<div class="wccr-email-step-card">
-			<h3><?php echo esc_html( sprintf( __( 'Email %d', 'vfwoo_woocommerce-cart-recovery' ), $step ) ); ?></h3>
+			<h3><?php echo esc_html( sprintf( /* translators: %d: email step number */ __( 'Email %d', 'vfwoo_woocommerce-cart-recovery' ), $step ) ); ?></h3>
 			<?php if ( ! empty( $items ) ) : ?>
 				<div class="wccr-email-step-card__meta">
 					<?php foreach ( $items as $item ) : ?>

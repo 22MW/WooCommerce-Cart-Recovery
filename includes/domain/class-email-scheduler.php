@@ -29,7 +29,7 @@ final class WCCR_Email_Scheduler {
 			}
 
 			$step          = absint( $eligibility['current_step'] ?? 0 );
-			$step_settings = $settings['steps'][ $step ] ?? array();
+			$step_settings = $this->settings_repository->get_localized_step_settings( $settings, $step, (string) ( $cart['locale'] ?? '' ) );
 			if ( ! $step ) {
 				continue;
 			}
@@ -49,6 +49,7 @@ final class WCCR_Email_Scheduler {
 			'subject' => sanitize_text_field( (string) ( $step_settings['subject'] ?? '' ) ),
 			'message' => '',
 		);
+		$switched = $this->switch_to_email_locale( (string) ( $cart['locale'] ?? '' ) );
 
 		try {
 			$coupon_code  = $this->coupon_service->maybe_generate_coupon( $cart, $step_settings, $coupon_expiry_days );
@@ -75,6 +76,21 @@ final class WCCR_Email_Scheduler {
 				sanitize_text_field( (string) ( $email['subject'] ?? $step_settings['subject'] ?? '' ) ),
 				$throwable->getMessage()
 			);
+		} finally {
+			if ( $switched ) {
+				restore_previous_locale();
+			}
 		}
+	}
+
+	/**
+	 * Switch WordPress locale before rendering and sending an email.
+	 */
+	private function switch_to_email_locale( string $locale ): bool {
+		if ( '' === $locale || ! function_exists( 'switch_to_locale' ) ) {
+			return false;
+		}
+
+		return (bool) switch_to_locale( sanitize_text_field( $locale ) );
 	}
 }

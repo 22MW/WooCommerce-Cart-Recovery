@@ -51,6 +51,45 @@
 	border-radius: 12px;
 }
 
+.wccr-admin .wccr-locale-tabs {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px 12px;
+	margin-top: 20px;
+}
+
+.wccr-admin .wccr-locale-tabs__toggle {
+	position: absolute;
+	opacity: 0;
+	pointer-events: none;
+}
+
+.wccr-admin .wccr-locale-tabs__label {
+	display: inline-flex;
+	align-items: center;
+	padding: 8px 14px;
+	border: 1px solid #dcdcde;
+	border-radius: 999px;
+	background: #f6f7f7;
+	cursor: pointer;
+	font-weight: 600;
+}
+
+.wccr-admin .wccr-locale-tabs__panel {
+	display: none;
+	flex: 0 0 100%;
+}
+
+.wccr-admin .wccr-locale-tabs__toggle:checked + .wccr-locale-tabs__label {
+	background: #fff;
+	border-color: #2271b1;
+	color: #2271b1;
+}
+
+.wccr-admin .wccr-locale-tabs__toggle:checked + .wccr-locale-tabs__label + .wccr-locale-tabs__panel {
+	display: block;
+}
+
 .wccr-admin .wccr-recovery-grid {
 	display: grid;
 	grid-template-columns: repeat(auto-fit, minmax(333px, 1fr));

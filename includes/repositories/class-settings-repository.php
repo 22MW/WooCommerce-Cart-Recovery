@@ -13,40 +13,14 @@ final class WCCR_Settings_Repository {
 	 * @return array<string, mixed>
 	 */
 	public static function default_settings(): array {
+		$default_locale = self::get_default_locale();
+
 		return array(
 			'abandon_after_minutes' => 60,
 			'cleanup_days'          => 90,
 			'coupon_expiry_days'    => 7,
 			'from_name'             => get_bloginfo( 'name' ),
-			'steps'                 => array(
-				1 => array(
-					'enabled'          => 1,
-					'delay_minutes'    => 60,
-					'discount_type'    => 'none',
-					'discount_amount'  => 0,
-					'min_cart_total'   => 0,
-					'subject'          => __( '{customer_name}, you left something in your cart', 'vfwoo_woocommerce-cart-recovery' ),
-					'body'             => __( 'Hi {customer_name}, your cart is still available. Click the button below to complete your order: {recovery_link}', 'vfwoo_woocommerce-cart-recovery' ),
-				),
-				2 => array(
-					'enabled'          => 1,
-					'delay_minutes'    => 1440,
-					'discount_type'    => 'percent',
-					'discount_amount'  => 5,
-					'min_cart_total'   => 0,
-					'subject'          => __( '{customer_name}, your cart is waiting for you', 'vfwoo_woocommerce-cart-recovery' ),
-					'body'             => __( 'Hi {customer_name}, complete your purchase here: {recovery_link}. Discount: {coupon_label}. Code: {coupon_code}', 'vfwoo_woocommerce-cart-recovery' ),
-				),
-				3 => array(
-					'enabled'          => 1,
-					'delay_minutes'    => 2880,
-					'discount_type'    => 'percent',
-					'discount_amount'  => 10,
-					'min_cart_total'   => 0,
-					'subject'          => __( '{customer_name}, last reminder for your cart', 'vfwoo_woocommerce-cart-recovery' ),
-					'body'             => __( 'Hi {customer_name}, your cart can still be recovered here: {recovery_link}. Discount: {coupon_label}. Code: {coupon_code}', 'vfwoo_woocommerce-cart-recovery' ),
-				),
-			),
+			'steps'                 => self::get_default_steps( $default_locale ),
 		);
 	}
 
@@ -57,7 +31,8 @@ final class WCCR_Settings_Repository {
 	 */
 	public function get(): array {
 		$settings = get_option( self::OPTION_KEY, array() );
-		return wp_parse_args( is_array( $settings ) ? $settings : array(), self::default_settings() );
+		$settings = wp_parse_args( is_array( $settings ) ? $settings : array(), self::default_settings() );
+		return $this->normalize_settings( $settings );
 	}
 
 	/**
@@ -67,5 +42,183 @@ final class WCCR_Settings_Repository {
 	 */
 	public function save( array $settings ): void {
 		update_option( self::OPTION_KEY, $settings );
+	}
+
+	/**
+	 * Return the localized step settings for one locale with fallback.
+	 *
+	 * @param array<string, mixed> $settings Plugin settings.
+	 * @return array<string, mixed>
+	 */
+	public function get_localized_step_settings( array $settings, int $step, string $locale ): array {
+		$step_settings  = isset( $settings['steps'][ $step ] ) && is_array( $settings['steps'][ $step ] ) ? $settings['steps'][ $step ] : array();
+		$translations   = isset( $step_settings['translations'] ) && is_array( $step_settings['translations'] ) ? $step_settings['translations'] : array();
+		$default_locale = self::get_default_locale();
+		$translation    = $this->find_translation( $translations, $locale, $default_locale );
+
+		$step_settings['subject'] = (string) ( $translation['subject'] ?? $step_settings['subject'] ?? '' );
+		$step_settings['body']    = (string) ( $translation['body'] ?? $step_settings['body'] ?? '' );
+
+		return $step_settings;
+	}
+
+	/**
+	 * Normalize settings and migrate legacy single-language fields.
+	 *
+	 * @param array<string, mixed> $settings Raw settings payload.
+	 * @return array<string, mixed>
+	 */
+	private function normalize_settings( array $settings ): array {
+		$default_locale = self::get_default_locale();
+		$default_steps  = self::get_default_steps( $default_locale );
+
+		foreach ( array( 1, 2, 3 ) as $step ) {
+			$step_settings            = isset( $settings['steps'][ $step ] ) && is_array( $settings['steps'][ $step ] ) ? $settings['steps'][ $step ] : array();
+			$settings['steps'][ $step ] = $this->normalize_step_settings( $step_settings, $default_steps[ $step ], $default_locale );
+		}
+
+		return $settings;
+	}
+
+	/**
+	 * Normalize one step and ensure translated subject/body values exist.
+	 *
+	 * @param array<string, mixed> $step_settings Raw step settings.
+	 * @param array<string, mixed> $default_step  Default step settings.
+	 * @return array<string, mixed>
+	 */
+	private function normalize_step_settings( array $step_settings, array $default_step, string $default_locale ): array {
+		$step_settings = wp_parse_args( $step_settings, $default_step );
+		$translations  = isset( $step_settings['translations'] ) && is_array( $step_settings['translations'] ) ? $step_settings['translations'] : array();
+		$translations  = $this->normalize_translations(
+			$translations,
+			(string) ( $step_settings['subject'] ?? '' ),
+			(string) ( $step_settings['body'] ?? '' ),
+			$default_locale,
+			$default_step
+		);
+
+		$step_settings['translations'] = $translations;
+		$step_settings['subject']      = (string) $translations[ $default_locale ]['subject'];
+		$step_settings['body']         = (string) $translations[ $default_locale ]['body'];
+
+		return $step_settings;
+	}
+
+	/**
+	 * Normalize translated values for one step.
+	 *
+	 * @param array<string, mixed> $translations Raw translations.
+	 * @param array<string, mixed> $default_step Default step settings.
+	 * @return array<string, array{subject:string,body:string}>
+	 */
+	private function normalize_translations( array $translations, string $legacy_subject, string $legacy_body, string $default_locale, array $default_step ): array {
+		$normalized = array();
+
+		foreach ( $translations as $locale => $translation ) {
+			if ( ! is_string( $locale ) || '' === $locale || ! is_array( $translation ) ) {
+				continue;
+			}
+
+			$normalized[ $locale ] = array(
+				'subject' => (string) ( $translation['subject'] ?? '' ),
+				'body'    => (string) ( $translation['body'] ?? '' ),
+			);
+		}
+
+		if ( ! isset( $normalized[ $default_locale ] ) ) {
+			$normalized[ $default_locale ] = array(
+				'subject' => '' !== $legacy_subject ? $legacy_subject : (string) ( $default_step['subject'] ?? '' ),
+				'body'    => '' !== $legacy_body ? $legacy_body : (string) ( $default_step['body'] ?? '' ),
+			);
+		}
+
+		return $normalized;
+	}
+
+	/**
+	 * Resolve the best available translation for a locale.
+	 *
+	 * @param array<string, mixed> $translations Step translations.
+	 * @return array<string, string>
+	 */
+	private function find_translation( array $translations, string $locale, string $default_locale ): array {
+		$locale = sanitize_text_field( $locale );
+		if ( isset( $translations[ $locale ] ) && is_array( $translations[ $locale ] ) ) {
+			return $translations[ $locale ];
+		}
+
+		$language_code = strtok( $locale, '_' );
+		foreach ( $translations as $translation_locale => $translation ) {
+			if ( ! is_array( $translation ) || ! is_string( $translation_locale ) ) {
+				continue;
+			}
+
+			if ( $language_code && $language_code === strtok( $translation_locale, '_' ) ) {
+				return $translation;
+			}
+		}
+
+		if ( isset( $translations[ $default_locale ] ) && is_array( $translations[ $default_locale ] ) ) {
+			return $translations[ $default_locale ];
+		}
+
+		$first = reset( $translations );
+		return is_array( $first ) ? $first : array( 'subject' => '', 'body' => '' );
+	}
+
+	/**
+	 * Return default step definitions with translated content in the default locale.
+	 *
+	 * @return array<int, array<string, mixed>>
+	 */
+	private static function get_default_steps( string $default_locale ): array {
+		$steps = array(
+			1 => array(
+				'enabled'         => 1,
+				'delay_minutes'   => 60,
+				'discount_type'   => 'none',
+				'discount_amount' => 0,
+				'min_cart_total'  => 0,
+				'subject'         => __( '{customer_name}, you left something in your cart', 'vfwoo_woocommerce-cart-recovery' ),
+				'body'            => __( 'Hi {customer_name}, your cart is still available. Click the button below to complete your order: {recovery_link}', 'vfwoo_woocommerce-cart-recovery' ),
+			),
+			2 => array(
+				'enabled'         => 1,
+				'delay_minutes'   => 1440,
+				'discount_type'   => 'percent',
+				'discount_amount' => 5,
+				'min_cart_total'  => 0,
+				'subject'         => __( '{customer_name}, your cart is waiting for you', 'vfwoo_woocommerce-cart-recovery' ),
+				'body'            => __( 'Hi {customer_name}, complete your purchase here: {recovery_link}. Discount: {coupon_label}. Code: {coupon_code}', 'vfwoo_woocommerce-cart-recovery' ),
+			),
+			3 => array(
+				'enabled'         => 1,
+				'delay_minutes'   => 2880,
+				'discount_type'   => 'percent',
+				'discount_amount' => 10,
+				'min_cart_total'  => 0,
+				'subject'         => __( '{customer_name}, last reminder for your cart', 'vfwoo_woocommerce-cart-recovery' ),
+				'body'            => __( 'Hi {customer_name}, your cart can still be recovered here: {recovery_link}. Discount: {coupon_label}. Code: {coupon_code}', 'vfwoo_woocommerce-cart-recovery' ),
+			),
+		);
+
+		foreach ( $steps as $step => $step_settings ) {
+			$steps[ $step ]['translations'] = array(
+				$default_locale => array(
+					'subject' => (string) $step_settings['subject'],
+					'body'    => (string) $step_settings['body'],
+				),
+			);
+		}
+
+		return $steps;
+	}
+
+	/**
+	 * Return the site default locale used as settings fallback.
+	 */
+	private static function get_default_locale(): string {
+		return get_locale();
 	}
 }

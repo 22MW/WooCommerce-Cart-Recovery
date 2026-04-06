@@ -438,6 +438,11 @@ msgstr "Hola %s,"
 msgid "Complete your order with %s."
 msgstr "Completa tu pedido con %s."
 
+#. translators: %s: discount label
+#: includes/domain/class-coupon-service.php:141
+msgid "%s off"
+msgstr "%s de descuento"
+
 #: templates/emails/base-email.php:26
 msgid "Your cart summary"
 msgstr "Resumen de tu carrito"

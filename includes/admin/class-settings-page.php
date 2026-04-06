@@ -7,6 +7,7 @@ defined( 'ABSPATH' ) || exit;
 final class WCCR_Settings_Page {
 	public function __construct(
 		private WCCR_Settings_Repository $settings_repository,
+		private WCCR_Locale_Resolver_Manager $locale_resolver,
 		private WCCR_Abandoned_Cart_Detector $detector,
 		private WCCR_Email_Scheduler $email_scheduler,
 		private WCCR_Pending_Order_Detector $pending_order_detector
@@ -37,6 +38,8 @@ final class WCCR_Settings_Page {
 			'from_name'             => sanitize_text_field( wp_unslash( $_POST['from_name'] ?? '' ) ),
 			'steps'                 => array(),
 		);
+		$locales  = $this->locale_resolver->get_available_locales();
+		$default_locale = $this->locale_resolver->get_default_locale();
 
 		foreach ( array( 1, 2, 3 ) as $step ) {
 			$settings['steps'][ $step ] = array(
@@ -45,9 +48,12 @@ final class WCCR_Settings_Page {
 				'discount_type'   => sanitize_text_field( wp_unslash( $_POST['steps'][ $step ]['discount_type'] ?? 'none' ) ),
 				'discount_amount' => (float) ( $_POST['steps'][ $step ]['discount_amount'] ?? 0 ),
 				'min_cart_total'  => (float) ( $_POST['steps'][ $step ]['min_cart_total'] ?? 0 ),
-				'subject'         => sanitize_text_field( wp_unslash( $_POST['steps'][ $step ]['subject'] ?? '' ) ),
-				'body'            => wp_kses_post( wp_unslash( $_POST['steps'][ $step ]['body'] ?? '' ) ),
+				'translations'    => $this->collect_step_translations( $step, $locales ),
 			);
+
+			$default_translation = $settings['steps'][ $step ]['translations'][ $default_locale ] ?? reset( $settings['steps'][ $step ]['translations'] );
+			$settings['steps'][ $step ]['subject'] = is_array( $default_translation ) ? (string) ( $default_translation['subject'] ?? '' ) : '';
+			$settings['steps'][ $step ]['body']    = is_array( $default_translation ) ? (string) ( $default_translation['body'] ?? '' ) : '';
 		}
 
 		$this->settings_repository->save( $settings );
@@ -104,6 +110,7 @@ final class WCCR_Settings_Page {
 		}
 
 		$settings = $this->settings_repository->get();
+		$locales  = $this->locale_resolver->get_available_locales();
 		settings_errors( 'wccr_settings' );
 		?>
 		<div class="wrap wccr-admin">
@@ -116,25 +123,8 @@ final class WCCR_Settings_Page {
 					<tr><th><label for="coupon_expiry_days"><?php esc_html_e( 'Coupon expiry days', 'vfwoo_woocommerce-cart-recovery' ); ?></label></th><td><input type="number" name="coupon_expiry_days" id="coupon_expiry_days" value="<?php echo esc_attr( $settings['coupon_expiry_days'] ); ?>" min="1"></td></tr>
 				</table>
 
-				<?php foreach ( array( 1, 2, 3 ) as $step ) : $step_settings = $settings['steps'][ $step ] ?? array(); ?>
-					<div class="wccr-card">
-						<h2><?php echo esc_html( sprintf( __( 'Email step %d', 'vfwoo_woocommerce-cart-recovery' ), $step ) ); ?></h2>
-						<p><label><input type="checkbox" name="steps[<?php echo esc_attr( $step ); ?>][enabled]" value="1" <?php checked( ! empty( $step_settings['enabled'] ) ); ?>> <?php esc_html_e( 'Enabled', 'vfwoo_woocommerce-cart-recovery' ); ?></label></p>
-						<p><label><?php esc_html_e( 'Delay minutes', 'vfwoo_woocommerce-cart-recovery' ); ?> <input type="number" name="steps[<?php echo esc_attr( $step ); ?>][delay_minutes]" value="<?php echo esc_attr( $step_settings['delay_minutes'] ?? 60 ); ?>"></label></p>
-						<p><label><?php esc_html_e( 'Discount type', 'vfwoo_woocommerce-cart-recovery' ); ?>
-							<select name="steps[<?php echo esc_attr( $step ); ?>][discount_type]">
-								<option value="none" <?php selected( $step_settings['discount_type'] ?? 'none', 'none' ); ?>><?php esc_html_e( 'None', 'vfwoo_woocommerce-cart-recovery' ); ?></option>
-								<option value="percent" <?php selected( $step_settings['discount_type'] ?? 'none', 'percent' ); ?>><?php esc_html_e( 'Percentage', 'vfwoo_woocommerce-cart-recovery' ); ?></option>
-								<option value="fixed_cart" <?php selected( $step_settings['discount_type'] ?? 'none', 'fixed_cart' ); ?>><?php esc_html_e( 'Fixed cart', 'vfwoo_woocommerce-cart-recovery' ); ?></option>
-							</select>
-						</label></p>
-						<p><label><?php esc_html_e( 'Discount amount', 'vfwoo_woocommerce-cart-recovery' ); ?> <input type="number" step="0.01" name="steps[<?php echo esc_attr( $step ); ?>][discount_amount]" value="<?php echo esc_attr( $step_settings['discount_amount'] ?? 0 ); ?>"></label></p>
-						<p><label><?php esc_html_e( 'Minimum cart total', 'vfwoo_woocommerce-cart-recovery' ); ?> <input type="number" step="0.01" name="steps[<?php echo esc_attr( $step ); ?>][min_cart_total]" value="<?php echo esc_attr( $step_settings['min_cart_total'] ?? 0 ); ?>"></label></p>
-						<p><label><?php esc_html_e( 'Subject', 'vfwoo_woocommerce-cart-recovery' ); ?><br><input type="text" class="large-text" name="steps[<?php echo esc_attr( $step ); ?>][subject]" value="<?php echo esc_attr( $step_settings['subject'] ?? '' ); ?>"></label></p>
-						<p><label><?php esc_html_e( 'Body', 'vfwoo_woocommerce-cart-recovery' ); ?><br><textarea class="large-text" rows="6" name="steps[<?php echo esc_attr( $step ); ?>][body]"><?php echo esc_textarea( $step_settings['body'] ?? '' ); ?></textarea></label></p>
-						<p class="description"><?php esc_html_e( 'Available variables: {recovery_link}, {coupon_code}, {coupon_label}, {cart_total}, {site_name}, {customer_name}', 'vfwoo_woocommerce-cart-recovery' ); ?></p>
-					</div>
-				<?php endforeach; ?>
+				<?php $this->render_step_cards( $settings ); ?>
+				<?php $this->render_locale_tabs( $settings, $locales ); ?>
 
 				<?php submit_button( __( 'Save settings', 'vfwoo_woocommerce-cart-recovery' ) ); ?>
 			</form>
@@ -161,5 +151,111 @@ final class WCCR_Settings_Page {
 			(int) $results['updated'],
 			(int) $results['skipped']
 		);
+	}
+
+	/**
+	 * Collect translated subject/body values for one email step.
+	 *
+	 * @param array<int, array{locale:string,label:string}> $locales Active locales.
+	 * @return array<string, array{subject:string,body:string}>
+	 */
+	private function collect_step_translations( int $step, array $locales ): array {
+		$translations = array();
+
+		foreach ( $locales as $locale ) {
+			$locale_key = sanitize_text_field( (string) ( $locale['locale'] ?? '' ) );
+			if ( '' === $locale_key ) {
+				continue;
+			}
+
+			$subject = $_POST['steps'][ $step ]['translations'][ $locale_key ]['subject'] ?? '';
+			$body    = $_POST['steps'][ $step ]['translations'][ $locale_key ]['body'] ?? '';
+
+			$translations[ $locale_key ] = array(
+				'subject' => sanitize_text_field( wp_unslash( $subject ) ),
+				'body'    => wp_kses_post( wp_unslash( $body ) ),
+			);
+		}
+
+		return $translations;
+	}
+
+	/**
+	 * Render global step cards shared across every language.
+	 *
+	 * @param array<string, mixed> $settings Plugin settings.
+	 */
+	private function render_step_cards( array $settings ): void {
+		foreach ( array( 1, 2, 3 ) as $step ) {
+			$step_settings = isset( $settings['steps'][ $step ] ) && is_array( $settings['steps'][ $step ] ) ? $settings['steps'][ $step ] : array();
+			?>
+			<div class="wccr-card">
+				<h2><?php echo esc_html( sprintf( /* translators: %d: email step number */ __( 'Email step %d', 'vfwoo_woocommerce-cart-recovery' ), $step ) ); ?></h2>
+				<p><label><input type="checkbox" name="steps[<?php echo esc_attr( $step ); ?>][enabled]" value="1" <?php checked( ! empty( $step_settings['enabled'] ) ); ?>> <?php esc_html_e( 'Enabled', 'vfwoo_woocommerce-cart-recovery' ); ?></label></p>
+				<p><label><?php esc_html_e( 'Delay minutes', 'vfwoo_woocommerce-cart-recovery' ); ?> <input type="number" name="steps[<?php echo esc_attr( $step ); ?>][delay_minutes]" value="<?php echo esc_attr( $step_settings['delay_minutes'] ?? 60 ); ?>"></label></p>
+				<p><label><?php esc_html_e( 'Discount type', 'vfwoo_woocommerce-cart-recovery' ); ?>
+					<select name="steps[<?php echo esc_attr( $step ); ?>][discount_type]">
+						<option value="none" <?php selected( $step_settings['discount_type'] ?? 'none', 'none' ); ?>><?php esc_html_e( 'None', 'vfwoo_woocommerce-cart-recovery' ); ?></option>
+						<option value="percent" <?php selected( $step_settings['discount_type'] ?? 'none', 'percent' ); ?>><?php esc_html_e( 'Percentage', 'vfwoo_woocommerce-cart-recovery' ); ?></option>
+						<option value="fixed_cart" <?php selected( $step_settings['discount_type'] ?? 'none', 'fixed_cart' ); ?>><?php esc_html_e( 'Fixed cart', 'vfwoo_woocommerce-cart-recovery' ); ?></option>
+					</select>
+				</label></p>
+				<p><label><?php esc_html_e( 'Discount amount', 'vfwoo_woocommerce-cart-recovery' ); ?> <input type="number" step="0.01" name="steps[<?php echo esc_attr( $step ); ?>][discount_amount]" value="<?php echo esc_attr( $step_settings['discount_amount'] ?? 0 ); ?>"></label></p>
+				<p><label><?php esc_html_e( 'Minimum cart total', 'vfwoo_woocommerce-cart-recovery' ); ?> <input type="number" step="0.01" name="steps[<?php echo esc_attr( $step ); ?>][min_cart_total]" value="<?php echo esc_attr( $step_settings['min_cart_total'] ?? 0 ); ?>"></label></p>
+			</div>
+			<?php
+		}
+	}
+
+	/**
+	 * Render translated email content tabs by locale.
+	 *
+	 * @param array<string, mixed>                $settings Plugin settings.
+	 * @param array<int, array{locale:string,label:string}> $locales Active locales.
+	 */
+	private function render_locale_tabs( array $settings, array $locales ): void {
+		?>
+		<div class="wccr-locale-tabs">
+			<?php foreach ( array_values( $locales ) as $index => $locale ) : ?>
+				<?php $this->render_locale_tab( $settings, $locale, 0 === $index ); ?>
+			<?php endforeach; ?>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Render one locale tab and its translated textareas.
+	 *
+	 * @param array<string, mixed>      $settings Plugin settings.
+	 * @param array{locale:string,label:string} $locale   Locale item.
+	 */
+	private function render_locale_tab( array $settings, array $locale, bool $checked ): void {
+		$locale_key = sanitize_key( str_replace( '-', '_', $locale['locale'] ) );
+		?>
+		<input type="radio" class="wccr-locale-tabs__toggle" name="wccr_locale_tab" id="wccr-locale-tab-<?php echo esc_attr( $locale_key ); ?>" <?php checked( $checked ); ?>>
+		<label class="wccr-locale-tabs__label" for="wccr-locale-tab-<?php echo esc_attr( $locale_key ); ?>"><?php echo esc_html( $locale['label'] ); ?></label>
+		<div class="wccr-locale-tabs__panel">
+			<?php foreach ( array( 1, 2, 3 ) as $step ) : ?>
+				<?php $this->render_locale_translation_card( $settings, $step, (string) $locale['locale'] ); ?>
+			<?php endforeach; ?>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Render one translated subject/body card for one locale and step.
+	 *
+	 * @param array<string, mixed> $settings Plugin settings.
+	 */
+	private function render_locale_translation_card( array $settings, int $step, string $locale ): void {
+		$step_settings = $this->settings_repository->get_localized_step_settings( $settings, $step, $locale );
+		?>
+		<div class="wccr-card">
+			<h3><?php echo esc_html( sprintf( __( 'Email step %d', 'vfwoo_woocommerce-cart-recovery' ), $step ) ); ?></h3>
+			<p><label><?php esc_html_e( 'Subject', 'vfwoo_woocommerce-cart-recovery' ); ?><br><input type="text" class="large-text" name="steps[<?php echo esc_attr( $step ); ?>][translations][<?php echo esc_attr( $locale ); ?>][subject]" value="<?php echo esc_attr( $step_settings['subject'] ?? '' ); ?>"></label></p>
+			<p><label><?php esc_html_e( 'Body', 'vfwoo_woocommerce-cart-recovery' ); ?><br><textarea class="large-text" rows="6" name="steps[<?php echo esc_attr( $step ); ?>][translations][<?php echo esc_attr( $locale ); ?>][body]"><?php echo esc_textarea( $step_settings['body'] ?? '' ); ?></textarea></label></p>
+			<p class="description"><?php esc_html_e( 'Available variables: {recovery_link}, {coupon_code}, {coupon_label}, {cart_total}, {site_name}, {customer_name}', 'vfwoo_woocommerce-cart-recovery' ); ?></p>
+		</div>
+		<?php
 	}
 }
