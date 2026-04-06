@@ -2,7 +2,7 @@
 # This file is distributed under the GPL-2.0-or-later.
 msgid ""
 msgstr ""
-"Project-Id-Version: WooCommerce Cart Recovery 0.1.9\n"
+"Project-Id-Version: WooCommerce Cart Recovery 0.1.17\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/woocommerce-cart-recovery\n"
 "Last-Translator: 22MW <info@22mw.com>\n"
 "Language-Team: Español <info@22mw.com>\n"
@@ -11,8 +11,8 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Language: es_ES\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"POT-Creation-Date: 2026-04-05T10:55:01+00:00\n"
-"PO-Revision-Date: 2026-04-05 12:30+0200\n"
+"POT-Creation-Date: 2026-04-06T18:00:00+00:00\n"
+"PO-Revision-Date: 2026-04-06 22:10+0200\n"
 "X-Generator: WP-CLI 2.6.0\n"
 "X-Domain: vfwoo_woocommerce-cart-recovery\n"
 
@@ -49,6 +49,10 @@ msgstr "Recuperación de carritos"
 msgid "Recovery item deleted."
 msgstr "Elemento de recuperación eliminado."
 
+#: includes/admin/class-abandoned-carts-page.php:84
+msgid "Recovery item and linked unpaid order deleted."
+msgstr "Elemento de recuperación y pedido impagado enlazado eliminados."
+
 #: includes/admin/class-abandoned-carts-page.php:89
 #: includes/admin/class-stats-page.php:25
 msgid "Abandoned carts"
@@ -84,6 +88,10 @@ msgstr "Emails enviados"
 msgid "Sort by"
 msgstr "Ordenar por"
 
+#: includes/admin/class-abandoned-carts-page.php:110
+msgid "Vista"
+msgstr "Vista"
+
 #: includes/admin/class-abandoned-carts-page.php:112
 msgid "Apply"
 msgstr "Aplicar"
@@ -91,6 +99,14 @@ msgstr "Aplicar"
 #: includes/admin/class-abandoned-carts-page.php:156
 msgid "No email"
 msgstr "Sin email"
+
+#: includes/admin/class-abandoned-carts-page.php:225
+msgid "Source"
+msgstr "Origen"
+
+#: includes/admin/class-abandoned-carts-page.php:226
+msgid "Linked order"
+msgstr "Pedido enlazado"
 
 #: includes/admin/class-abandoned-carts-page.php:180
 msgid "Step"
@@ -136,6 +152,11 @@ msgstr "Última actualización"
 msgid "Delete"
 msgstr "Borrar"
 
+#: includes/admin/class-abandoned-carts-page.php:286
+#, php-format
+msgid "Email %d"
+msgstr "Email %d"
+
 #: includes/admin/class-abandoned-carts-page.php:237
 msgid "Most recent"
 msgstr "Más recientes"
@@ -159,6 +180,14 @@ msgstr "Estado"
 #: includes/admin/class-abandoned-carts-page.php:242
 msgid "Purchased first"
 msgstr "Comprados primero"
+
+#: includes/admin/class-abandoned-carts-page.php:334
+msgid "Tarjetas"
+msgstr "Tarjetas"
+
+#: includes/admin/class-abandoned-carts-page.php:335
+msgid "Lista"
+msgstr "Lista"
 
 #: includes/admin/class-abandoned-carts-page.php:287
 msgid "Yes"
@@ -185,6 +214,18 @@ msgstr "Clicado"
 msgid "Recovered"
 msgstr "Recuperado"
 
+#: includes/admin/class-abandoned-carts-page.php:426
+msgid "Cart"
+msgstr "Carrito"
+
+#: includes/admin/class-abandoned-carts-page.php:442
+msgid "Imported"
+msgstr "Importado"
+
+#: includes/admin/class-abandoned-carts-page.php:445
+msgid "Captured"
+msgstr "Capturado"
+
 #. translators: %s: click timestamp
 #: includes/admin/class-abandoned-carts-page.php:328
 msgid "Yes (%s)"
@@ -207,6 +248,18 @@ msgstr "Copiado"
 msgid "Delete this recovery item?"
 msgstr "¿Borrar este elemento de recuperación?"
 
+#: includes/admin/class-abandoned-carts-page.php:537
+msgid "Sent"
+msgstr "Enviado"
+
+#: includes/admin/class-abandoned-carts-page.php:544
+msgid "Sent at"
+msgstr "Enviado el"
+
+#: includes/admin/class-abandoned-carts-page.php:563
+msgid "Resolved"
+msgstr "Resuelto"
+
 #: includes/admin/class-settings-page.php:52
 msgid "Settings saved."
 msgstr "Ajustes guardados."
@@ -214,6 +267,27 @@ msgstr "Ajustes guardados."
 #: includes/admin/class-settings-page.php:70
 msgid "Recovery detector and email queue executed manually."
 msgstr "El detector de recuperación y la cola de emails se han ejecutado manualmente."
+
+#: includes/admin/class-settings-page.php:73
+msgid "Runs abandoned-cart detection, unpaid-order sync and recovery email queue immediately."
+msgstr "Ejecuta de inmediato la detección de carritos abandonados, la sincronización de pedidos impagados y la cola de emails de recuperación."
+
+#: includes/admin/class-settings-page.php:74
+msgid "Import unpaid orders"
+msgstr "Importar pedidos impagados"
+
+#: includes/admin/class-settings-page.php:75
+msgid "Imports existing pending and failed WooCommerce orders that match the recovery rules."
+msgstr "Importa los pedidos existentes de WooCommerce en pendiente o fallidos que cumplan las reglas de recuperación."
+
+#: includes/admin/class-settings-page.php:76
+msgid "No eligible pending or failed orders were found."
+msgstr "No se encontraron pedidos pendientes o fallidos aptos para importar."
+
+#: includes/admin/class-settings-page.php:77
+#, php-format
+msgid "Unpaid orders reviewed: %1$d. Imported: %2$d. Merged: %3$d. Updated: %4$d. Skipped: %5$d."
+msgstr "Pedidos impagados revisados: %1$d. Importados: %2$d. Fusionados: %3$d. Actualizados: %4$d. Omitidos: %5$d."
 
 #: includes/admin/class-settings-page.php:85
 msgid "Cart Recovery Settings"

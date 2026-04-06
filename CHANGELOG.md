@@ -12,6 +12,11 @@ The format is based on Keep a Changelog, and this project follows a simple `MAJO
 
 ### Fixed
 
+## [0.1.18] - 2026-04-06
+
+### Changed
+- Refreshed the translation catalog and compiled language files to include the latest PHP and JavaScript admin strings.
+
 ## [0.1.17] - 2026-04-06
 
 ### Changed

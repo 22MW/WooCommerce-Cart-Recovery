@@ -2,14 +2,14 @@
 # This file is distributed under the GPL-2.0-or-later.
 msgid ""
 msgstr ""
-"Project-Id-Version: WooCommerce Cart Recovery 0.1.9\n"
+"Project-Id-Version: WooCommerce Cart Recovery 0.1.17\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/woocommerce-cart-recovery\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-04-05T10:55:01+00:00\n"
+"POT-Creation-Date: 2026-04-06T20:57:46+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.6.0\n"
 "X-Domain: vfwoo_woocommerce-cart-recovery\n"
@@ -30,167 +30,200 @@ msgstr ""
 msgid "22MW"
 msgstr ""
 
-#: includes/admin/class-abandoned-carts-page.php:21
-#: includes/admin/class-settings-page.php:78
+#: includes/admin/class-abandoned-carts-page.php:22
+#: includes/admin/class-settings-page.php:103
 #: includes/admin/class-stats-page.php:17
 msgid "You do not have permission to access this page."
 msgstr ""
 
-#: includes/admin/class-abandoned-carts-page.php:33
+#: includes/admin/class-abandoned-carts-page.php:35
 #: includes/admin/class-admin-menu.php:24
 #: includes/admin/class-admin-menu.php:25
 #: includes/admin/class-admin-menu.php:32
 msgid "Cart Recovery"
 msgstr ""
 
-#: includes/admin/class-abandoned-carts-page.php:76
+#: includes/admin/class-abandoned-carts-page.php:90
+msgid "Recovery item and linked unpaid order deleted."
+msgstr ""
+
+#: includes/admin/class-abandoned-carts-page.php:91
 msgid "Recovery item deleted."
 msgstr ""
 
-#: includes/admin/class-abandoned-carts-page.php:89
+#: includes/admin/class-abandoned-carts-page.php:107
 #: includes/admin/class-stats-page.php:25
 msgid "Abandoned carts"
 msgstr ""
 
-#: includes/admin/class-abandoned-carts-page.php:90
+#: includes/admin/class-abandoned-carts-page.php:108
 #: includes/admin/class-stats-page.php:26
 msgid "Recovery clicks"
 msgstr ""
 
-#: includes/admin/class-abandoned-carts-page.php:91
+#: includes/admin/class-abandoned-carts-page.php:109
 #: includes/admin/class-stats-page.php:27
 msgid "Recovered carts"
 msgstr ""
 
-#: includes/admin/class-abandoned-carts-page.php:92
+#: includes/admin/class-abandoned-carts-page.php:110
 #: includes/admin/class-stats-page.php:28
 msgid "Recovery rate"
 msgstr ""
 
-#: includes/admin/class-abandoned-carts-page.php:93
+#: includes/admin/class-abandoned-carts-page.php:111
 #: includes/admin/class-stats-page.php:29
 msgid "Recovered revenue"
 msgstr ""
 
-#: includes/admin/class-abandoned-carts-page.php:94
-#: includes/admin/class-abandoned-carts-page.php:181
+#: includes/admin/class-abandoned-carts-page.php:112
 #: includes/admin/class-stats-page.php:30
 msgid "Emails sent"
 msgstr ""
 
-#: includes/admin/class-abandoned-carts-page.php:106
+#: includes/admin/class-abandoned-carts-page.php:124
 msgid "Sort by"
 msgstr ""
 
-#: includes/admin/class-abandoned-carts-page.php:112
+#: includes/admin/class-abandoned-carts-page.php:130
+msgid "Vista"
+msgstr ""
+
+#: includes/admin/class-abandoned-carts-page.php:136
 msgid "Apply"
 msgstr ""
 
-#: includes/admin/class-abandoned-carts-page.php:156
+#: includes/admin/class-abandoned-carts-page.php:183
+#: includes/admin/class-abandoned-carts-page.php:404
 msgid "No email"
 msgstr ""
 
-#: includes/admin/class-abandoned-carts-page.php:180
-msgid "Step"
+#: includes/admin/class-abandoned-carts-page.php:217
+msgid "Source"
 msgstr ""
 
-#: includes/admin/class-abandoned-carts-page.php:182
-msgid "Coupon"
+#: includes/admin/class-abandoned-carts-page.php:218
+msgid "Linked order"
 msgstr ""
 
-#: includes/admin/class-abandoned-carts-page.php:183
-msgid "Eligible at"
-msgstr ""
-
-#: includes/admin/class-abandoned-carts-page.php:184
-msgid "Reason"
-msgstr ""
-
-#: includes/admin/class-abandoned-carts-page.php:185
-msgid "Clicked email link"
-msgstr ""
-
-#: includes/admin/class-abandoned-carts-page.php:186
-msgid "Purchased"
-msgstr ""
-
-#: includes/admin/class-abandoned-carts-page.php:187
+#: includes/admin/class-abandoned-carts-page.php:219
+#: includes/admin/class-abandoned-carts-page.php:427
 msgid "Order"
 msgstr ""
 
-#: includes/admin/class-abandoned-carts-page.php:188
-msgid "Last error"
-msgstr ""
-
-#: includes/admin/class-abandoned-carts-page.php:189
+#: includes/admin/class-abandoned-carts-page.php:220
 msgid "Abandoned at"
 msgstr ""
 
-#: includes/admin/class-abandoned-carts-page.php:190
+#: includes/admin/class-abandoned-carts-page.php:221
 msgid "Last update"
 msgstr ""
 
-#: includes/admin/class-abandoned-carts-page.php:216
+#: includes/admin/class-abandoned-carts-page.php:254
 msgid "Delete"
 msgstr ""
 
-#: includes/admin/class-abandoned-carts-page.php:237
+#: includes/admin/class-abandoned-carts-page.php:286
+msgid "Email %d"
+msgstr ""
+
+#: includes/admin/class-abandoned-carts-page.php:318
 msgid "Most recent"
 msgstr ""
 
-#: includes/admin/class-abandoned-carts-page.php:238
+#: includes/admin/class-abandoned-carts-page.php:319
 msgid "Oldest first"
 msgstr ""
 
-#: includes/admin/class-abandoned-carts-page.php:239
+#: includes/admin/class-abandoned-carts-page.php:320
 msgid "Abandoned date"
 msgstr ""
 
-#: includes/admin/class-abandoned-carts-page.php:240
+#: includes/admin/class-abandoned-carts-page.php:321
 msgid "Email A-Z"
 msgstr ""
 
-#: includes/admin/class-abandoned-carts-page.php:241
+#: includes/admin/class-abandoned-carts-page.php:322
 msgid "Status"
 msgstr ""
 
-#: includes/admin/class-abandoned-carts-page.php:242
+#: includes/admin/class-abandoned-carts-page.php:323
 msgid "Purchased first"
 msgstr ""
 
-#: includes/admin/class-abandoned-carts-page.php:287
-msgid "Yes"
+#: includes/admin/class-abandoned-carts-page.php:334
+msgid "Tarjetas"
 msgstr ""
 
-#: includes/admin/class-abandoned-carts-page.php:288
-#: includes/admin/class-abandoned-carts-page.php:323
-msgid "No"
+#: includes/admin/class-abandoned-carts-page.php:335
+msgid "Lista"
 msgstr ""
 
-#: includes/admin/class-abandoned-carts-page.php:306
+#: includes/admin/class-abandoned-carts-page.php:409
 msgid "Active"
 msgstr ""
 
-#: includes/admin/class-abandoned-carts-page.php:307
+#: includes/admin/class-abandoned-carts-page.php:410
 msgid "Abandoned"
 msgstr ""
 
-#: includes/admin/class-abandoned-carts-page.php:308
+#: includes/admin/class-abandoned-carts-page.php:411
+#: includes/admin/class-abandoned-carts-page.php:558
 msgid "Clicked"
 msgstr ""
 
-#: includes/admin/class-abandoned-carts-page.php:309
+#: includes/admin/class-abandoned-carts-page.php:412
 msgid "Recovered"
 msgstr ""
 
-#. translators: %s: click timestamp
-#: includes/admin/class-abandoned-carts-page.php:328
-msgid "Yes (%s)"
+#: includes/admin/class-abandoned-carts-page.php:426
+msgid "Cart"
 msgstr ""
 
-#: includes/admin/class-abandoned-carts-page.php:352
+#: includes/admin/class-abandoned-carts-page.php:442
+msgid "Imported"
+msgstr ""
+
+#: includes/admin/class-abandoned-carts-page.php:445
+msgid "Captured"
+msgstr ""
+
+#: includes/admin/class-abandoned-carts-page.php:505
 #: includes/admin/class-admin-menu.php:50
 msgid "Copy URL"
+msgstr ""
+
+#: includes/admin/class-abandoned-carts-page.php:517
+#: includes/admin/class-abandoned-carts-page.php:522
+#: includes/admin/class-abandoned-carts-page.php:538
+#: includes/admin/class-abandoned-carts-page.php:588
+msgid "No"
+msgstr ""
+
+#: includes/admin/class-abandoned-carts-page.php:521
+#: includes/admin/class-abandoned-carts-page.php:538
+msgid "Yes"
+msgstr ""
+
+#: includes/admin/class-abandoned-carts-page.php:537
+msgid "Sent"
+msgstr ""
+
+#: includes/admin/class-abandoned-carts-page.php:544
+msgid "Sent at"
+msgstr ""
+
+#: includes/admin/class-abandoned-carts-page.php:552
+msgid "Coupon"
+msgstr ""
+
+#: includes/admin/class-abandoned-carts-page.php:563
+msgid "Resolved"
+msgstr ""
+
+#. translators: %s: recovered amount.
+#: includes/admin/class-abandoned-carts-page.php:593
+msgid "Yes (%s)"
 msgstr ""
 
 #: includes/admin/class-admin-menu.php:33
@@ -205,95 +238,112 @@ msgstr ""
 msgid "Delete this recovery item?"
 msgstr ""
 
-#: includes/admin/class-settings-page.php:52
+#: includes/admin/class-settings-page.php:54
 msgid "Settings saved."
 msgstr ""
 
-#: includes/admin/class-settings-page.php:70
+#: includes/admin/class-settings-page.php:73
 msgid "Recovery detector and email queue executed manually."
 msgstr ""
 
-#: includes/admin/class-settings-page.php:85
+#: includes/admin/class-settings-page.php:110
 msgid "Cart Recovery Settings"
 msgstr ""
 
-#: includes/admin/class-settings-page.php:88
+#: includes/admin/class-settings-page.php:113
 msgid "Run now"
 msgstr ""
 
-#: includes/admin/class-settings-page.php:89
-msgid "Runs abandoned-cart detection and recovery email queue immediately."
-msgstr ""
-
-#: includes/admin/class-settings-page.php:94
-msgid "Mark cart abandoned after minutes"
-msgstr ""
-
-#: includes/admin/class-settings-page.php:95
-msgid "Cleanup data after days"
-msgstr ""
-
-#: includes/admin/class-settings-page.php:96
-msgid "Coupon expiry days"
-msgstr ""
-
-#: includes/admin/class-settings-page.php:101
-msgid "Email step %d"
-msgstr ""
-
-#: includes/admin/class-settings-page.php:102
-msgid "Enabled"
-msgstr ""
-
-#: includes/admin/class-settings-page.php:103
-msgid "Delay minutes"
-msgstr ""
-
-#: includes/admin/class-settings-page.php:104
-msgid "Discount type"
-msgstr ""
-
-#: includes/admin/class-settings-page.php:106
-msgid "None"
-msgstr ""
-
-#: includes/admin/class-settings-page.php:107
-msgid "Percentage"
-msgstr ""
-
-#: includes/admin/class-settings-page.php:108
-msgid "Fixed cart"
-msgstr ""
-
-#: includes/admin/class-settings-page.php:111
-msgid "Discount amount"
-msgstr ""
-
-#: includes/admin/class-settings-page.php:112
-msgid "Minimum cart total"
-msgstr ""
-
-#: includes/admin/class-settings-page.php:113
-msgid "Subject"
-msgstr ""
-
 #: includes/admin/class-settings-page.php:114
-msgid "Body"
+msgid "Runs abandoned-cart detection, unpaid-order sync and recovery email queue immediately."
 msgstr ""
 
-#: includes/admin/class-settings-page.php:115
-msgid "Available variables: {recovery_link}, {coupon_code}, {coupon_label}, {cart_total}, {site_name}, {customer_name}"
+#: includes/admin/class-settings-page.php:118
+msgid "Import unpaid orders"
 msgstr ""
 
 #: includes/admin/class-settings-page.php:119
+msgid "Imports existing pending and failed WooCommerce orders that match the recovery rules."
+msgstr ""
+
+#: includes/admin/class-settings-page.php:124
+msgid "Mark cart abandoned after minutes"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:125
+msgid "Cleanup data after days"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:126
+msgid "Coupon expiry days"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:131
+msgid "Email step %d"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:132
+msgid "Enabled"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:133
+msgid "Delay minutes"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:134
+msgid "Discount type"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:136
+msgid "None"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:137
+msgid "Percentage"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:138
+msgid "Fixed cart"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:141
+msgid "Discount amount"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:142
+msgid "Minimum cart total"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:143
+msgid "Subject"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:144
+msgid "Body"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:145
+msgid "Available variables: {recovery_link}, {coupon_code}, {coupon_label}, {cart_total}, {site_name}, {customer_name}"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:149
 msgid "Save settings"
+msgstr ""
+
+#: includes/admin/class-settings-page.php:162
+msgid "No eligible pending or failed orders were found."
+msgstr ""
+
+#. translators: 1: reviewed count, 2: imported count, 3: merged count, 4: updated count, 5: skipped count
+#: includes/admin/class-settings-page.php:167
+msgid "Unpaid orders reviewed: %1$d. Imported: %2$d. Merged: %3$d. Updated: %4$d. Skipped: %5$d."
 msgstr ""
 
 #: includes/admin/class-stats-page.php:23
 msgid "Cart Recovery Statistics"
 msgstr ""
 
-#: includes/class-plugin.php:76
+#: includes/class-plugin.php:77
 msgid "Every minute"
 msgstr ""
 
