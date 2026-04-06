@@ -12,6 +12,15 @@ The format is based on Keep a Changelog, and this project follows a simple `MAJO
 
 ### Fixed
 
+## [0.1.12] - 2026-04-06
+
+### Changed
+- Added a secondary origin badge in recovery cards to show imported vs captured cases.
+
+### Fixed
+- Improved unpaid-order import feedback with reviewed, imported, merged, updated and skipped counts.
+- Added a clear notice when no eligible pending or failed orders are found.
+
 ## [0.1.11] - 2026-04-06
 
 ### Added

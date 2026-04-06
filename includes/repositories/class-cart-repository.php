@@ -52,7 +52,7 @@ final class WCCR_Cart_Repository {
 	 * @param float       $cart_total     Order total.
 	 * @param string      $currency       Order currency.
 	 */
-	public function upsert_unpaid_order( int $order_id, ?int $user_id, ?string $email, ?string $customer_name, string $locale, array $cart_payload, float $cart_total, string $currency ): void {
+	public function upsert_unpaid_order( int $order_id, ?int $user_id, ?string $email, ?string $customer_name, string $locale, array $cart_payload, float $cart_total, string $currency ): string {
 		$cart_hash   = $this->build_cart_hash( $cart_payload, $cart_total );
 		$existing_id = $this->find_merge_candidate_for_order( $order_id, $email, $cart_hash, $cart_total );
 		$existing    = $existing_id ? $this->find_by_id( $existing_id ) : null;
@@ -61,10 +61,11 @@ final class WCCR_Cart_Repository {
 
 		if ( $existing ) {
 			$this->update_existing_open_cart( $existing_id, $existing, $data, $cart_hash, $now_gmt, true );
-			return;
+			return ! empty( $existing['linked_order_id'] ) ? 'updated' : 'merged';
 		}
 
 		$this->insert_new_abandoned_order_cart( $data, $now_gmt );
+		return 'imported';
 	}
 
 	/**

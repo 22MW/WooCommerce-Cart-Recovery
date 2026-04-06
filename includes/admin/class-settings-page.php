@@ -85,8 +85,14 @@ final class WCCR_Settings_Page {
 			return;
 		}
 
-		$this->pending_order_detector->import_existing_unpaid_orders();
-		add_settings_error( 'wccr_settings', 'wccr_import_done', __( 'Existing pending and failed orders imported into recovery.', 'vfwoo_woocommerce-cart-recovery' ), 'updated' );
+		$results = $this->pending_order_detector->import_existing_unpaid_orders();
+
+		add_settings_error(
+			'wccr_settings',
+			'wccr_import_done',
+			$this->get_import_notice_message( $results ),
+			'updated'
+		);
 	}
 
 	/**
@@ -144,5 +150,26 @@ final class WCCR_Settings_Page {
 			</form>
 		</div>
 		<?php
+	}
+
+	/**
+	 * Build a useful admin notice for unpaid-order imports.
+	 *
+	 * @param array{reviewed:int,imported:int,merged:int,updated:int,skipped:int} $results Import counters.
+	 */
+	private function get_import_notice_message( array $results ): string {
+		if ( 0 === (int) $results['reviewed'] ) {
+			return __( 'No eligible pending or failed orders were found.', 'vfwoo_woocommerce-cart-recovery' );
+		}
+
+		return sprintf(
+			/* translators: 1: reviewed count, 2: imported count, 3: merged count, 4: updated count, 5: skipped count */
+			__( 'Unpaid orders reviewed: %1$d. Imported: %2$d. Merged: %3$d. Updated: %4$d. Skipped: %5$d.', 'vfwoo_woocommerce-cart-recovery' ),
+			(int) $results['reviewed'],
+			(int) $results['imported'],
+			(int) $results['merged'],
+			(int) $results['updated'],
+			(int) $results['skipped']
+		);
 	}
 }

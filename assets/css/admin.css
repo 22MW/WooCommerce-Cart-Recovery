@@ -62,6 +62,13 @@
 	gap: 12px;
 }
 
+.wccr-admin .wccr-recovery-item__badges {
+	display: flex;
+	gap: 8px;
+	flex-wrap: wrap;
+	justify-content: flex-end;
+}
+
 .wccr-admin .wccr-recovery-item__title {
 	margin: 0;
 	font-size: 18px;
@@ -99,6 +106,11 @@
 .wccr-admin .wccr-status-badge--recovered {
 	background: #edfaef;
 	color: #156b2d;
+}
+
+.wccr-admin .wccr-status-badge--source {
+	background: #f6f7f7;
+	color: #2c3338;
 }
 
 .wccr-admin .wccr-meta-list {

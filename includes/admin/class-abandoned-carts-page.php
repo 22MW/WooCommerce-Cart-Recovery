@@ -179,9 +179,14 @@ final class WCCR_Abandoned_Carts_Page {
 				<h2 class="wccr-recovery-item__title"><?php echo esc_html( $email ); ?></h2>
 				<p class="wccr-recovery-item__total"><?php echo esc_html( $total ); ?></p>
 			</div>
-			<span class="wccr-status-badge wccr-status-badge--<?php echo esc_attr( sanitize_html_class( $status ) ); ?>">
-				<?php echo esc_html( $this->get_status_label( $status ) ); ?>
-			</span>
+			<div class="wccr-recovery-item__badges">
+				<span class="wccr-status-badge wccr-status-badge--<?php echo esc_attr( sanitize_html_class( $status ) ); ?>">
+					<?php echo esc_html( $this->get_status_label( $status ) ); ?>
+				</span>
+				<span class="wccr-status-badge wccr-status-badge--source">
+					<?php echo esc_html( $this->get_source_badge_label( $cart ) ); ?>
+				</span>
+			</div>
 		</div>
 		<?php
 	}
@@ -345,6 +350,21 @@ final class WCCR_Abandoned_Carts_Page {
 		);
 
 		return $labels[ $source ] ?? $source;
+	}
+
+	/**
+	 * Return a short origin label for the card header badge.
+	 *
+	 * @param array<string, mixed> $cart Recovery row.
+	 */
+	private function get_source_badge_label( array $cart ): string {
+		$source = (string) ( $cart['primary_source'] ?? 'cart' );
+
+		if ( 'order' === $source ) {
+			return __( 'Imported', 'vfwoo_woocommerce-cart-recovery' );
+		}
+
+		return __( 'Captured', 'vfwoo_woocommerce-cart-recovery' );
 	}
 
 	/**

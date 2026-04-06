@@ -30,15 +30,20 @@ final class WCCR_Pending_Order_Detector {
 
 	/**
 	 * Manually import existing pending and failed orders into the recovery table.
+	 *
+	 * @return array{reviewed:int,imported:int,merged:int,updated:int,skipped:int}
 	 */
-	public function import_existing_unpaid_orders(): void {
-		$this->sync_unpaid_orders( true );
+	public function import_existing_unpaid_orders(): array {
+		return $this->sync_unpaid_orders( true );
 	}
 
 	/**
 	 * Sync eligible pending and failed orders into the recovery table.
+	 *
+	 * @return array{reviewed:int,imported:int,merged:int,updated:int,skipped:int}
 	 */
-	private function sync_unpaid_orders( bool $manual_import ): void {
+	private function sync_unpaid_orders( bool $manual_import ): array {
+		$results  = $this->get_empty_import_results();
 		$settings = $this->settings_repository->get();
 		$minutes  = max( 1, absint( $settings['abandon_after_minutes'] ?? 60 ) );
 		$orders   = wc_get_orders(
@@ -53,8 +58,17 @@ final class WCCR_Pending_Order_Detector {
 		);
 
 		foreach ( $orders as $order_id ) {
-			$this->capture_unpaid_order( absint( $order_id ), true );
+			++$results['reviewed'];
+			$outcome = $this->capture_unpaid_order( absint( $order_id ), true );
+			if ( isset( $results[ $outcome ] ) ) {
+				++$results[ $outcome ];
+				continue;
+			}
+
+			++$results['skipped'];
 		}
+
+		return $results;
 	}
 
 	/**
@@ -67,14 +81,14 @@ final class WCCR_Pending_Order_Detector {
 	/**
 	 * Capture an unpaid order if it should be treated as abandoned.
 	 */
-	private function capture_unpaid_order( int $order_id, bool $respect_age ): void {
+	private function capture_unpaid_order( int $order_id, bool $respect_age ): string {
 		$order = wc_get_order( $order_id );
 		if ( ! $order || ! in_array( $order->get_status(), array( 'pending', 'failed' ), true ) ) {
-			return;
+			return 'skipped';
 		}
 
 		if ( absint( $order->get_meta( '_wccr_recovered_cart_id', true ) ) ) {
-			return;
+			return 'skipped';
 		}
 
 		if ( $respect_age ) {
@@ -83,14 +97,14 @@ final class WCCR_Pending_Order_Detector {
 			$created  = $order->get_date_created();
 
 			if ( $created && $created->getTimestamp() > time() - ( $minutes * MINUTE_IN_SECONDS ) ) {
-				return;
+				return 'skipped';
 			}
 		}
 
 		$items = $this->get_order_items_snapshot( $order );
 
 		if ( empty( $items ) ) {
-			return;
+			return 'skipped';
 		}
 
 		$user_id = $order->get_user_id() ? absint( $order->get_user_id() ) : null;
@@ -99,7 +113,7 @@ final class WCCR_Pending_Order_Detector {
 		$locale  = $order->get_meta( '_wccr_locale', true );
 		$locale  = is_string( $locale ) && '' !== $locale ? sanitize_text_field( $locale ) : sanitize_text_field( $this->locale_resolver->resolve_locale( $user_id ) );
 
-		$this->cart_repository->upsert_unpaid_order(
+		$result = $this->cart_repository->upsert_unpaid_order(
 			absint( $order->get_id() ),
 			$user_id,
 			$email,
@@ -111,6 +125,7 @@ final class WCCR_Pending_Order_Detector {
 		);
 
 		$this->mark_order_as_plugin_managed( $order );
+		return $result;
 	}
 
 	/**
@@ -177,5 +192,20 @@ final class WCCR_Pending_Order_Detector {
 	private function mark_order_as_plugin_managed( WC_Order $order ): void {
 		$order->update_meta_data( '_wccr_managed_unpaid_order', 1 );
 		$order->save();
+	}
+
+	/**
+	 * Return the default import counters structure.
+	 *
+	 * @return array{reviewed:int,imported:int,merged:int,updated:int,skipped:int}
+	 */
+	private function get_empty_import_results(): array {
+		return array(
+			'reviewed' => 0,
+			'imported' => 0,
+			'merged'   => 0,
+			'updated'  => 0,
+			'skipped'  => 0,
+		);
 	}
 }
