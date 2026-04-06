@@ -22,8 +22,8 @@ final class WCCR_Cart_Capture_Service {
 			return;
 		}
 
-		if ( WC()->session->get( 'wccr_recovery_lock_until' ) ) {
-			WC()->session->__unset( 'wccr_recovery_lock_until' );
+		if ( $this->has_active_recovery_session() ) {
+			return;
 		}
 
 		$items = array();
@@ -61,6 +61,15 @@ final class WCCR_Cart_Capture_Service {
 			get_woocommerce_currency(),
 			$source
 		);
+	}
+
+	/**
+	 * Block capture while the customer is actively checking out a recovered cart.
+	 */
+	private function has_active_recovery_session(): bool {
+		return function_exists( 'WC' )
+			&& WC()->session
+			&& absint( WC()->session->get( 'wccr_recovered_cart_id', 0 ) ) > 0;
 	}
 
 	/**

@@ -27,7 +27,7 @@ final class WCCR_Cart_Repository {
 	 */
 	public function upsert_active_cart( string $session_key, ?int $user_id, ?string $email, ?string $customer_name, string $locale, array $cart_payload, float $cart_total, string $currency, string $source = 'classic' ): void {
 		$cart_hash   = $this->build_cart_hash( $cart_payload, $cart_total );
-		$existing_id = $this->find_open_cart_id( $session_key, $email );
+		$existing_id = $this->find_open_cart_id( $session_key, $email, $cart_hash, $cart_total );
 		$existing    = $existing_id ? $this->find_by_id( $existing_id ) : null;
 		$now_gmt     = gmdate( 'Y-m-d H:i:s' );
 		$data        = $this->build_cart_row_data( $session_key, $user_id, $email, $customer_name, $locale, $cart_payload, $cart_total, $currency, $source, 'cart', null, false, $cart_hash, $now_gmt );
@@ -521,10 +521,8 @@ final class WCCR_Cart_Repository {
 	/**
 	 * Find an open cart only by the live WooCommerce session.
 	 */
-	private function find_open_cart_id( string $session_key, ?string $email ): int {
+	private function find_open_cart_id( string $session_key, ?string $email, string $cart_hash, float $cart_total ): int {
 		global $wpdb;
-
-		unset( $email );
 
 		$cart_id = (int) $wpdb->get_var(
 			$wpdb->prepare(
@@ -538,7 +536,11 @@ final class WCCR_Cart_Repository {
 		}
 
 		$row = $this->find_by_id( $cart_id );
-		return $row && $this->can_reuse_live_session_row( $row ) ? $cart_id : 0;
+		if ( $row && $this->can_reuse_live_session_row( $row ) ) {
+			return $cart_id;
+		}
+
+		return $this->find_matching_order_backed_cart_id( $email, $cart_hash, $cart_total );
 	}
 
 	/**
@@ -582,6 +584,20 @@ final class WCCR_Cart_Repository {
 	}
 
 	/**
+	 * Find an open order-backed row that matches the same customer and cart snapshot.
+	 */
+	private function find_matching_order_backed_cart_id( ?string $email, string $cart_hash, float $cart_total ): int {
+		$candidates = $this->get_recent_email_candidates( $email );
+		foreach ( $candidates as $candidate ) {
+			if ( $this->is_matching_order_backed_cart( $candidate, $cart_hash, $cart_total ) ) {
+				return absint( $candidate['id'] );
+			}
+		}
+
+		return 0;
+	}
+
+	/**
 	 * Load recent open rows for an email.
 	 *
 	 * @return array<int, array<string, mixed>>
@@ -595,7 +611,7 @@ final class WCCR_Cart_Repository {
 
 		return $wpdb->get_results(
 			$wpdb->prepare(
-				"SELECT id, cart_hash, cart_total, updated_at_gmt FROM {$this->table}
+				"SELECT id, cart_hash, cart_total, updated_at_gmt, status, linked_order_id FROM {$this->table}
 				WHERE email = %s AND status IN ('active','abandoned','clicked') AND updated_at_gmt >= %s
 				ORDER BY id DESC LIMIT 5",
 				$email,
@@ -638,6 +654,23 @@ final class WCCR_Cart_Repository {
 		}
 
 		return abs( (float) ( $candidate['cart_total'] ?? 0 ) - $cart_total ) < 0.01;
+	}
+
+	/**
+	 * Match a new cart capture against an existing order-backed recovery case.
+	 *
+	 * @param array<string, mixed> $candidate Candidate row.
+	 */
+	private function is_matching_order_backed_cart( array $candidate, string $cart_hash, float $cart_total ): bool {
+		if ( empty( $candidate['linked_order_id'] ) ) {
+			return false;
+		}
+
+		if ( 'recovered' === (string) ( $candidate['status'] ?? '' ) ) {
+			return false;
+		}
+
+		return $this->is_same_cart_snapshot( $candidate, $cart_hash, $cart_total );
 	}
 
 	/**

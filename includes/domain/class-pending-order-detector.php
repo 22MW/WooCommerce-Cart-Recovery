@@ -16,9 +16,12 @@ final class WCCR_Pending_Order_Detector {
 	 */
 	public function register_hooks(): void {
 		add_action( 'woocommerce_checkout_order_processed', array( $this, 'link_recovered_order' ), 30, 1 );
+		add_action( 'woocommerce_store_api_checkout_order_processed', array( $this, 'link_recovered_store_api_order' ), 30, 1 );
 		add_action( 'woocommerce_order_status_failed', array( $this, 'capture_failed_order' ), 20, 1 );
+		add_action( 'woocommerce_order_status_on-hold', array( $this, 'mark_order_recovered' ), 20, 1 );
 		add_action( 'woocommerce_order_status_processing', array( $this, 'mark_order_recovered' ), 20, 1 );
 		add_action( 'woocommerce_order_status_completed', array( $this, 'mark_order_recovered' ), 20, 1 );
+		add_action( 'woocommerce_payment_complete', array( $this, 'mark_order_recovered' ), 20, 1 );
 	}
 
 	/**
@@ -150,6 +153,35 @@ final class WCCR_Pending_Order_Detector {
 	 * Link a newly created order to the clicked recovery cart in session.
 	 */
 	public function link_recovered_order( int $order_id ): void {
+		$order = wc_get_order( $order_id );
+		if ( ! $order ) {
+			return;
+		}
+
+		$this->link_recovered_order_object( $order );
+	}
+
+	/**
+	 * Link a newly created Store API order to the clicked recovery cart in session.
+	 *
+	 * @param mixed $order WooCommerce order object.
+	 */
+	public function link_recovered_store_api_order( $order ): void {
+		if ( ! $order ) {
+			return;
+		}
+
+		if ( ! $order instanceof WC_Order ) {
+			return;
+		}
+
+		$this->link_recovered_order_object( $order );
+	}
+
+	/**
+	 * Link a WooCommerce order object to the current recovered cart in session.
+	 */
+	private function link_recovered_order_object( WC_Order $order ): void {
 		if ( ! function_exists( 'WC' ) || ! WC()->session ) {
 			return;
 		}
@@ -159,13 +191,9 @@ final class WCCR_Pending_Order_Detector {
 			return;
 		}
 
-		$order = wc_get_order( $order_id );
-		if ( ! $order ) {
-			return;
-		}
-
 		$order->update_meta_data( '_wccr_recovered_cart_id', $cart_id );
 		$order->save();
+		$this->clear_recovery_session();
 	}
 
 	/**
@@ -207,6 +235,15 @@ final class WCCR_Pending_Order_Detector {
 
 		$linked_cart = $this->cart_repository->find_by_linked_order_id( absint( $order->get_id() ) );
 		return $linked_cart ? absint( $linked_cart['id'] ?? 0 ) : 0;
+	}
+
+	/**
+	 * Clear the temporary session flag once the recovery cart is linked to an order.
+	 */
+	private function clear_recovery_session(): void {
+		if ( function_exists( 'WC' ) && WC()->session ) {
+			WC()->session->__unset( 'wccr_recovered_cart_id' );
+		}
 	}
 
 	/**

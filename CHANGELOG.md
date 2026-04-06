@@ -12,6 +12,13 @@ The format is based on Keep a Changelog, and this project follows a simple `MAJO
 
 ### Fixed
 
+## [0.1.15] - 2026-04-06
+
+### Fixed
+- Fixed restored checkout capture so recovery sessions no longer create a second abandoned cart with discounted totals.
+- Fixed recovery order linking for WooCommerce Blocks checkout and reinforced recovered detection with payment-complete handling.
+- Fixed imported and order-backed cases so matching follow-up carts reuse the same recovery case instead of duplicating it.
+
 ## [0.1.14] - 2026-04-06
 
 ### Fixed
