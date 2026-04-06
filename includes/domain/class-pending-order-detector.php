@@ -137,11 +137,13 @@ final class WCCR_Pending_Order_Detector {
 			return;
 		}
 
-		$cart_id = absint( $order->get_meta( '_wccr_recovered_cart_id', true ) );
-		if ( $cart_id ) {
-			$this->cart_repository->mark_recovered_order( $cart_id, absint( $order_id ) );
-			do_action( 'wccr_cart_recovered', $cart_id, $order_id );
+		$cart_id = $this->resolve_recovered_cart_id( $order );
+		if ( ! $cart_id ) {
+			return;
 		}
+
+		$this->cart_repository->mark_recovered_order( $cart_id, absint( $order_id ) );
+		do_action( 'wccr_cart_recovered', $cart_id, $order_id );
 	}
 
 	/**
@@ -192,6 +194,19 @@ final class WCCR_Pending_Order_Detector {
 	private function mark_order_as_plugin_managed( WC_Order $order ): void {
 		$order->update_meta_data( '_wccr_managed_unpaid_order', 1 );
 		$order->save();
+	}
+
+	/**
+	 * Resolve the recovery row that should be marked as paid.
+	 */
+	private function resolve_recovered_cart_id( WC_Order $order ): int {
+		$cart_id = absint( $order->get_meta( '_wccr_recovered_cart_id', true ) );
+		if ( $cart_id ) {
+			return $cart_id;
+		}
+
+		$linked_cart = $this->cart_repository->find_by_linked_order_id( absint( $order->get_id() ) );
+		return $linked_cart ? absint( $linked_cart['id'] ?? 0 ) : 0;
 	}
 
 	/**

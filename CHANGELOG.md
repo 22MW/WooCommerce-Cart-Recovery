@@ -12,6 +12,13 @@ The format is based on Keep a Changelog, and this project follows a simple `MAJO
 
 ### Fixed
 
+## [0.1.14] - 2026-04-06
+
+### Fixed
+- Fixed recovery attempts so a clicked cart no longer falls back to active when the restored checkout refreshes.
+- Fixed paid imported unpaid orders so they can move to recovered through their linked WooCommerce order.
+- Fixed recovery identity so a new attempt in the same browser creates a clean case instead of inheriting old email logs and coupons.
+
 ## [0.1.13] - 2026-04-06
 
 ### Changed

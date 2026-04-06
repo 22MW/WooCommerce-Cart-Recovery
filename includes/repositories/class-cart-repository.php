@@ -125,6 +125,16 @@ final class WCCR_Cart_Repository {
 	}
 
 	/**
+	 * Find a recovery row by linked WooCommerce order ID.
+	 *
+	 * @return array<string, mixed>|null
+	 */
+	public function find_by_linked_order_id( int $order_id ): ?array {
+		$cart_id = $this->find_linked_order_cart_id( $order_id );
+		return $cart_id ? $this->find_by_id( $cart_id ) : null;
+	}
+
+	/**
 	 * Mark a cart as recovered without order linkage.
 	 */
 	public function mark_recovered( int $id ): void {
@@ -509,37 +519,26 @@ final class WCCR_Cart_Repository {
 	}
 
 	/**
-	 * Find an open cart by session first and email second.
+	 * Find an open cart only by the live WooCommerce session.
 	 */
 	private function find_open_cart_id( string $session_key, ?string $email ): int {
 		global $wpdb;
 
-		$session_id = (int) $wpdb->get_var(
+		unset( $email );
+
+		$cart_id = (int) $wpdb->get_var(
 			$wpdb->prepare(
 				"SELECT id FROM {$this->table} WHERE session_key = %s AND status IN ('active','abandoned','clicked') ORDER BY id DESC LIMIT 1",
 				$session_key
 			)
 		);
-		if ( $session_id ) {
-			return $session_id;
-		}
 
-		if ( empty( $email ) ) {
+		if ( ! $cart_id ) {
 			return 0;
 		}
 
-		return (int) $wpdb->get_var(
-			$wpdb->prepare(
-				"SELECT id FROM {$this->table}
-				WHERE email = %s
-				AND status IN ('active','abandoned','clicked')
-				AND ( linked_order_id IS NULL OR linked_order_id = 0 )
-				AND updated_at_gmt >= %s
-				ORDER BY id DESC LIMIT 1",
-				$email,
-				gmdate( 'Y-m-d H:i:s', time() - DAY_IN_SECONDS )
-			)
-		);
+		$row = $this->find_by_id( $cart_id );
+		return $row && $this->can_reuse_live_session_row( $row ) ? $cart_id : 0;
 	}
 
 	/**
@@ -574,7 +573,7 @@ final class WCCR_Cart_Repository {
 	private function find_email_order_candidate_id( ?string $email, string $cart_hash, float $cart_total ): int {
 		$candidates = $this->get_recent_email_candidates( $email );
 		foreach ( $candidates as $candidate ) {
-			if ( $this->is_order_merge_candidate( $candidate, $cart_hash, $cart_total ) ) {
+			if ( $this->is_clean_order_merge_candidate( $candidate, $cart_hash, $cart_total ) ) {
 				return absint( $candidate['id'] );
 			}
 		}
@@ -607,11 +606,33 @@ final class WCCR_Cart_Repository {
 	}
 
 	/**
-	 * Decide whether an open cart should merge into an unpaid order row.
+	 * Decide whether an unpaid order can safely merge into an open cart row.
 	 *
 	 * @param array<string, mixed> $candidate Candidate row.
 	 */
-	private function is_order_merge_candidate( array $candidate, string $cart_hash, float $cart_total ): bool {
+	private function is_clean_order_merge_candidate( array $candidate, string $cart_hash, float $cart_total ): bool {
+		if ( ! $this->is_candidate_open_for_merge( $candidate ) ) {
+			return false;
+		}
+
+		return $this->is_same_cart_snapshot( $candidate, $cart_hash, $cart_total );
+	}
+
+	/**
+	 * Ensure a candidate is still clean enough to merge with a later order.
+	 *
+	 * @param array<string, mixed> $candidate Candidate row.
+	 */
+	private function is_candidate_open_for_merge( array $candidate ): bool {
+		return 'active' === (string) ( $candidate['status'] ?? '' ) && empty( $candidate['linked_order_id'] );
+	}
+
+	/**
+	 * Compare cart snapshots with a strict hash-first rule and total fallback.
+	 *
+	 * @param array<string, mixed> $candidate Candidate row.
+	 */
+	private function is_same_cart_snapshot( array $candidate, string $cart_hash, float $cart_total ): bool {
 		if ( (string) ( $candidate['cart_hash'] ?? '' ) === $cart_hash ) {
 			return true;
 		}
@@ -683,6 +704,11 @@ final class WCCR_Cart_Repository {
 	 * @param array<string, mixed> $existing Existing row.
 	 */
 	private function prepare_cart_backed_update( array &$data, array $existing, string $now_gmt ): void {
+		if ( $this->should_preserve_clicked_state( $existing ) ) {
+			$this->preserve_clicked_cart_update( $data, $existing, $now_gmt );
+			return;
+		}
+
 		$data['status']            = 'active';
 		$data['last_activity_gmt'] = $now_gmt;
 		$data['abandoned_at_gmt']  = null;
@@ -692,6 +718,57 @@ final class WCCR_Cart_Repository {
 
 		if ( ! empty( $existing['linked_order_id'] ) ) {
 			$data['primary_source'] = 'order';
+			$data['linked_order_id'] = absint( $existing['linked_order_id'] );
+		}
+	}
+
+	/**
+	 * Decide whether an updated cart must remain clicked.
+	 *
+	 * @param array<string, mixed> $existing Existing row.
+	 */
+	private function should_preserve_clicked_state( array $existing ): bool {
+		return 'clicked' === (string) ( $existing['status'] ?? '' ) && ! empty( $existing['clicked_at_gmt'] );
+	}
+
+	/**
+	 * Reuse a session row only while it is still an active and clean cart attempt.
+	 *
+	 * @param array<string, mixed> $row Existing row.
+	 */
+	private function can_reuse_live_session_row( array $row ): bool {
+		if ( 'active' !== (string) ( $row['status'] ?? '' ) ) {
+			return false;
+		}
+
+		if ( ! empty( $row['abandoned_at_gmt'] ) || ! empty( $row['clicked_at_gmt'] ) ) {
+			return false;
+		}
+
+		if ( ! empty( $row['recovered_order_id'] ) || ! empty( $row['linked_order_id'] ) ) {
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Keep a clicked recovery row visible while refreshing cart payload data.
+	 *
+	 * @param array<string, mixed> $data     Update data.
+	 * @param array<string, mixed> $existing Existing row.
+	 */
+	private function preserve_clicked_cart_update( array &$data, array $existing, string $now_gmt ): void {
+		$data['status']             = 'clicked';
+		$data['last_activity_gmt']  = $now_gmt;
+		$data['abandoned_at_gmt']   = $existing['abandoned_at_gmt'] ?? null;
+		$data['clicked_at_gmt']     = $existing['clicked_at_gmt'] ?? $now_gmt;
+		$data['clicked_step']       = $existing['clicked_step'] ?? null;
+		$data['recovered_at_gmt']   = $existing['recovered_at_gmt'] ?? null;
+		$data['recovered_order_id'] = $existing['recovered_order_id'] ?? null;
+
+		if ( ! empty( $existing['linked_order_id'] ) ) {
+			$data['primary_source']  = 'order';
 			$data['linked_order_id'] = absint( $existing['linked_order_id'] );
 		}
 	}
