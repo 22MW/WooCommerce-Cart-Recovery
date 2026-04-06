@@ -7,7 +7,6 @@
 
 .wccr-admin .wccr-card {
 	background: #fff;
-	border: 1px solid #dcdcde;
 	border-radius: 12px;
 	padding: 20px;
 	margin-top: 20px;
@@ -38,7 +37,6 @@
 	margin: 24px 0 16px;
 	padding: 12px 16px;
 	background: #fff;
-	border: 1px solid #dcdcde;
 	border-radius: 12px;
 }
 
@@ -55,7 +53,6 @@
 
 .wccr-admin .wccr-recovery-item {
 	background: #fff;
-	border: 1px solid #dcdcde;
 	border-radius: 14px;
 	padding: 16px;
 	display: flex;
@@ -197,10 +194,9 @@
 }
 
 .wccr-admin .wccr-email-step-card {
-	border: 1px solid #dcdcde;
 	border-radius: 12px;
 	padding: 10px 12px;
-	background: #fbfbfc;
+	background: #f0f0f1;
 }
 
 .wccr-admin .wccr-email-step-card h3 {
@@ -240,6 +236,10 @@
 	word-break: break-word;
 }
 
+.wccr-admin .wccr-email-step-card__value.wccr-status-badge {
+	color: #156b2d;
+}
+
 .wccr-admin .wccr-delete-form {
 	margin: 0;
 }
@@ -270,10 +270,10 @@
 }
 
 .wccr-admin .wccr-recovery-grid--list .wccr-email-step-card {
-	display: grid;
-	grid-template-columns: 72px 1fr auto;
-	align-items: start;
-	gap: 10px;
+    display: grid;
+    grid-template-columns: 72px 1fr auto;
+    align-items: center;
+    gap: 10px;
 }
 
 .wccr-admin .wccr-recovery-grid--list .wccr-email-step-card h3 {

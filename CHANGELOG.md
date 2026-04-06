@@ -12,6 +12,11 @@ The format is based on Keep a Changelog, and this project follows a simple `MAJO
 
 ### Fixed
 
+## [0.1.17] - 2026-04-06
+
+### Changed
+- Highlighted the resolved email step with the same visual recovery treatment used for recovered states.
+
 ## [0.1.16] - 2026-04-06
 
 ### Changed

@@ -290,7 +290,7 @@ final class WCCR_Abandoned_Carts_Page {
 						<div class="wccr-email-step-card__item">
 							<span class="wccr-email-step-card__label"><?php echo esc_html( (string) $item['label'] ); ?></span>
 							<span class="wccr-email-step-card__separator">-</span>
-							<span class="wccr-email-step-card__value"><?php echo esc_html( (string) $item['value'] ); ?></span>
+							<span class="<?php echo esc_attr( $this->get_email_step_value_class( $item ) ); ?>"><?php echo esc_html( (string) $item['value'] ); ?></span>
 						</div>
 					<?php endforeach; ?>
 				</div>
@@ -562,9 +562,20 @@ final class WCCR_Abandoned_Carts_Page {
 		$items[] = array(
 			'label' => __( 'Resolved', 'vfwoo_woocommerce-cart-recovery' ),
 			'value' => $this->get_step_resolved_label( $cart, $step ),
+			'value_class' => $this->is_resolved_step( $cart, $step ) ? 'wccr-email-step-card__value wccr-status-badge wccr-status-badge--recovered' : 'wccr-email-step-card__value',
 		);
 
 		return $items;
+	}
+
+	/**
+	 * Get the CSS class list for one step value.
+	 *
+	 * @param array<string, mixed> $item Step item payload.
+	 */
+	private function get_email_step_value_class( array $item ): string {
+		$value_class = isset( $item['value_class'] ) ? trim( (string) $item['value_class'] ) : '';
+		return '' !== $value_class ? $value_class : 'wccr-email-step-card__value';
 	}
 
 	/**
