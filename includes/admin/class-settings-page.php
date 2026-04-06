@@ -108,16 +108,6 @@ final class WCCR_Settings_Page {
 		?>
 		<div class="wrap wccr-admin">
 			<h1><?php esc_html_e( 'Cart Recovery Settings', 'vfwoo_woocommerce-cart-recovery' ); ?></h1>
-			<form method="post" class="wccr-run-now-form">
-				<?php wp_nonce_field( 'wccr_run_now', 'wccr_run_now_nonce' ); ?>
-				<?php submit_button( __( 'Run now', 'vfwoo_woocommerce-cart-recovery' ), 'secondary', 'wccr_run_now', false ); ?>
-				<p class="description"><?php esc_html_e( 'Runs abandoned-cart detection, unpaid-order sync and recovery email queue immediately.', 'vfwoo_woocommerce-cart-recovery' ); ?></p>
-			</form>
-			<form method="post" class="wccr-run-now-form">
-				<?php wp_nonce_field( 'wccr_import_unpaid_orders', 'wccr_import_unpaid_nonce' ); ?>
-				<?php submit_button( __( 'Import unpaid orders', 'vfwoo_woocommerce-cart-recovery' ), 'secondary', 'wccr_import_unpaid', false ); ?>
-				<p class="description"><?php esc_html_e( 'Imports existing pending and failed WooCommerce orders that match the recovery rules.', 'vfwoo_woocommerce-cart-recovery' ); ?></p>
-			</form>
 			<form method="post">
 				<?php wp_nonce_field( 'wccr_save_settings', 'wccr_settings_nonce' ); ?>
 				<table class="form-table">

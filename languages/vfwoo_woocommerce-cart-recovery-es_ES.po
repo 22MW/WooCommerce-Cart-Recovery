@@ -450,6 +450,10 @@ msgstr "Producto"
 msgid "Quantity"
 msgstr "Cantidad"
 
+#: templates/emails/base-email.php:37
+msgid "Price"
+msgstr "Precio"
+
 #: templates/emails/base-email.php:32
 #: templates/emails/base-email.php:46
 msgid "Total"

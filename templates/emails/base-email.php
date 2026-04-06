@@ -1,59 +1,88 @@
 <?php
 defined( 'ABSPATH' ) || exit;
+
+$text_align = is_rtl() ? 'right' : 'left';
 ?>
 
-<?php if ( ! empty( $customer_name ) ) : ?>
-	<p><?php echo esc_html( sprintf( __( 'Hello %s,', 'vfwoo_woocommerce-cart-recovery' ), $customer_name ) ); ?></p>
-<?php endif; ?>
+<div class="email-introduction">
+	<?php if ( ! empty( $customer_name ) ) : ?>
+		<p><?php echo esc_html( sprintf( __( 'Hello %s,', 'vfwoo_woocommerce-cart-recovery' ), $customer_name ) ); ?></p>
+	<?php endif; ?>
 
-<?php echo wpautop( wp_kses_post( $body ) ); ?>
+	<?php echo wpautop( wp_kses_post( $body ) ); ?>
 
-<?php if ( ! empty( $coupon_code ) && ! empty( $discount_text ) ) : ?>
-	<p>
-		<?php
-		echo esc_html(
-			sprintf(
-				/* translators: %s: discount label */
-				__( 'Complete your order with %s.', 'vfwoo_woocommerce-cart-recovery' ),
-				$discount_text
-			)
-		);
-		?>
-	</p>
-<?php endif; ?>
+	<?php if ( ! empty( $coupon_code ) && ! empty( $discount_text ) ) : ?>
+		<p>
+			<?php
+			echo esc_html(
+				sprintf(
+					/* translators: %s: discount label */
+					__( 'Complete your order with %s.', 'vfwoo_woocommerce-cart-recovery' ),
+					$discount_text
+				)
+			);
+			?>
+		</p>
+	<?php endif; ?>
+</div>
 
 <?php if ( ! empty( $cart_items ) ) : ?>
 	<h2><?php esc_html_e( 'Your cart summary', 'vfwoo_woocommerce-cart-recovery' ); ?></h2>
-	<table cellspacing="0" cellpadding="6" style="width:100%;border:1px solid #e5e5e5;" border="1">
-		<thead>
-			<tr>
-				<th scope="col" style="text-align:left;"><?php esc_html_e( 'Product', 'vfwoo_woocommerce-cart-recovery' ); ?></th>
-				<th scope="col" style="text-align:left;"><?php esc_html_e( 'Quantity', 'vfwoo_woocommerce-cart-recovery' ); ?></th>
-				<th scope="col" style="text-align:left;"><?php esc_html_e( 'Total', 'vfwoo_woocommerce-cart-recovery' ); ?></th>
-			</tr>
-		</thead>
-		<tbody>
-			<?php foreach ( $cart_items as $cart_item ) : ?>
+	<div style="margin-bottom:24px;">
+		<table class="td font-family email-order-details" cellspacing="0" cellpadding="6" style="width:100%;" border="1">
+			<thead>
 				<tr>
-					<td style="text-align:left;vertical-align:middle;"><?php echo esc_html( $cart_item['name'] ); ?></td>
-					<td style="text-align:left;vertical-align:middle;"><?php echo esc_html( $cart_item['quantity'] ); ?></td>
-					<td style="text-align:left;vertical-align:middle;"><?php echo wp_kses_post( $cart_item['total'] ); ?></td>
+					<th class="td" scope="col" style="text-align:<?php echo esc_attr( $text_align ); ?>;"><?php esc_html_e( 'Product', 'vfwoo_woocommerce-cart-recovery' ); ?></th>
+					<th class="td" scope="col" style="text-align:right;"><?php esc_html_e( 'Quantity', 'vfwoo_woocommerce-cart-recovery' ); ?></th>
+					<th class="td" scope="col" style="text-align:right;"><?php esc_html_e( 'Price', 'vfwoo_woocommerce-cart-recovery' ); ?></th>
 				</tr>
-			<?php endforeach; ?>
-		</tbody>
-		<tfoot>
-			<tr>
-				<th scope="row" colspan="2" style="text-align:left;"><?php esc_html_e( 'Total', 'vfwoo_woocommerce-cart-recovery' ); ?></th>
-				<td style="text-align:left;"><?php echo wp_kses_post( $cart_total ); ?></td>
-			</tr>
-			<?php if ( ! empty( $coupon_code ) ) : ?>
-				<tr>
-					<th scope="row" colspan="2" style="text-align:left;"><?php esc_html_e( 'Discount code', 'vfwoo_woocommerce-cart-recovery' ); ?></th>
-					<td style="text-align:left;"><strong><?php echo esc_html( $coupon_code ); ?></strong><?php if ( ! empty( $discount_text ) ) : ?><?php echo esc_html( ' (' . $discount_text . ')' ); ?><?php endif; ?></td>
-				</tr>
-			<?php endif; ?>
-		</tfoot>
-	</table>
+			</thead>
+			<tbody>
+				<?php foreach ( $cart_items as $cart_item ) : ?>
+					<tr class="order_item">
+						<td class="td font-family text-align-left" style="vertical-align:middle;word-wrap:break-word;">
+							<table class="order-item-data" role="presentation">
+								<tr>
+									<?php if ( ! empty( $cart_item['image'] ) ) : ?>
+										<td style="padding-<?php echo esc_attr( is_rtl() ? 'left' : 'right' ); ?>:12px;vertical-align:top;width:48px;">
+											<?php echo wp_kses_post( $cart_item['image'] ); ?>
+										</td>
+									<?php endif; ?>
+									<td style="vertical-align:top;">
+										<strong style="font-size:inherit;font-weight:inherit;"><?php echo esc_html( $cart_item['name'] ); ?></strong>
+										<?php if ( ! empty( $cart_item['meta'] ) ) : ?>
+											<div class="email-order-item-meta"><?php echo wp_kses_post( $cart_item['meta'] ); ?></div>
+										<?php endif; ?>
+									</td>
+								</tr>
+							</table>
+						</td>
+						<td class="td font-family text-align-right" style="vertical-align:middle;text-align:right;">
+							<?php echo esc_html( (string) $cart_item['quantity'] ); ?>
+						</td>
+						<td class="td font-family text-align-right" style="vertical-align:middle;text-align:right;">
+							<?php echo wp_kses_post( $cart_item['total'] ); ?>
+						</td>
+					</tr>
+				<?php endforeach; ?>
+			</tbody>
+		</table>
+		<hr style="border:0;border-top:1px solid rgba(30,30,30,0.2);margin:20px 0;">
+		<table class="td font-family email-order-details" cellspacing="0" cellpadding="6" style="width:100%;" border="1">
+			<tbody>
+				<?php foreach ( $summary_totals as $total_row ) : ?>
+					<tr class="order-totals">
+						<th class="td text-align-left" scope="row" colspan="2" style="text-align:<?php echo esc_attr( $text_align ); ?>;">
+							<?php echo esc_html( $total_row['label'] ); ?>
+						</th>
+						<td class="td text-align-right" style="text-align:right;">
+							<?php echo wp_kses_post( $total_row['value'] ); ?>
+						</td>
+					</tr>
+				<?php endforeach; ?>
+			</tbody>
+		</table>
+	</div>
 <?php endif; ?>
 
 <p style="margin-top:24px;">

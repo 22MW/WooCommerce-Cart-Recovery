@@ -12,6 +12,13 @@ The format is based on Keep a Changelog, and this project follows a simple `MAJO
 
 ### Fixed
 
+## [0.1.19] - 2026-04-06
+
+### Changed
+- Moved the manual recovery actions to the main Cart Recovery dashboard and displayed them in a responsive two-column layout.
+- Reworked recovery emails to use a more WooCommerce-native product table and summary structure based on the active store installation.
+- Refreshed translation files to include the latest email and admin strings.
+
 ## [0.1.18] - 2026-04-06
 
 ### Changed

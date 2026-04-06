@@ -34,7 +34,9 @@ final class WCCR_Abandoned_Carts_Page {
 		<div class="wrap wccr-admin">
 			<h1><?php esc_html_e( 'Cart Recovery', 'vfwoo_woocommerce-cart-recovery' ); ?></h1>
 			<?php $this->render_deleted_notice(); ?>
+			<?php settings_errors( 'wccr_settings' ); ?>
 			<?php $this->render_stats_grid( $stats ); ?>
+			<?php $this->render_dashboard_actions(); ?>
 			<?php $this->render_toolbar( $sort, $view ); ?>
 			<?php $this->render_cards_grid( $carts, $settings, $view ); ?>
 		</div>
@@ -110,6 +112,26 @@ final class WCCR_Abandoned_Carts_Page {
 			<div class="wccr-card"><strong><?php echo esc_html( (string) $stats['recovery_rate'] ); ?>%</strong><span><?php esc_html_e( 'Recovery rate', 'vfwoo_woocommerce-cart-recovery' ); ?></span></div>
 			<div class="wccr-card"><strong><?php echo wp_kses_post( wc_price( (float) $stats['revenue'] ) ); ?></strong><span><?php esc_html_e( 'Recovered revenue', 'vfwoo_woocommerce-cart-recovery' ); ?></span></div>
 			<div class="wccr-card"><strong><?php echo esc_html( (string) $stats['emails_sent'] ); ?></strong><span><?php esc_html_e( 'Emails sent', 'vfwoo_woocommerce-cart-recovery' ); ?></span></div>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Render the run/import action cards under the statistics grid.
+	 */
+	private function render_dashboard_actions(): void {
+		?>
+		<div class="wccr-dashboard-actions">
+			<form method="post" class="wccr-run-now-form">
+				<?php wp_nonce_field( 'wccr_run_now', 'wccr_run_now_nonce' ); ?>
+				<?php submit_button( __( 'Run now', 'vfwoo_woocommerce-cart-recovery' ), 'secondary', 'wccr_run_now', false ); ?>
+				<p class="description"><?php esc_html_e( 'Runs abandoned-cart detection, unpaid-order sync and recovery email queue immediately.', 'vfwoo_woocommerce-cart-recovery' ); ?></p>
+			</form>
+			<form method="post" class="wccr-run-now-form">
+				<?php wp_nonce_field( 'wccr_import_unpaid_orders', 'wccr_import_unpaid_nonce' ); ?>
+				<?php submit_button( __( 'Import unpaid orders', 'vfwoo_woocommerce-cart-recovery' ), 'secondary', 'wccr_import_unpaid', false ); ?>
+				<p class="description"><?php esc_html_e( 'Imports existing pending and failed WooCommerce orders that match the recovery rules.', 'vfwoo_woocommerce-cart-recovery' ); ?></p>
+			</form>
 		</div>
 		<?php
 	}
