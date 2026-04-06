@@ -42,7 +42,7 @@ final class WCCR_Plugin {
 		);
 		$checkout->register_hooks();
 
-		$settings_page = new WCCR_Settings_Page( $settings_repository, $detector, $email_scheduler );
+		$settings_page = new WCCR_Settings_Page( $settings_repository, $detector, $email_scheduler, $pending_detector );
 		$settings_page->register_hooks();
 
 		$admin = new WCCR_Admin_Menu(

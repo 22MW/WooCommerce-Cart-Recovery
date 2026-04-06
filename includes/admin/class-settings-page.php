@@ -8,12 +8,14 @@ final class WCCR_Settings_Page {
 	public function __construct(
 		private WCCR_Settings_Repository $settings_repository,
 		private WCCR_Abandoned_Cart_Detector $detector,
-		private WCCR_Email_Scheduler $email_scheduler
+		private WCCR_Email_Scheduler $email_scheduler,
+		private WCCR_Pending_Order_Detector $pending_order_detector
 	) {}
 
 	public function register_hooks(): void {
 		add_action( 'admin_init', array( $this, 'maybe_save' ) );
 		add_action( 'admin_init', array( $this, 'maybe_run_now' ) );
+		add_action( 'admin_init', array( $this, 'maybe_import_unpaid_orders' ) );
 	}
 
 	/**
@@ -65,9 +67,26 @@ final class WCCR_Settings_Page {
 		}
 
 		$this->detector->run();
+		$this->pending_order_detector->sync_stale_pending_orders();
 		$this->email_scheduler->process_queue();
 
 		add_settings_error( 'wccr_settings', 'wccr_run_done', __( 'Recovery detector and email queue executed manually.', 'vfwoo_woocommerce-cart-recovery' ), 'updated' );
+	}
+
+	/**
+	 * Manually import existing pending and failed orders.
+	 */
+	public function maybe_import_unpaid_orders(): void {
+		if ( ! isset( $_POST['wccr_import_unpaid_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['wccr_import_unpaid_nonce'] ) ), 'wccr_import_unpaid_orders' ) ) {
+			return;
+		}
+
+		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+			return;
+		}
+
+		$this->pending_order_detector->import_existing_unpaid_orders();
+		add_settings_error( 'wccr_settings', 'wccr_import_done', __( 'Existing pending and failed orders imported into recovery.', 'vfwoo_woocommerce-cart-recovery' ), 'updated' );
 	}
 
 	/**
@@ -86,7 +105,12 @@ final class WCCR_Settings_Page {
 			<form method="post" class="wccr-run-now-form">
 				<?php wp_nonce_field( 'wccr_run_now', 'wccr_run_now_nonce' ); ?>
 				<?php submit_button( __( 'Run now', 'vfwoo_woocommerce-cart-recovery' ), 'secondary', 'wccr_run_now', false ); ?>
-				<p class="description"><?php esc_html_e( 'Runs abandoned-cart detection and recovery email queue immediately.', 'vfwoo_woocommerce-cart-recovery' ); ?></p>
+				<p class="description"><?php esc_html_e( 'Runs abandoned-cart detection, unpaid-order sync and recovery email queue immediately.', 'vfwoo_woocommerce-cart-recovery' ); ?></p>
+			</form>
+			<form method="post" class="wccr-run-now-form">
+				<?php wp_nonce_field( 'wccr_import_unpaid_orders', 'wccr_import_unpaid_nonce' ); ?>
+				<?php submit_button( __( 'Import unpaid orders', 'vfwoo_woocommerce-cart-recovery' ), 'secondary', 'wccr_import_unpaid', false ); ?>
+				<p class="description"><?php esc_html_e( 'Imports existing pending and failed WooCommerce orders that match the recovery rules.', 'vfwoo_woocommerce-cart-recovery' ); ?></p>
 			</form>
 			<form method="post">
 				<?php wp_nonce_field( 'wccr_save_settings', 'wccr_settings_nonce' ); ?>

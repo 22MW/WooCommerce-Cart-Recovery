@@ -177,6 +177,9 @@ final class WCCR_Abandoned_Carts_Page {
 	 */
 	private function render_card_meta( array $cart, array $eligibility ): void {
 		$meta = array(
+			__( 'Source', 'vfwoo_woocommerce-cart-recovery' )             => $this->get_source_label( $cart ),
+			__( 'Linked order', 'vfwoo_woocommerce-cart-recovery' )       => $this->get_order_link_html( absint( $cart['linked_order_id'] ?? 0 ) ),
+			__( 'Merged', 'vfwoo_woocommerce-cart-recovery' )             => $this->get_merged_label( $cart ),
 			__( 'Step', 'vfwoo_woocommerce-cart-recovery' )               => absint( $eligibility['current_step'] ?? 0 ) ?: '-',
 			__( 'Emails sent', 'vfwoo_woocommerce-cart-recovery' )        => $this->email_log_repository->count_sent_for_cart( absint( $cart['id'] ) ),
 			__( 'Coupon', 'vfwoo_woocommerce-cart-recovery' )             => $this->get_coupon_label( $cart ),
@@ -310,6 +313,32 @@ final class WCCR_Abandoned_Carts_Page {
 		);
 
 		return $labels[ $status ] ?? $status;
+	}
+
+	/**
+	 * Get a translated source label for the current recovery row.
+	 *
+	 * @param array<string, mixed> $cart Recovery row.
+	 */
+	private function get_source_label( array $cart ): string {
+		$source = (string) ( $cart['primary_source'] ?? 'cart' );
+		$labels = array(
+			'cart'  => __( 'Cart', 'vfwoo_woocommerce-cart-recovery' ),
+			'order' => __( 'Order', 'vfwoo_woocommerce-cart-recovery' ),
+		);
+
+		return $labels[ $source ] ?? $source;
+	}
+
+	/**
+	 * Get a yes/no label for merged rows.
+	 *
+	 * @param array<string, mixed> $cart Recovery row.
+	 */
+	private function get_merged_label( array $cart ): string {
+		return ! empty( $cart['is_merged'] )
+			? __( 'Yes', 'vfwoo_woocommerce-cart-recovery' )
+			: __( 'No', 'vfwoo_woocommerce-cart-recovery' );
 	}
 
 	/**

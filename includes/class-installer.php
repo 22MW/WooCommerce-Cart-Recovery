@@ -55,6 +55,9 @@ final class WCCR_Installer {
 				currency VARCHAR(10) NOT NULL DEFAULT '',
 				status VARCHAR(20) NOT NULL DEFAULT 'active',
 				source VARCHAR(20) NOT NULL DEFAULT 'classic',
+				primary_source VARCHAR(20) NOT NULL DEFAULT 'cart',
+				linked_order_id BIGINT UNSIGNED NULL,
+				is_merged TINYINT(1) NOT NULL DEFAULT 0,
 				last_activity_gmt DATETIME NOT NULL,
 				abandoned_at_gmt DATETIME NULL,
 				clicked_at_gmt DATETIME NULL,
@@ -65,7 +68,8 @@ final class WCCR_Installer {
 				PRIMARY KEY (id),
 				KEY session_key (session_key),
 				KEY status_activity (status, last_activity_gmt),
-				KEY email (email)
+				KEY email (email),
+				KEY linked_order_id (linked_order_id)
 			) {$charset_collate};"
 		);
 

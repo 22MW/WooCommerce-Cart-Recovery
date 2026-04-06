@@ -17,8 +17,16 @@
 - Objetivo de maximo 20-30 lineas por funcion.
 - Nombres claros y descriptivos.
 - No duplicar logica si el plugin ya tiene una funcion o bloque que resuelve lo mismo.
+- Si un flujo nuevo sustituye de verdad al anterior, el codigo viejo debe simplificarse o eliminarse en el mismo bloque cuando ya no sea necesario.
+- Evitar mantener modos hibridos durante demasiado tiempo si ya existe una fuente principal clara.
+- No dejar caminos legacy activos solo por inercia.
 - Evitar efectos secundarios cuando sea posible.
 - Mantener el codigo facil de testear y reutilizar.
+- Debe respetar buenas practicas de seguridad de WordPress: sanitizacion, escaping, validacion, nonces, capability checks y acceso directo bloqueado.
+- Debe seguir WordPress Coding Standards en la medida de lo posible.
+- Debe estar preparado para internacionalizacion con text domain correcto.
+- No debe incluir codigo ofuscado, minimizado de forma no revisable ni dependencias inseguras.
+- No debe cargar codigo remoto ejecutable ni hacer tracking sin consentimiento explicito.
 
 ## Reglas De Cambio
 - Preguntar antes de cambios mayores.
@@ -26,6 +34,7 @@
 - No usar iconos dentro de textos de interfaz.
 - Cambios minimos: un problema, una solucion.
 - Si aparece una mejora adicional, comentarla antes de aplicarla.
+- Si una mejora obliga a retirar codigo viejo o consolidar logica duplicada para cumplir estas reglas, indicarlo en el plan antes de ejecutar.
 
 ## Documentacion
 - Anadir documentacion inline cuando aporte valor.

@@ -25,12 +25,26 @@ final class WCCR_Pending_Order_Detector {
 	 * Sync stale pending or failed orders into the recovery table.
 	 */
 	public function sync_stale_pending_orders(): void {
+		$this->sync_unpaid_orders( false );
+	}
+
+	/**
+	 * Manually import existing pending and failed orders into the recovery table.
+	 */
+	public function import_existing_unpaid_orders(): void {
+		$this->sync_unpaid_orders( true );
+	}
+
+	/**
+	 * Sync eligible pending and failed orders into the recovery table.
+	 */
+	private function sync_unpaid_orders( bool $manual_import ): void {
 		$settings = $this->settings_repository->get();
 		$minutes  = max( 1, absint( $settings['abandon_after_minutes'] ?? 60 ) );
 		$orders   = wc_get_orders(
 			array(
 				'status'       => array( 'pending', 'failed' ),
-				'limit'        => 50,
+				'limit'        => $manual_import ? 200 : 50,
 				'orderby'      => 'date',
 				'order'        => 'ASC',
 				'date_created' => '<=' . gmdate( 'Y-m-d H:i:s', time() - ( $minutes * MINUTE_IN_SECONDS ) ),
@@ -73,15 +87,7 @@ final class WCCR_Pending_Order_Detector {
 			}
 		}
 
-		$items = array();
-		foreach ( $order->get_items() as $item ) {
-			$items[] = array(
-				'product_id'   => absint( $item->get_product_id() ),
-				'variation_id' => absint( $item->get_variation_id() ),
-				'quantity'     => absint( $item->get_quantity() ),
-				'cart_item'    => array(),
-			);
-		}
+		$items = $this->get_order_items_snapshot( $order );
 
 		if ( empty( $items ) ) {
 			return;
@@ -93,19 +99,16 @@ final class WCCR_Pending_Order_Detector {
 		$locale  = $order->get_meta( '_wccr_locale', true );
 		$locale  = is_string( $locale ) && '' !== $locale ? sanitize_text_field( $locale ) : sanitize_text_field( $this->locale_resolver->resolve_locale( $user_id ) );
 
-		$this->cart_repository->upsert_active_cart(
-			'order_' . $order->get_id(),
+		$this->cart_repository->upsert_unpaid_order(
+			absint( $order->get_id() ),
 			$user_id,
 			$email,
 			'' !== $name ? $name : null,
 			$locale,
 			$items,
-			(float) $order->get_total(),
+			(float) $order->get_total( 'edit' ),
 			$order->get_currency(),
-			'order_pending'
 		);
-
-		$this->cart_repository->mark_session_abandoned( 'order_' . $order->get_id() );
 	}
 
 	/**
@@ -144,5 +147,25 @@ final class WCCR_Pending_Order_Detector {
 
 		$order->update_meta_data( '_wccr_recovered_cart_id', $cart_id );
 		$order->save();
+	}
+
+	/**
+	 * Build a normalized item snapshot from a WooCommerce order.
+	 *
+	 * @return array<int, array<string, mixed>>
+	 */
+	private function get_order_items_snapshot( WC_Order $order ): array {
+		$items = array();
+
+		foreach ( $order->get_items() as $item ) {
+			$items[] = array(
+				'product_id'   => absint( $item->get_product_id() ),
+				'variation_id' => absint( $item->get_variation_id() ),
+				'quantity'     => absint( $item->get_quantity() ),
+				'cart_item'    => array(),
+			);
+		}
+
+		return $items;
 	}
 }

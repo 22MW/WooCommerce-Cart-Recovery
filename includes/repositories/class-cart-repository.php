@@ -30,14 +30,41 @@ final class WCCR_Cart_Repository {
 		$existing_id = $this->find_open_cart_id( $session_key, $email );
 		$existing    = $existing_id ? $this->find_by_id( $existing_id ) : null;
 		$now_gmt     = gmdate( 'Y-m-d H:i:s' );
-		$data        = $this->build_cart_row_data( $session_key, $user_id, $email, $customer_name, $locale, $cart_payload, $cart_total, $currency, $source, $cart_hash, $now_gmt );
+		$data        = $this->build_cart_row_data( $session_key, $user_id, $email, $customer_name, $locale, $cart_payload, $cart_total, $currency, $source, 'cart', null, false, $cart_hash, $now_gmt );
 
 		if ( $existing ) {
-			$this->update_existing_open_cart( absint( $existing_id ), $existing, $data, $cart_hash, $now_gmt );
+			$this->update_existing_open_cart( absint( $existing_id ), $existing, $data, $cart_hash, $now_gmt, false );
 			return;
 		}
 
 		$this->insert_new_active_cart( $data, $now_gmt );
+	}
+
+	/**
+	 * Create or update a recovery row backed by a pending or failed order.
+	 *
+	 * @param int         $order_id       WooCommerce order ID.
+	 * @param int|null    $user_id        Customer user ID.
+	 * @param string|null $email          Billing email.
+	 * @param string|null $customer_name  Billing name.
+	 * @param string      $locale         Resolved locale.
+	 * @param array       $cart_payload   Order line snapshot.
+	 * @param float       $cart_total     Order total.
+	 * @param string      $currency       Order currency.
+	 */
+	public function upsert_unpaid_order( int $order_id, ?int $user_id, ?string $email, ?string $customer_name, string $locale, array $cart_payload, float $cart_total, string $currency ): void {
+		$cart_hash   = $this->build_cart_hash( $cart_payload, $cart_total );
+		$existing_id = $this->find_merge_candidate_for_order( $order_id, $email, $cart_hash, $cart_total );
+		$existing    = $existing_id ? $this->find_by_id( $existing_id ) : null;
+		$now_gmt     = gmdate( 'Y-m-d H:i:s' );
+		$data        = $this->build_cart_row_data( 'order_' . $order_id, $user_id, $email, $customer_name, $locale, $cart_payload, $cart_total, $currency, 'order_pending', 'order', $order_id, (bool) $existing, $cart_hash, $now_gmt );
+
+		if ( $existing ) {
+			$this->update_existing_open_cart( $existing_id, $existing, $data, $cart_hash, $now_gmt, true );
+			return;
+		}
+
+		$this->insert_new_abandoned_order_cart( $data, $now_gmt );
 	}
 
 	/**
@@ -69,7 +96,7 @@ final class WCCR_Cart_Repository {
 
 		$threshold = gmdate( 'Y-m-d H:i:s', time() - ( $delay_minutes * MINUTE_IN_SECONDS ) );
 
-		return $wpdb->get_results(
+		$rows = $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT c.* FROM {$this->table} c
 				LEFT JOIN {$wpdb->prefix}wccr_email_log l ON l.cart_id = c.id AND l.step = %d AND l.status = 'sent'
@@ -80,6 +107,8 @@ final class WCCR_Cart_Repository {
 			),
 			ARRAY_A
 		);
+
+		return $this->hydrate_rows_from_linked_orders( $rows );
 	}
 
 	/**
@@ -91,7 +120,7 @@ final class WCCR_Cart_Repository {
 		global $wpdb;
 
 		$row = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$this->table} WHERE id = %d", $id ), ARRAY_A );
-		return $row ?: null;
+		return $row ? $this->hydrate_row_from_linked_order( $row ) : null;
 	}
 
 	/**
@@ -204,13 +233,15 @@ final class WCCR_Cart_Repository {
 
 		$order_by = $this->get_list_order_by( $sort );
 
-		return $wpdb->get_results(
+		$rows = $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT * FROM {$this->table} WHERE status IN ('abandoned','clicked','recovered') ORDER BY {$order_by} LIMIT %d",
 				$limit
 			),
 			ARRAY_A
 		);
+
+		return $this->hydrate_rows_from_linked_orders( $rows );
 	}
 
 	/**
@@ -221,13 +252,15 @@ final class WCCR_Cart_Repository {
 	public function get_abandoned_carts( int $limit = 200 ): array {
 		global $wpdb;
 
-		return $wpdb->get_results(
+		$rows = $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT * FROM {$this->table} WHERE status = 'abandoned' AND email IS NOT NULL AND email != '' ORDER BY abandoned_at_gmt ASC LIMIT %d",
 				$limit
 			),
 			ARRAY_A
 		);
+
+		return $this->hydrate_rows_from_linked_orders( $rows );
 	}
 
 	/**
@@ -290,7 +323,7 @@ final class WCCR_Cart_Repository {
 	 *
 	 * @return array<string, mixed>
 	 */
-	private function build_cart_row_data( string $session_key, ?int $user_id, ?string $email, ?string $customer_name, string $locale, array $cart_payload, float $cart_total, string $currency, string $source, string $cart_hash, string $now_gmt ): array {
+	private function build_cart_row_data( string $session_key, ?int $user_id, ?string $email, ?string $customer_name, string $locale, array $cart_payload, float $cart_total, string $currency, string $source, string $primary_source, ?int $linked_order_id, bool $is_merged, string $cart_hash, string $now_gmt ): array {
 		return array(
 			'session_key'    => $session_key,
 			'user_id'        => $user_id,
@@ -302,6 +335,9 @@ final class WCCR_Cart_Repository {
 			'cart_total'     => $cart_total,
 			'currency'       => $currency,
 			'source'         => $source,
+			'primary_source' => $primary_source,
+			'linked_order_id' => $linked_order_id,
+			'is_merged'      => $is_merged ? 1 : 0,
 			'updated_at_gmt' => $now_gmt,
 		);
 	}
@@ -312,23 +348,23 @@ final class WCCR_Cart_Repository {
 	 * @param array<string, mixed> $existing Existing database row.
 	 * @param array<string, mixed> $data     Replacement values.
 	 */
-	private function update_existing_open_cart( int $existing_id, array $existing, array $data, string $cart_hash, string $now_gmt ): void {
+	private function update_existing_open_cart( int $existing_id, array $existing, array $data, string $cart_hash, string $now_gmt, bool $from_order ): void {
 		global $wpdb;
 
 		$current_status = (string) ( $existing['status'] ?? '' );
 		$current_hash   = (string) ( $existing['cart_hash'] ?? '' );
+		$data           = $this->merge_existing_identity( $existing, $data, $from_order );
 
 		if ( in_array( $current_status, array( 'abandoned', 'clicked' ), true ) && $current_hash === $cart_hash ) {
 			$wpdb->update( $this->table, $data, array( 'id' => $existing_id ) );
 			return;
 		}
 
-		$data['status']              = 'active';
-		$data['last_activity_gmt']   = $now_gmt;
-		$data['abandoned_at_gmt']    = null;
-		$data['clicked_at_gmt']      = null;
-		$data['recovered_at_gmt']    = null;
-		$data['recovered_order_id']  = null;
+		if ( $from_order ) {
+			$this->prepare_order_backed_update( $data, $existing, $now_gmt );
+		} else {
+			$this->prepare_cart_backed_update( $data, $existing, $now_gmt );
+		}
 
 		$wpdb->update( $this->table, $data, array( 'id' => $existing_id ) );
 	}
@@ -343,6 +379,22 @@ final class WCCR_Cart_Repository {
 
 		$data['status']            = 'active';
 		$data['last_activity_gmt'] = $now_gmt;
+		$data['created_at_gmt']    = $now_gmt;
+
+		$wpdb->insert( $this->table, $data );
+	}
+
+	/**
+	 * Insert a brand-new row already backed by an abandoned unpaid order.
+	 *
+	 * @param array<string, mixed> $data Row values.
+	 */
+	private function insert_new_abandoned_order_cart( array $data, string $now_gmt ): void {
+		global $wpdb;
+
+		$data['status']            = 'abandoned';
+		$data['last_activity_gmt'] = $now_gmt;
+		$data['abandoned_at_gmt']  = $now_gmt;
 		$data['created_at_gmt']    = $now_gmt;
 
 		$wpdb->insert( $this->table, $data );
@@ -454,17 +506,170 @@ final class WCCR_Cart_Repository {
 
 		return (int) $wpdb->get_var(
 			$wpdb->prepare(
-				"SELECT id FROM {$this->table} WHERE email = %s AND status IN ('active','abandoned','clicked') ORDER BY id DESC LIMIT 1",
-				$email
+				"SELECT id FROM {$this->table}
+				WHERE email = %s
+				AND status IN ('active','abandoned','clicked')
+				AND ( linked_order_id IS NULL OR linked_order_id = 0 )
+				AND updated_at_gmt >= %s
+				ORDER BY id DESC LIMIT 1",
+				$email,
+				gmdate( 'Y-m-d H:i:s', time() - DAY_IN_SECONDS )
 			)
 		);
+	}
+
+	/**
+	 * Find a matching open row for a pending or failed order.
+	 */
+	private function find_merge_candidate_for_order( int $order_id, ?string $email, string $cart_hash, float $cart_total ): int {
+		$linked_id = $this->find_linked_order_cart_id( $order_id );
+		if ( $linked_id ) {
+			return $linked_id;
+		}
+
+		return $this->find_email_order_candidate_id( $email, $cart_hash, $cart_total );
+	}
+
+	/**
+	 * Return a row already linked to the provided order ID.
+	 */
+	private function find_linked_order_cart_id( int $order_id ): int {
+		global $wpdb;
+
+		return (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT id FROM {$this->table} WHERE linked_order_id = %d AND status IN ('active','abandoned','clicked') ORDER BY id DESC LIMIT 1",
+				$order_id
+			)
+		);
+	}
+
+	/**
+	 * Find the best open cart candidate for an unpaid order using email and cart similarity.
+	 */
+	private function find_email_order_candidate_id( ?string $email, string $cart_hash, float $cart_total ): int {
+		$candidates = $this->get_recent_email_candidates( $email );
+		foreach ( $candidates as $candidate ) {
+			if ( $this->is_order_merge_candidate( $candidate, $cart_hash, $cart_total ) ) {
+				return absint( $candidate['id'] );
+			}
+		}
+
+		return 0;
+	}
+
+	/**
+	 * Load recent open rows for an email.
+	 *
+	 * @return array<int, array<string, mixed>>
+	 */
+	private function get_recent_email_candidates( ?string $email ): array {
+		global $wpdb;
+
+		if ( empty( $email ) ) {
+			return array();
+		}
+
+		return $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT id, cart_hash, cart_total, updated_at_gmt FROM {$this->table}
+				WHERE email = %s AND status IN ('active','abandoned','clicked') AND updated_at_gmt >= %s
+				ORDER BY id DESC LIMIT 5",
+				$email,
+				gmdate( 'Y-m-d H:i:s', time() - DAY_IN_SECONDS )
+			),
+			ARRAY_A
+		);
+	}
+
+	/**
+	 * Decide whether an open cart should merge into an unpaid order row.
+	 *
+	 * @param array<string, mixed> $candidate Candidate row.
+	 */
+	private function is_order_merge_candidate( array $candidate, string $cart_hash, float $cart_total ): bool {
+		if ( (string) ( $candidate['cart_hash'] ?? '' ) === $cart_hash ) {
+			return true;
+		}
+
+		return abs( (float) ( $candidate['cart_total'] ?? 0 ) - $cart_total ) < 0.01;
 	}
 
 	/**
 	 * Calculate a stable cart hash from payload and total.
 	 */
 	private function build_cart_hash( array $cart_payload, float $cart_total ): string {
-		return hash( 'sha256', wp_json_encode( $cart_payload ) . '|' . $cart_total );
+		$normalized_items = array();
+
+		foreach ( $cart_payload as $item ) {
+			$normalized_items[] = array(
+				'product_id'   => absint( $item['product_id'] ?? 0 ),
+				'variation_id' => absint( $item['variation_id'] ?? 0 ),
+				'quantity'     => absint( $item['quantity'] ?? 0 ),
+			);
+		}
+
+		return hash( 'sha256', wp_json_encode( $normalized_items ) . '|' . wc_format_decimal( $cart_total, 4 ) );
+	}
+
+	/**
+	 * Preserve order linkage and merge metadata across updates.
+	 *
+	 * @param array<string, mixed> $existing Existing row.
+	 * @param array<string, mixed> $data     New row data.
+	 * @return array<string, mixed>
+	 */
+	private function merge_existing_identity( array $existing, array $data, bool $from_order ): array {
+		$existing_order_id = absint( $existing['linked_order_id'] ?? 0 );
+
+		if ( $existing_order_id && empty( $data['linked_order_id'] ) ) {
+			$data['linked_order_id'] = $existing_order_id;
+		}
+
+		if ( $existing_order_id && ! $from_order ) {
+			$data['primary_source'] = 'order';
+		}
+
+		if ( ! empty( $existing['is_merged'] ) || ( $from_order && ! empty( $existing['id'] ) ) ) {
+			$data['is_merged'] = 1;
+		}
+
+		return $data;
+	}
+
+	/**
+	 * Prepare an updated row that is now primarily backed by an unpaid order.
+	 *
+	 * @param array<string, mixed> $data     Update data.
+	 * @param array<string, mixed> $existing Existing row.
+	 */
+	private function prepare_order_backed_update( array &$data, array $existing, string $now_gmt ): void {
+		$data['status']           = 'clicked' === ( $existing['status'] ?? '' ) ? 'clicked' : 'abandoned';
+		$data['last_activity_gmt'] = $now_gmt;
+		$data['abandoned_at_gmt'] = $existing['abandoned_at_gmt'] ?: $now_gmt;
+		$data['clicked_at_gmt']   = $existing['clicked_at_gmt'] ?? null;
+		$data['recovered_at_gmt'] = $existing['recovered_at_gmt'] ?? null;
+		$data['recovered_order_id'] = $existing['recovered_order_id'] ?? null;
+	}
+
+	/**
+	 * Prepare an updated row that remains primarily backed by the live cart session.
+	 *
+	 * @param array<string, mixed> $data     Update data.
+	 * @param array<string, mixed> $existing Existing row.
+	 */
+	private function prepare_cart_backed_update( array &$data, array $existing, string $now_gmt ): void {
+		$data['status']            = 'active';
+		$data['last_activity_gmt'] = $now_gmt;
+		$data['abandoned_at_gmt']  = null;
+		$data['clicked_at_gmt']    = null;
+		$data['recovered_at_gmt']  = null;
+		$data['recovered_order_id'] = null;
+
+		if ( ! empty( $existing['linked_order_id'] ) ) {
+			$data['primary_source'] = 'order';
+			$data['linked_order_id'] = absint( $existing['linked_order_id'] );
+		}
 	}
 
 	/**
@@ -484,5 +689,75 @@ final class WCCR_Cart_Repository {
 		}
 
 		return 0;
+	}
+
+	/**
+	 * Refresh row data from linked WooCommerce orders when available.
+	 *
+	 * @param array<int, array<string, mixed>> $rows Recovery rows.
+	 * @return array<int, array<string, mixed>>
+	 */
+	private function hydrate_rows_from_linked_orders( array $rows ): array {
+		foreach ( $rows as $index => $row ) {
+			$rows[ $index ] = $this->hydrate_row_from_linked_order( $row );
+		}
+
+		return $rows;
+	}
+
+	/**
+	 * Prefer linked order data once a recovery row is backed by an order.
+	 *
+	 * @param array<string, mixed> $row Recovery row.
+	 * @return array<string, mixed>
+	 */
+	private function hydrate_row_from_linked_order( array $row ): array {
+		$order_id = absint( $row['linked_order_id'] ?? 0 );
+		if ( ! $order_id ) {
+			return $row;
+		}
+
+		$order = wc_get_order( $order_id );
+		if ( ! $order ) {
+			return $row;
+		}
+
+		$row['primary_source'] = 'order';
+		$row['email']          = $order->get_billing_email() ?: ( $row['email'] ?? '' );
+		$row['customer_name']  = $this->get_order_customer_name( $order, (string) ( $row['customer_name'] ?? '' ) );
+		$row['cart_total']     = (float) $order->get_total( 'edit' );
+		$row['currency']       = $order->get_currency() ?: ( $row['currency'] ?? '' );
+		$row['cart_payload']   = wp_json_encode( $this->get_order_payload( $order ) );
+		$row['cart_hash']      = $this->build_cart_hash( $this->get_order_payload( $order ), (float) $row['cart_total'] );
+
+		return $row;
+	}
+
+	/**
+	 * Build a normalized customer name from a linked order.
+	 */
+	private function get_order_customer_name( WC_Order $order, string $fallback ): string {
+		$name = trim( trim( (string) $order->get_billing_first_name() ) . ' ' . trim( (string) $order->get_billing_last_name() ) );
+		return '' !== $name ? $name : $fallback;
+	}
+
+	/**
+	 * Build a normalized payload from a linked order.
+	 *
+	 * @return array<int, array<string, mixed>>
+	 */
+	private function get_order_payload( WC_Order $order ): array {
+		$items = array();
+
+		foreach ( $order->get_items() as $item ) {
+			$items[] = array(
+				'product_id'   => absint( $item->get_product_id() ),
+				'variation_id' => absint( $item->get_variation_id() ),
+				'quantity'     => absint( $item->get_quantity() ),
+				'cart_item'    => array(),
+			);
+		}
+
+		return $items;
 	}
 }
