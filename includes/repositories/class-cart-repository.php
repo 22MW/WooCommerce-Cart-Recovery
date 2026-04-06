@@ -130,8 +130,15 @@ final class WCCR_Cart_Repository {
 	 * @return array<string, mixed>|null
 	 */
 	public function find_by_linked_order_id( int $order_id ): ?array {
-		$cart_id = $this->find_linked_order_cart_id( $order_id );
+		$cart_id = $this->find_any_linked_order_cart_id( $order_id );
 		return $cart_id ? $this->find_by_id( $cart_id ) : null;
+	}
+
+	/**
+	 * Check whether a recovery row already exists for a linked WooCommerce order.
+	 */
+	public function has_linked_order_row( int $order_id ): bool {
+		return $this->find_any_linked_order_cart_id( $order_id ) > 0;
 	}
 
 	/**
@@ -564,6 +571,20 @@ final class WCCR_Cart_Repository {
 		return (int) $wpdb->get_var(
 			$wpdb->prepare(
 				"SELECT id FROM {$this->table} WHERE linked_order_id = %d AND status IN ('active','abandoned','clicked') ORDER BY id DESC LIMIT 1",
+				$order_id
+			)
+		);
+	}
+
+	/**
+	 * Return any row already linked to the provided order ID, including recovered cases.
+	 */
+	private function find_any_linked_order_cart_id( int $order_id ): int {
+		global $wpdb;
+
+		return (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT id FROM {$this->table} WHERE linked_order_id = %d ORDER BY id DESC LIMIT 1",
 				$order_id
 			)
 		);

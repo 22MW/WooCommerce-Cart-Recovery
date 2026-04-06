@@ -12,6 +12,11 @@ The format is based on Keep a Changelog, and this project follows a simple `MAJO
 
 ### Fixed
 
+## [0.1.21] - 2026-04-06
+
+### Fixed
+- Prevented imported unpaid orders from being re-imported after they were already recovered through the recovery flow.
+
 ## [0.1.20] - 2026-04-06
 
 ### Added

@@ -90,6 +90,10 @@ final class WCCR_Pending_Order_Detector {
 			return 'skipped';
 		}
 
+		if ( $this->cart_repository->has_linked_order_row( $order_id ) ) {
+			return 'skipped';
+		}
+
 		if ( absint( $order->get_meta( '_wccr_recovered_cart_id', true ) ) ) {
 			return 'skipped';
 		}
