@@ -131,11 +131,16 @@ final class WCCR_Email_Log_Repository {
 	}
 
 	/**
-	 * Delete log rows older than the configured threshold.
+	 * Delete failed log rows older than the configured threshold.
 	 */
-	public function delete_old_rows( int $days ): int {
+	public function delete_old_failed_rows( int $days ): int {
 		global $wpdb;
 		$threshold = gmdate( 'Y-m-d H:i:s', time() - ( $days * DAY_IN_SECONDS ) );
-		return (int) $wpdb->query( $wpdb->prepare( "DELETE FROM {$this->table} WHERE created_at_gmt < %s", $threshold ) );
+		return (int) $wpdb->query(
+			$wpdb->prepare(
+				"DELETE FROM {$this->table} WHERE status = 'failed' AND created_at_gmt < %s",
+				$threshold
+			)
+		);
 	}
 }

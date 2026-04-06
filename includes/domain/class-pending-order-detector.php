@@ -109,6 +109,8 @@ final class WCCR_Pending_Order_Detector {
 			(float) $order->get_total( 'edit' ),
 			$order->get_currency(),
 		);
+
+		$this->mark_order_as_plugin_managed( $order );
 	}
 
 	/**
@@ -167,5 +169,13 @@ final class WCCR_Pending_Order_Detector {
 		}
 
 		return $items;
+	}
+
+	/**
+	 * Mark an unpaid WooCommerce order as owned by the recovery plugin flow.
+	 */
+	private function mark_order_as_plugin_managed( WC_Order $order ): void {
+		$order->update_meta_data( '_wccr_managed_unpaid_order', 1 );
+		$order->save();
 	}
 }

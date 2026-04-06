@@ -8,6 +8,7 @@ final class WCCR_Abandoned_Carts_Page {
 	public function __construct(
 		private WCCR_Cart_Repository $cart_repository,
 		private WCCR_Email_Log_Repository $email_log_repository,
+		private WCCR_Stats_Repository $stats_repository,
 		private WCCR_Settings_Repository $settings_repository,
 		private WCCR_Email_Eligibility_Service $email_eligibility_service,
 		private WCCR_Stats_Service $stats_service
@@ -57,10 +58,17 @@ final class WCCR_Abandoned_Carts_Page {
 			return;
 		}
 
+		$cart = $this->cart_repository->find_by_id( $cart_id );
+		if ( ! $cart ) {
+			return;
+		}
+
+		$deleted_order = $this->delete_plugin_owned_order( absint( $cart['linked_order_id'] ?? 0 ) );
+		$this->stats_repository->archive_cart_metrics( $cart, $this->email_log_repository->count_sent_for_cart( $cart_id ) );
 		$this->email_log_repository->delete_for_cart( $cart_id );
 		$this->cart_repository->delete_by_id( $cart_id );
 
-		wp_safe_redirect( $this->get_dashboard_url( array( 'wccr_deleted' => 1 ) ) );
+		wp_safe_redirect( $this->get_dashboard_url( array( 'wccr_deleted' => $deleted_order ? 'order' : 'item' ) ) );
 		exit;
 	}
 
@@ -68,12 +76,21 @@ final class WCCR_Abandoned_Carts_Page {
 	 * Render a success notice after delete.
 	 */
 	private function render_deleted_notice(): void {
-		if ( ! isset( $_GET['wccr_deleted'] ) ) {
+		$deleted = isset( $_GET['wccr_deleted'] ) ? sanitize_key( wp_unslash( $_GET['wccr_deleted'] ) ) : '';
+		if ( '' === $deleted ) {
 			return;
 		}
 		?>
 		<div class="notice notice-success is-dismissible">
-			<p><?php esc_html_e( 'Recovery item deleted.', 'vfwoo_woocommerce-cart-recovery' ); ?></p>
+			<p>
+				<?php
+				echo esc_html(
+					'order' === $deleted
+						? __( 'Recovery item and linked unpaid order deleted.', 'vfwoo_woocommerce-cart-recovery' )
+						: __( 'Recovery item deleted.', 'vfwoo_woocommerce-cart-recovery' )
+				);
+				?>
+			</p>
 		</div>
 		<?php
 	}
@@ -398,5 +415,22 @@ final class WCCR_Abandoned_Carts_Page {
 		}
 
 		return $args;
+	}
+
+	/**
+	 * Delete a linked WooCommerce order only if it belongs to this plugin and is still unpaid.
+	 */
+	private function delete_plugin_owned_order( int $order_id ): bool {
+		$order = $order_id ? wc_get_order( $order_id ) : null;
+		if ( ! $order || ! in_array( $order->get_status(), array( 'pending', 'failed' ), true ) ) {
+			return false;
+		}
+
+		if ( 1 !== absint( $order->get_meta( '_wccr_managed_unpaid_order', true ) ) ) {
+			return false;
+		}
+
+		$order->delete( true );
+		return true;
 	}
 }

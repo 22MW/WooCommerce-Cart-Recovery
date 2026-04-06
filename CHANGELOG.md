@@ -12,6 +12,19 @@ The format is based on Keep a Changelog, and this project follows a simple `MAJO
 
 ### Fixed
 
+## [0.1.11] - 2026-04-06
+
+### Added
+- Added archived recovery statistics storage to preserve metrics after operational cleanup.
+
+### Changed
+- Marked plugin-managed unpaid WooCommerce orders so cleanup and manual delete can handle them safely.
+- Updated cleanup and delete flows to archive metrics before removing recovery rows.
+
+### Fixed
+- Fixed cleanup so sent email history is no longer deleted blindly with old operational rows.
+- Fixed manual and automatic deletion so only plugin-owned pending or failed orders can be removed.
+
 ## [0.1.10] - 2026-04-05
 
 ### Added

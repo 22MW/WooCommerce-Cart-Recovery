@@ -215,6 +215,26 @@ final class WCCR_Cart_Repository {
 	}
 
 	/**
+	 * Return recovery rows older than the retention threshold.
+	 *
+	 * @return array<int, array<string, mixed>>
+	 */
+	public function get_rows_older_than( int $days ): array {
+		global $wpdb;
+
+		$threshold = gmdate( 'Y-m-d H:i:s', time() - ( $days * DAY_IN_SECONDS ) );
+		$rows      = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT * FROM {$this->table} WHERE updated_at_gmt < %s ORDER BY id ASC",
+				$threshold
+			),
+			ARRAY_A
+		);
+
+		return $this->hydrate_rows_from_linked_orders( $rows );
+	}
+
+	/**
 	 * Delete rows with missing email.
 	 */
 	public function delete_rows_without_email(): int {
