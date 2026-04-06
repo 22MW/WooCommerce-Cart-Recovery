@@ -29,18 +29,18 @@ $text_align = is_rtl() ? 'right' : 'left';
 <?php if ( ! empty( $cart_items ) ) : ?>
 	<h2><?php esc_html_e( 'Your cart summary', 'vfwoo_woocommerce-cart-recovery' ); ?></h2>
 	<div style="margin-bottom:24px;">
-		<table class="td font-family email-order-details" cellspacing="0" cellpadding="6" style="width:100%;" border="1">
+		<table class="td font-family email-order-details" cellspacing="0" cellpadding="6" style="width:100%;border:none;border-collapse:separate;" border="0">
 			<thead>
 				<tr>
-					<th class="td" scope="col" style="text-align:<?php echo esc_attr( $text_align ); ?>;"><?php esc_html_e( 'Product', 'vfwoo_woocommerce-cart-recovery' ); ?></th>
-					<th class="td" scope="col" style="text-align:right;"><?php esc_html_e( 'Quantity', 'vfwoo_woocommerce-cart-recovery' ); ?></th>
-					<th class="td" scope="col" style="text-align:right;"><?php esc_html_e( 'Price', 'vfwoo_woocommerce-cart-recovery' ); ?></th>
+					<th class="td" scope="col" style="text-align:<?php echo esc_attr( $text_align ); ?>;border:none;"><?php esc_html_e( 'Product', 'vfwoo_woocommerce-cart-recovery' ); ?></th>
+					<th class="td" scope="col" style="text-align:right;border:none;"><?php esc_html_e( 'Quantity', 'vfwoo_woocommerce-cart-recovery' ); ?></th>
+					<th class="td" scope="col" style="text-align:right;border:none;"><?php esc_html_e( 'Price', 'vfwoo_woocommerce-cart-recovery' ); ?></th>
 				</tr>
 			</thead>
 			<tbody>
 				<?php foreach ( $cart_items as $cart_item ) : ?>
 					<tr class="order_item">
-						<td class="td font-family text-align-left" style="vertical-align:middle;word-wrap:break-word;">
+						<td class="td font-family text-align-left" style="vertical-align:middle;word-wrap:break-word;border:none;">
 							<table class="order-item-data" role="presentation">
 								<tr>
 									<?php if ( ! empty( $cart_item['image'] ) ) : ?>
@@ -57,10 +57,10 @@ $text_align = is_rtl() ? 'right' : 'left';
 								</tr>
 							</table>
 						</td>
-						<td class="td font-family text-align-right" style="vertical-align:middle;text-align:right;">
+						<td class="td font-family text-align-right" style="vertical-align:middle;text-align:right;border:none;">
 							<?php echo esc_html( (string) $cart_item['quantity'] ); ?>
 						</td>
-						<td class="td font-family text-align-right" style="vertical-align:middle;text-align:right;">
+						<td class="td font-family text-align-right" style="vertical-align:middle;text-align:right;border:none;">
 							<?php echo wp_kses_post( $cart_item['total'] ); ?>
 						</td>
 					</tr>
@@ -68,14 +68,14 @@ $text_align = is_rtl() ? 'right' : 'left';
 			</tbody>
 		</table>
 		<hr style="border:0;border-top:1px solid rgba(30,30,30,0.2);margin:20px 0;">
-		<table class="td font-family email-order-details" cellspacing="0" cellpadding="6" style="width:100%;" border="1">
+		<table class="td font-family email-order-details" cellspacing="0" cellpadding="6" style="width:100%;border:none;border-collapse:separate;" border="0">
 			<tbody>
 				<?php foreach ( $summary_totals as $total_row ) : ?>
 					<tr class="order-totals">
-						<th class="td text-align-left" scope="row" colspan="2" style="text-align:<?php echo esc_attr( $text_align ); ?>;">
+						<th class="td text-align-left" scope="row" colspan="2" style="text-align:<?php echo esc_attr( $text_align ); ?>;border:none;">
 							<?php echo esc_html( $total_row['label'] ); ?>
 						</th>
-						<td class="td text-align-right" style="text-align:right;">
+						<td class="td text-align-right" style="text-align:right;border:none;">
 							<?php echo wp_kses_post( $total_row['value'] ); ?>
 						</td>
 					</tr>

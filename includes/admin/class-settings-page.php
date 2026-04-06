@@ -109,26 +109,39 @@ final class WCCR_Settings_Page {
 			wp_die( esc_html__( 'You do not have permission to access this page.', 'vfwoo_woocommerce-cart-recovery' ) );
 		}
 
-		$settings = $this->settings_repository->get();
-		$locales  = $this->locale_resolver->get_available_locales();
-		settings_errors( 'wccr_settings' );
 		?>
 		<div class="wrap wccr-admin">
 			<h1><?php esc_html_e( 'Cart Recovery Settings', 'vfwoo_woocommerce-cart-recovery' ); ?></h1>
-			<form method="post">
-				<?php wp_nonce_field( 'wccr_save_settings', 'wccr_settings_nonce' ); ?>
-				<table class="form-table">
-					<tr><th><label for="abandon_after_minutes"><?php esc_html_e( 'Mark cart abandoned after minutes', 'vfwoo_woocommerce-cart-recovery' ); ?></label></th><td><input type="number" name="abandon_after_minutes" id="abandon_after_minutes" value="<?php echo esc_attr( $settings['abandon_after_minutes'] ); ?>" min="1"></td></tr>
-					<tr><th><label for="cleanup_days"><?php esc_html_e( 'Cleanup data after days', 'vfwoo_woocommerce-cart-recovery' ); ?></label></th><td><input type="number" name="cleanup_days" id="cleanup_days" value="<?php echo esc_attr( $settings['cleanup_days'] ); ?>" min="1"></td></tr>
-					<tr><th><label for="coupon_expiry_days"><?php esc_html_e( 'Coupon expiry days', 'vfwoo_woocommerce-cart-recovery' ); ?></label></th><td><input type="number" name="coupon_expiry_days" id="coupon_expiry_days" value="<?php echo esc_attr( $settings['coupon_expiry_days'] ); ?>" min="1"></td></tr>
-				</table>
-
-				<?php $this->render_step_cards( $settings ); ?>
-				<?php $this->render_locale_tabs( $settings, $locales ); ?>
-
-				<?php submit_button( __( 'Save settings', 'vfwoo_woocommerce-cart-recovery' ) ); ?>
-			</form>
+			<?php settings_errors( 'wccr_settings' ); ?>
+			<?php $this->render_content(); ?>
 		</div>
+		<?php
+	}
+
+	/**
+	 * Render the settings form without the page wrapper.
+	 */
+	public function render_content(): void {
+		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+			wp_die( esc_html__( 'You do not have permission to access this page.', 'vfwoo_woocommerce-cart-recovery' ) );
+		}
+
+		$settings = $this->settings_repository->get();
+		$locales  = $this->locale_resolver->get_available_locales();
+		?>
+		<form method="post">
+			<?php wp_nonce_field( 'wccr_save_settings', 'wccr_settings_nonce' ); ?>
+			<table class="form-table">
+				<tr><th><label for="abandon_after_minutes"><?php esc_html_e( 'Mark cart abandoned after minutes', 'vfwoo_woocommerce-cart-recovery' ); ?></label></th><td><input type="number" name="abandon_after_minutes" id="abandon_after_minutes" value="<?php echo esc_attr( $settings['abandon_after_minutes'] ); ?>" min="1"></td></tr>
+				<tr><th><label for="cleanup_days"><?php esc_html_e( 'Cleanup data after days', 'vfwoo_woocommerce-cart-recovery' ); ?></label></th><td><input type="number" name="cleanup_days" id="cleanup_days" value="<?php echo esc_attr( $settings['cleanup_days'] ); ?>" min="1"></td></tr>
+				<tr><th><label for="coupon_expiry_days"><?php esc_html_e( 'Coupon expiry days', 'vfwoo_woocommerce-cart-recovery' ); ?></label></th><td><input type="number" name="coupon_expiry_days" id="coupon_expiry_days" value="<?php echo esc_attr( $settings['coupon_expiry_days'] ); ?>" min="1"></td></tr>
+			</table>
+
+			<?php $this->render_step_cards( $settings ); ?>
+			<?php $this->render_locale_tabs( $settings, $locales ); ?>
+
+			<?php submit_button( __( 'Save settings', 'vfwoo_woocommerce-cart-recovery' ) ); ?>
+		</form>
 		<?php
 	}
 

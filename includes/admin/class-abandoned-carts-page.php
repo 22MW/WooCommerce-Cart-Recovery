@@ -22,6 +22,22 @@ final class WCCR_Abandoned_Carts_Page {
 			wp_die( esc_html__( 'You do not have permission to access this page.', 'vfwoo_woocommerce-cart-recovery' ) );
 		}
 
+		?>
+		<div class="wrap wccr-admin">
+			<h1><?php esc_html_e( 'Cart Recovery', 'vfwoo_woocommerce-cart-recovery' ); ?></h1>
+			<?php $this->render_content(); ?>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Render the carts dashboard content without the page wrapper.
+	 */
+	public function render_content(): void {
+		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+			wp_die( esc_html__( 'You do not have permission to access this page.', 'vfwoo_woocommerce-cart-recovery' ) );
+		}
+
 		$this->maybe_handle_delete();
 
 		$sort     = $this->get_current_sort();
@@ -31,15 +47,11 @@ final class WCCR_Abandoned_Carts_Page {
 		$stats    = $this->stats_service->get_stats();
 
 		?>
-		<div class="wrap wccr-admin">
-			<h1><?php esc_html_e( 'Cart Recovery', 'vfwoo_woocommerce-cart-recovery' ); ?></h1>
-			<?php $this->render_deleted_notice(); ?>
-			<?php settings_errors( 'wccr_settings' ); ?>
-			<?php $this->render_stats_grid( $stats ); ?>
-			<?php $this->render_dashboard_actions(); ?>
-			<?php $this->render_toolbar( $sort, $view ); ?>
-			<?php $this->render_cards_grid( $carts, $settings, $view ); ?>
-		</div>
+		<?php $this->render_deleted_notice(); ?>
+		<?php $this->render_stats_grid( $stats ); ?>
+		<?php $this->render_dashboard_actions(); ?>
+		<?php $this->render_toolbar( $sort, $view ); ?>
+		<?php $this->render_cards_grid( $carts, $settings, $view ); ?>
 		<?php
 	}
 

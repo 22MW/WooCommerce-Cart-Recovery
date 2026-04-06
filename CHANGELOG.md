@@ -12,6 +12,13 @@ The format is based on Keep a Changelog, and this project follows a simple `MAJO
 
 ### Fixed
 
+## [0.1.22] - 2026-04-07
+
+### Changed
+- Moved plugin navigation under WooCommerce into a single Cart Recovery screen with internal Carts and Settings tabs.
+- Updated translation files to cover the new admin navigation labels.
+- Removed visible borders from the recovery email product and totals tables.
+
 ## [0.1.21] - 2026-04-06
 
 ### Fixed

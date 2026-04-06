@@ -240,6 +240,10 @@ msgstr "Copiar URL"
 msgid "Settings"
 msgstr "Ajustes"
 
+#: includes/admin/class-admin-menu.php:47
+msgid "Carts"
+msgstr "Carritos"
+
 #: includes/admin/class-admin-menu.php:51
 msgid "Copied"
 msgstr "Copiado"
