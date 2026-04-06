@@ -12,6 +12,19 @@ The format is based on Keep a Changelog, and this project follows a simple `MAJO
 
 ### Fixed
 
+## [0.1.24] - 2026-04-07
+
+### Added
+- Added a per-step, per-language reset action to restore translated default email subject and body values.
+- Documented the multilingual email flow and WPML-tested behavior in the README.
+
+### Changed
+- Improved locale fallback handling so settings tabs and email rendering can resolve the nearest supported plugin locale before falling back to English or the site default locale.
+
+### Fixed
+- Fixed multilingual email defaults so German and other variant locales can resolve the correct plugin translations instead of falling back to Spanish.
+- Fixed plugin locale switching so plugin strings reload correctly for translated defaults and locale-aware email sending.
+
 ## [0.1.23] - 2026-04-07
 
 ### Added

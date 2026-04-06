@@ -78,7 +78,7 @@ final class WCCR_Email_Scheduler {
 			);
 		} finally {
 			if ( $switched ) {
-				restore_previous_locale();
+				WCCR_Plugin_Locale_Switcher::restore_previous_locale();
 			}
 		}
 	}
@@ -87,10 +87,6 @@ final class WCCR_Email_Scheduler {
 	 * Switch WordPress locale before rendering and sending an email.
 	 */
 	private function switch_to_email_locale( string $locale ): bool {
-		if ( '' === $locale || ! function_exists( 'switch_to_locale' ) ) {
-			return false;
-		}
-
-		return (bool) switch_to_locale( sanitize_text_field( $locale ) );
+		return WCCR_Plugin_Locale_Switcher::switch_to_locale( $locale );
 	}
 }

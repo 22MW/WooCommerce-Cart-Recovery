@@ -63,6 +63,15 @@ final class WCCR_Settings_Repository {
 	}
 
 	/**
+	 * Return the translated default subject/body for one step and locale.
+	 *
+	 * @return array{subject:string,body:string}
+	 */
+	public function get_translated_default_step_settings( int $step, string $locale ): array {
+		return $this->get_default_translation_with_fallback( $step, $locale, self::get_default_locale() );
+	}
+
+	/**
 	 * Normalize settings and migrate legacy single-language fields.
 	 *
 	 * @param array<string, mixed> $settings Raw settings payload.
@@ -208,15 +217,7 @@ final class WCCR_Settings_Repository {
 	 * @return array<int, string>
 	 */
 	private function get_default_locale_candidates( string $locale, string $default_locale ): array {
-		$candidates = array_filter(
-			array(
-				sanitize_text_field( $locale ),
-				'en_US',
-				sanitize_text_field( $default_locale ),
-			)
-		);
-
-		return array_values( array_unique( $candidates ) );
+		return WCCR_Plugin_Locale_Switcher::get_locale_candidates( $locale, $default_locale );
 	}
 
 	/**
@@ -277,7 +278,7 @@ final class WCCR_Settings_Repository {
 		$steps    = self::get_default_steps( $locale );
 
 		if ( $switched ) {
-			restore_previous_locale();
+			WCCR_Plugin_Locale_Switcher::restore_previous_locale();
 		}
 
 		$step_settings = isset( $steps[ $step ] ) && is_array( $steps[ $step ] ) ? $steps[ $step ] : array();
@@ -291,11 +292,7 @@ final class WCCR_Settings_Repository {
 	 * Switch locale temporarily while building translated defaults.
 	 */
 	private static function switch_to_settings_locale( string $locale ): bool {
-		if ( '' === $locale || ! function_exists( 'switch_to_locale' ) ) {
-			return false;
-		}
-
-		return switch_to_locale( $locale );
+		return WCCR_Plugin_Locale_Switcher::switch_to_locale( $locale );
 	}
 
 	/**

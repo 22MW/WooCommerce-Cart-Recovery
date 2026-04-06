@@ -475,3 +475,11 @@ msgstr "Código de descuento"
 #: templates/emails/base-email.php:61
 msgid "Recover your cart"
 msgstr "Recuperar tu carrito"
+
+#: includes/admin/class-settings-page.php:93
+msgid "Translated defaults restored."
+msgstr "Se han restaurado los valores predeterminados traducidos."
+
+#: includes/admin/class-settings-page.php:333
+msgid "Reset to translated defaults"
+msgstr "Restablecer valores predeterminados traducidos"

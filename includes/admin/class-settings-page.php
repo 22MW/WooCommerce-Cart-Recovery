@@ -14,6 +14,7 @@ final class WCCR_Settings_Page {
 	) {}
 
 	public function register_hooks(): void {
+		add_action( 'admin_init', array( $this, 'maybe_reset_step_locale_defaults' ) );
 		add_action( 'admin_init', array( $this, 'maybe_save' ) );
 		add_action( 'admin_init', array( $this, 'maybe_run_now' ) );
 		add_action( 'admin_init', array( $this, 'maybe_import_unpaid_orders' ) );
@@ -23,6 +24,10 @@ final class WCCR_Settings_Page {
 	 * Persist settings after nonce and capability validation.
 	 */
 	public function maybe_save(): void {
+		if ( isset( $_POST['wccr_reset_translation'] ) ) {
+			return;
+		}
+
 		if ( ! isset( $_POST['wccr_settings_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['wccr_settings_nonce'] ) ), 'wccr_save_settings' ) ) {
 			return;
 		}
@@ -58,6 +63,34 @@ final class WCCR_Settings_Page {
 
 		$this->settings_repository->save( $settings );
 		add_settings_error( 'wccr_settings', 'wccr_saved', __( 'Settings saved.', 'vfwoo_woocommerce-cart-recovery' ), 'updated' );
+	}
+
+	/**
+	 * Reset one locale translation block to the translated plugin defaults.
+	 */
+	public function maybe_reset_step_locale_defaults(): void {
+		if ( ! isset( $_POST['wccr_reset_translation'], $_POST['wccr_settings_nonce'] ) ) {
+			return;
+		}
+
+		if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['wccr_settings_nonce'] ) ), 'wccr_save_settings' ) || ! current_user_can( 'manage_woocommerce' ) ) {
+			return;
+		}
+
+		$target = isset( $_POST['wccr_reset_translation'] ) ? sanitize_text_field( wp_unslash( $_POST['wccr_reset_translation'] ) ) : '';
+		$parts  = explode( '|', $target, 2 );
+		$step   = isset( $parts[0] ) ? absint( $parts[0] ) : 0;
+		$locale = isset( $parts[1] ) ? sanitize_text_field( $parts[1] ) : '';
+		if ( ! in_array( $step, array( 1, 2, 3 ), true ) || '' === $locale ) {
+			return;
+		}
+
+		$settings    = $this->settings_repository->get();
+		$translation = $this->settings_repository->get_translated_default_step_settings( $step, $locale );
+		$settings['steps'][ $step ]['translations'][ $locale ] = $translation;
+		$this->settings_repository->save( $settings );
+
+		add_settings_error( 'wccr_settings', 'wccr_reset_defaults', __( 'Translated defaults restored.', 'vfwoo_woocommerce-cart-recovery' ), 'updated' );
 	}
 
 	/**
@@ -299,6 +332,9 @@ final class WCCR_Settings_Page {
 			<p><label><?php esc_html_e( 'Subject', 'vfwoo_woocommerce-cart-recovery' ); ?><br><input type="text" class="large-text" name="steps[<?php echo esc_attr( $step ); ?>][translations][<?php echo esc_attr( $locale ); ?>][subject]" value="<?php echo esc_attr( $step_settings['subject'] ?? '' ); ?>"></label></p>
 			<p><label><?php esc_html_e( 'Body', 'vfwoo_woocommerce-cart-recovery' ); ?><br><textarea class="large-text" rows="6" name="steps[<?php echo esc_attr( $step ); ?>][translations][<?php echo esc_attr( $locale ); ?>][body]"><?php echo esc_textarea( $step_settings['body'] ?? '' ); ?></textarea></label></p>
 			<p class="description"><?php esc_html_e( 'Available variables: {recovery_link}, {coupon_code}, {coupon_label}, {cart_total}, {site_name}, {customer_name}', 'vfwoo_woocommerce-cart-recovery' ); ?></p>
+			<p>
+				<button type="submit" class="button button-secondary" name="wccr_reset_translation" value="<?php echo esc_attr( $step . '|' . $locale ); ?>"><?php esc_html_e( 'Reset to translated defaults', 'vfwoo_woocommerce-cart-recovery' ); ?></button>
+			</p>
 		</div>
 		<?php
 	}

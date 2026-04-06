@@ -84,6 +84,81 @@ Mientras ese recovery está activo:
 
 - el plugin no debe crear un carrito abandonado nuevo del mismo checkout restaurado
 
+## Multidioma y locale
+
+El plugin está preparado para trabajar con tiendas multidioma y guardar el idioma real del caso de recovery.
+
+### Qué detecta
+
+- idioma y locale del carrito capturado
+- idioma y locale del pedido importado
+- idioma activo en instalaciones con:
+  - WPML
+  - Polylang
+  - fallback WordPress si no hay plugin multidioma
+
+### Qué guarda
+
+Cada caso de recovery guarda su `locale` para poder reutilizarlo después en:
+
+- resolución del asunto del email
+- resolución del cuerpo del email
+- render del email
+- logs de envío
+
+### Ajustes por idioma
+
+En `Cart Recovery > Settings`:
+
+- cada idioma activo aparece en su propia tab
+- cada step de email tiene `Subject` y `Body` independientes por idioma
+- lo guardado por idioma tiene prioridad sobre cualquier valor por defecto
+
+### Defaults traducidos
+
+Si una tab todavía no tiene contenido guardado:
+
+- el plugin intenta cargar los defaults traducidos del propio plugin para ese idioma
+- si no existe traducción exacta, usa fallback al idioma equivalente soportado
+- si tampoco existe, usa inglés `en_US`
+- después, locale por defecto del sitio
+
+Además, cada bloque tiene un botón:
+
+- `Reset to translated defaults`
+
+Ese botón:
+
+- restaura solo el `step + idioma` actual
+- no toca otros idiomas
+- no toca otros steps
+
+### Envío según idioma del carrito
+
+Cuando el plugin envía un email:
+
+- usa el `locale` guardado en el caso
+- resuelve el `subject/body` de ese idioma
+- cambia el idioma del plugin para cargar sus cadenas traducidas
+- y renderiza el email con ese contexto
+
+Esto permite que:
+
+- un carrito en español reciba email en español
+- un carrito en inglés reciba email en inglés
+- un carrito en alemán reciba email en alemán
+
+### Compatibilidad comprobada
+
+Este flujo multidioma ha sido comprobado con:
+
+- WPML
+
+Y mantiene compatibilidad de diseño con:
+
+- Polylang
+- fallback WordPress estándar cuando no hay plugin multidioma
+
 ## Cómo marca una compra recuperada
 
 El plugin marca `recovered` cuando puede enlazar el pedido al caso de recovery y el pedido pasa por estados válidos de compra:
@@ -126,6 +201,7 @@ El plugin sigue un enfoque WordPress/WooCommerce:
 - cupones nativos de WooCommerce
 - hooks nativos de WooCommerce y Store API
 - text domain listo para traducción
+- catálogos `.po/.mo` por idioma para interfaz y defaults del plugin
 
 ## Qué no hace
 

@@ -3,7 +3,7 @@
  * Plugin Name:       WooCommerce Cart Recovery
  * Plugin URI:        https://example.com/plugins/woocommerce-cart-recovery
  * Description:       Recover abandoned WooCommerce carts and pending orders with scheduled reminders, native coupons and locale-aware emails.
- * Version:           0.1.23
+ * Version:           0.1.24
  * Requires at least: 6.7
  * Requires PHP:      8.1
  * Author:            22MW
@@ -16,7 +16,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'WCCR_VERSION', '0.1.23' );
+define( 'WCCR_VERSION', '0.1.24' );
 define( 'WCCR_PLUGIN_FILE', __FILE__ );
 define( 'WCCR_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'WCCR_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
@@ -28,6 +28,7 @@ require_once WCCR_PLUGIN_DIR . 'includes/locale/class-default-locale-resolver.ph
 require_once WCCR_PLUGIN_DIR . 'includes/locale/class-wpml-locale-resolver.php';
 require_once WCCR_PLUGIN_DIR . 'includes/locale/class-polylang-locale-resolver.php';
 require_once WCCR_PLUGIN_DIR . 'includes/locale/class-locale-resolver-manager.php';
+require_once WCCR_PLUGIN_DIR . 'includes/locale/class-plugin-locale-switcher.php';
 require_once WCCR_PLUGIN_DIR . 'includes/repositories/class-settings-repository.php';
 require_once WCCR_PLUGIN_DIR . 'includes/repositories/class-cart-repository.php';
 require_once WCCR_PLUGIN_DIR . 'includes/repositories/class-email-log-repository.php';
