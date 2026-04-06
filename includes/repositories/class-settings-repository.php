@@ -54,7 +54,7 @@ final class WCCR_Settings_Repository {
 		$step_settings  = isset( $settings['steps'][ $step ] ) && is_array( $settings['steps'][ $step ] ) ? $settings['steps'][ $step ] : array();
 		$translations   = isset( $step_settings['translations'] ) && is_array( $step_settings['translations'] ) ? $step_settings['translations'] : array();
 		$default_locale = self::get_default_locale();
-		$translation    = $this->find_translation( $translations, $locale, $default_locale );
+		$translation    = $this->find_translation( $translations, $locale, $default_locale, $step );
 
 		$step_settings['subject'] = (string) ( $translation['subject'] ?? $step_settings['subject'] ?? '' );
 		$step_settings['body']    = (string) ( $translation['body'] ?? $step_settings['body'] ?? '' );
@@ -142,8 +142,23 @@ final class WCCR_Settings_Repository {
 	 * @param array<string, mixed> $translations Step translations.
 	 * @return array<string, string>
 	 */
-	private function find_translation( array $translations, string $locale, string $default_locale ): array {
+	private function find_translation( array $translations, string $locale, string $default_locale, int $step ): array {
 		$locale = sanitize_text_field( $locale );
+		$translation = $this->find_saved_translation( $translations, $locale, $default_locale );
+		if ( ! empty( $translation ) ) {
+			return $translation;
+		}
+
+		return $this->get_default_translation_with_fallback( $step, $locale, $default_locale );
+	}
+
+	/**
+	 * Resolve the best saved translation for a locale before falling back to defaults.
+	 *
+	 * @param array<string, mixed> $translations Step translations.
+	 * @return array<string, string>
+	 */
+	private function find_saved_translation( array $translations, string $locale, string $default_locale ): array {
 		if ( isset( $translations[ $locale ] ) && is_array( $translations[ $locale ] ) ) {
 			return $translations[ $locale ];
 		}
@@ -159,12 +174,49 @@ final class WCCR_Settings_Repository {
 			}
 		}
 
+		if ( isset( $translations['en_US'] ) && is_array( $translations['en_US'] ) ) {
+			return $translations['en_US'];
+		}
+
 		if ( isset( $translations[ $default_locale ] ) && is_array( $translations[ $default_locale ] ) ) {
 			return $translations[ $default_locale ];
 		}
 
 		$first = reset( $translations );
-		return is_array( $first ) ? $first : array( 'subject' => '', 'body' => '' );
+		return is_array( $first ) ? $first : array();
+	}
+
+	/**
+	 * Build translated default subject/body values for one step and locale.
+	 *
+	 * @return array{subject:string,body:string}
+	 */
+	private function get_default_translation_with_fallback( int $step, string $locale, string $default_locale ): array {
+		foreach ( $this->get_default_locale_candidates( $locale, $default_locale ) as $candidate_locale ) {
+			$translation = self::get_default_step_translation( $step, $candidate_locale );
+			if ( '' !== $translation['subject'] || '' !== $translation['body'] ) {
+				return $translation;
+			}
+		}
+
+		return array( 'subject' => '', 'body' => '' );
+	}
+
+	/**
+	 * Return the ordered locale candidates for default translated content.
+	 *
+	 * @return array<int, string>
+	 */
+	private function get_default_locale_candidates( string $locale, string $default_locale ): array {
+		$candidates = array_filter(
+			array(
+				sanitize_text_field( $locale ),
+				'en_US',
+				sanitize_text_field( $default_locale ),
+			)
+		);
+
+		return array_values( array_unique( $candidates ) );
 	}
 
 	/**
@@ -213,6 +265,37 @@ final class WCCR_Settings_Repository {
 		}
 
 		return $steps;
+	}
+
+	/**
+	 * Return the translated default subject/body for one step and locale.
+	 *
+	 * @return array{subject:string,body:string}
+	 */
+	private static function get_default_step_translation( int $step, string $locale ): array {
+		$switched = self::switch_to_settings_locale( $locale );
+		$steps    = self::get_default_steps( $locale );
+
+		if ( $switched ) {
+			restore_previous_locale();
+		}
+
+		$step_settings = isset( $steps[ $step ] ) && is_array( $steps[ $step ] ) ? $steps[ $step ] : array();
+		return array(
+			'subject' => (string) ( $step_settings['subject'] ?? '' ),
+			'body'    => (string) ( $step_settings['body'] ?? '' ),
+		);
+	}
+
+	/**
+	 * Switch locale temporarily while building translated defaults.
+	 */
+	private static function switch_to_settings_locale( string $locale ): bool {
+		if ( '' === $locale || ! function_exists( 'switch_to_locale' ) ) {
+			return false;
+		}
+
+		return switch_to_locale( $locale );
 	}
 
 	/**

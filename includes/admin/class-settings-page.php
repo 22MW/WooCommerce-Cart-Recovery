@@ -229,25 +229,56 @@ final class WCCR_Settings_Page {
 	private function render_locale_tabs( array $settings, array $locales ): void {
 		?>
 		<div class="wccr-locale-tabs">
-			<?php foreach ( array_values( $locales ) as $index => $locale ) : ?>
-				<?php $this->render_locale_tab( $settings, $locale, 0 === $index ); ?>
-			<?php endforeach; ?>
+			<div class="wccr-locale-tabs__nav" role="tablist" aria-label="<?php esc_attr_e( 'Email languages', 'vfwoo_woocommerce-cart-recovery' ); ?>">
+				<?php foreach ( array_values( $locales ) as $index => $locale ) : ?>
+					<?php $this->render_locale_tab_button( $locale, 0 === $index ); ?>
+				<?php endforeach; ?>
+			</div>
+			<div class="wccr-locale-tabs__panels">
+				<?php foreach ( array_values( $locales ) as $index => $locale ) : ?>
+					<?php $this->render_locale_tab_panel( $settings, $locale, 0 === $index ); ?>
+				<?php endforeach; ?>
+			</div>
 		</div>
 		<?php
 	}
 
 	/**
-	 * Render one locale tab and its translated textareas.
+	 * Render one locale tab button.
 	 *
-	 * @param array<string, mixed>      $settings Plugin settings.
 	 * @param array{locale:string,label:string} $locale   Locale item.
 	 */
-	private function render_locale_tab( array $settings, array $locale, bool $checked ): void {
+	private function render_locale_tab_button( array $locale, bool $is_active ): void {
 		$locale_key = sanitize_key( str_replace( '-', '_', $locale['locale'] ) );
 		?>
-		<input type="radio" class="wccr-locale-tabs__toggle" name="wccr_locale_tab" id="wccr-locale-tab-<?php echo esc_attr( $locale_key ); ?>" <?php checked( $checked ); ?>>
-		<label class="wccr-locale-tabs__label" for="wccr-locale-tab-<?php echo esc_attr( $locale_key ); ?>"><?php echo esc_html( $locale['label'] ); ?></label>
-		<div class="wccr-locale-tabs__panel">
+		<button
+			type="button"
+			class="wccr-locale-tabs__button<?php echo esc_attr( $is_active ? ' is-active' : '' ); ?>"
+			data-locale-tab="<?php echo esc_attr( $locale['locale'] ); ?>"
+			role="tab"
+			aria-selected="<?php echo esc_attr( $is_active ? 'true' : 'false' ); ?>"
+			aria-controls="wccr-locale-panel-<?php echo esc_attr( $locale_key ); ?>"
+			id="wccr-locale-tab-<?php echo esc_attr( $locale_key ); ?>"
+		><?php echo esc_html( $locale['label'] ); ?></button>
+		<?php
+	}
+
+	/**
+	 * Render one locale tab panel and its translated textareas.
+	 *
+	 * @param array<string, mixed> $settings Plugin settings.
+	 * @param array{locale:string,label:string} $locale Locale item.
+	 */
+	private function render_locale_tab_panel( array $settings, array $locale, bool $is_active ): void {
+		$locale_key = sanitize_key( str_replace( '-', '_', $locale['locale'] ) );
+		?>
+		<div
+			class="wccr-locale-tabs__panel<?php echo esc_attr( $is_active ? ' is-active' : '' ); ?>"
+			data-locale-panel="<?php echo esc_attr( $locale['locale'] ); ?>"
+			id="wccr-locale-panel-<?php echo esc_attr( $locale_key ); ?>"
+			role="tabpanel"
+			aria-labelledby="wccr-locale-tab-<?php echo esc_attr( $locale_key ); ?>"
+		>
 			<?php foreach ( array( 1, 2, 3 ) as $step ) : ?>
 				<?php $this->render_locale_translation_card( $settings, $step, (string) $locale['locale'] ); ?>
 			<?php endforeach; ?>

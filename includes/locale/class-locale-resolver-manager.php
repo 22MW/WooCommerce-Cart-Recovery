@@ -61,7 +61,7 @@ final class WCCR_Locale_Resolver_Manager {
 
 		$items = array();
 		foreach ( $languages as $language_code => $language ) {
-			$locale = apply_filters( 'wpml_locale', null, $language_code );
+			$locale = $this->resolve_wpml_language_locale( $language_code, $language );
 			if ( ! is_string( $locale ) || '' === $locale ) {
 				continue;
 			}
@@ -71,6 +71,31 @@ final class WCCR_Locale_Resolver_Manager {
 		}
 
 		return $items;
+	}
+
+	/**
+	 * Resolve a WPML language locale from the language payload or SitePress API.
+	 *
+	 * @param mixed $language WPML language payload.
+	 */
+	private function resolve_wpml_language_locale( string $language_code, $language ): string {
+		if ( is_array( $language ) ) {
+			$locale = (string) ( $language['default_locale'] ?? $language['locale'] ?? '' );
+			if ( '' !== $locale ) {
+				return sanitize_text_field( $locale );
+			}
+		}
+
+		global $sitepress;
+
+		if ( isset( $sitepress ) && is_object( $sitepress ) && method_exists( $sitepress, 'get_locale' ) ) {
+			$locale = $sitepress->get_locale( $language_code );
+			if ( is_string( $locale ) && '' !== $locale ) {
+				return sanitize_text_field( $locale );
+			}
+		}
+
+		return '';
 	}
 
 	/**

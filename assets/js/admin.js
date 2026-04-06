@@ -94,6 +94,48 @@
 		}
 	}
 
+	/**
+	 * Activate one locale tab and its matching panel.
+	 *
+	 * @param {HTMLElement} button Selected tab button.
+	 * @return {void}
+	 */
+	function activateLocaleTab( button ) {
+		var locale = button.getAttribute( 'data-locale-tab' );
+		var container = button.closest( '.wccr-locale-tabs' );
+
+		if ( ! locale || ! container ) {
+			return;
+		}
+
+		container.querySelectorAll( '.wccr-locale-tabs__button' ).forEach( function ( item ) {
+			var isActive = item === button;
+			item.classList.toggle( 'is-active', isActive );
+			item.setAttribute( 'aria-selected', isActive ? 'true' : 'false' );
+		} );
+
+		container.querySelectorAll( '.wccr-locale-tabs__panel' ).forEach( function ( panel ) {
+			var isActive = panel.getAttribute( 'data-locale-panel' ) === locale;
+			panel.classList.toggle( 'is-active', isActive );
+		} );
+	}
+
+	/**
+	 * Handle delegated click events for locale tab buttons.
+	 *
+	 * @param {MouseEvent} event Browser click event.
+	 * @return {void}
+	 */
+	function handleLocaleTabClick( event ) {
+		var button = event.target.closest( '.wccr-locale-tabs__button' );
+		if ( ! button ) {
+			return;
+		}
+
+		activateLocaleTab( button );
+	}
+
 	document.addEventListener( 'click', handleCopyClick );
+	document.addEventListener( 'click', handleLocaleTabClick );
 	document.addEventListener( 'submit', handleDeleteSubmit );
 }() );

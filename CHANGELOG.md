@@ -12,6 +12,18 @@ The format is based on Keep a Changelog, and this project follows a simple `MAJO
 
 ### Fixed
 
+## [0.1.23] - 2026-04-07
+
+### Added
+- Added base English and German translation catalogs for plugin defaults.
+
+### Changed
+- Improved multilingual email settings tabs to behave like real admin tabs.
+- Added translated default fallback for empty email subject/body tabs.
+
+### Fixed
+- Fixed WPML locale resolution so the email settings can detect active languages correctly.
+
 ## [0.1.22] - 2026-04-07
 
 ### Changed
