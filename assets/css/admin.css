@@ -36,6 +36,10 @@
 	gap: 12px;
 	flex-wrap: wrap;
 	margin: 24px 0 16px;
+	padding: 12px 16px;
+	background: #fff;
+	border: 1px solid #dcdcde;
+	border-radius: 12px;
 }
 
 .wccr-admin .wccr-recovery-grid {
@@ -45,41 +49,75 @@
 	margin-top: 12px;
 }
 
+.wccr-admin .wccr-recovery-grid--list {
+	grid-template-columns: 1fr;
+}
+
 .wccr-admin .wccr-recovery-item {
 	background: #fff;
 	border: 1px solid #dcdcde;
 	border-radius: 14px;
-	padding: 18px;
+	padding: 16px;
 	display: flex;
 	flex-direction: column;
-	gap: 16px;
+	gap: 12px;
 }
 
 .wccr-admin .wccr-recovery-item__header {
 	display: flex;
-	justify-content: space-between;
 	align-items: flex-start;
 	gap: 12px;
+	flex-direction: column;
+}
+
+.wccr-admin .wccr-recovery-item__headline {
+	min-width: 0;
+	order: 2;
+}
+
+.wccr-admin .wccr-recovery-item__title-line {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	gap: 8px;
+	margin: 0;
 }
 
 .wccr-admin .wccr-recovery-item__badges {
 	display: flex;
 	gap: 8px;
 	flex-wrap: wrap;
+	order: 1;
+	align-self: flex-end;
 	justify-content: flex-end;
 }
 
 .wccr-admin .wccr-recovery-item__title {
-	margin: 0;
-	font-size: 18px;
+	font-size: 14px;
 	line-height: 1.3;
+	font-weight: 700;
+	word-break: break-word;
+}
+
+.wccr-admin .wccr-recovery-item__subtitle {
+	font-size: 13px;
+	color: #50575e;
 	word-break: break-word;
 }
 
 .wccr-admin .wccr-recovery-item__total {
-	margin: 6px 0 0;
-	color: #50575e;
+	color: #2c3338;
 	font-weight: 600;
+	font-size: 13px;
+}
+
+.wccr-admin .wccr-recovery-item__separator {
+	color: #8c8f94;
+}
+
+.wccr-admin .wccr-recovery-item__body {
+	display: grid;
+	gap: 12px;
 }
 
 .wccr-admin .wccr-status-badge {
@@ -113,26 +151,34 @@
 	color: #2c3338;
 }
 
-.wccr-admin .wccr-meta-list {
-	display: grid;
-	grid-template-columns: repeat(2, minmax(0, 1fr));
-	gap: 12px 16px;
-	margin: 0;
+.wccr-admin .wccr-meta-line {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px 14px;
+	align-items: center;
 }
 
-.wccr-admin .wccr-meta-list div {
+.wccr-admin .wccr-meta-line__item {
+	display: inline-flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	gap: 6px;
 	min-width: 0;
 }
 
-.wccr-admin .wccr-meta-list dt {
-	margin: 0 0 4px;
+.wccr-admin .wccr-meta-line__label {
 	font-size: 12px;
-	font-weight: 600;
-	color: #50575e;
+	font-weight: 700;
+	color: #2c3338;
 }
 
-.wccr-admin .wccr-meta-list dd {
-	margin: 0;
+.wccr-admin .wccr-meta-line__separator {
+	color: #8c8f94;
+}
+
+.wccr-admin .wccr-meta-line__value {
+	font-size: 12px;
+	color: #50575e;
 	word-break: break-word;
 }
 
@@ -144,8 +190,99 @@
 	margin-top: auto;
 }
 
+.wccr-admin .wccr-email-steps {
+	display: grid;
+	grid-template-columns: 1fr;
+	gap: 8px;
+}
+
+.wccr-admin .wccr-email-step-card {
+	border: 1px solid #dcdcde;
+	border-radius: 12px;
+	padding: 10px 12px;
+	background: #fbfbfc;
+}
+
+.wccr-admin .wccr-email-step-card h3 {
+	margin: 0;
+	font-size: 12px;
+	line-height: 1.3;
+}
+
+.wccr-admin .wccr-email-step-card__meta {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px 12px;
+	margin-top: 6px;
+}
+
+.wccr-admin .wccr-email-step-card__item {
+	display: inline-flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	gap: 6px;
+	min-width: 0;
+}
+
+.wccr-admin .wccr-email-step-card__label {
+	font-size: 12px;
+	font-weight: 700;
+	color: #2c3338;
+}
+
+.wccr-admin .wccr-email-step-card__separator {
+	color: #8c8f94;
+}
+
+.wccr-admin .wccr-email-step-card__value {
+	font-size: 12px;
+	color: #50575e;
+	word-break: break-word;
+}
+
 .wccr-admin .wccr-delete-form {
 	margin: 0;
+}
+
+.wccr-admin .wccr-recovery-grid--grid .wccr-email-step-card {
+	display: grid;
+	grid-template-columns: 1fr;
+	gap: 8px;
+}
+
+.wccr-admin .wccr-recovery-grid--grid .wccr-email-step-card .wccr-copy-url {
+	justify-self: start;
+}
+
+.wccr-admin .wccr-recovery-grid--list .wccr-recovery-item {
+	padding: 14px 16px;
+}
+
+.wccr-admin .wccr-recovery-grid--list .wccr-recovery-item__body {
+	grid-template-columns: 1fr;
+	align-items: start;
+	gap: 10px;
+}
+
+.wccr-admin .wccr-recovery-grid--list .wccr-email-steps {
+	gap: 8px;
+	grid-column: 1 / -1;
+}
+
+.wccr-admin .wccr-recovery-grid--list .wccr-email-step-card {
+	display: grid;
+	grid-template-columns: 72px 1fr auto;
+	align-items: start;
+	gap: 10px;
+}
+
+.wccr-admin .wccr-recovery-grid--list .wccr-email-step-card h3 {
+	margin: 2px 0 0;
+}
+
+.wccr-admin .wccr-recovery-grid--list .wccr-email-step-card .wccr-copy-url {
+	justify-self: end;
+	align-self: center;
 }
 
 @media (max-width: 782px) {
@@ -153,7 +290,13 @@
 		grid-template-columns: 1fr;
 	}
 
-	.wccr-admin .wccr-meta-list {
+	.wccr-admin .wccr-email-steps {
+		grid-template-columns: 1fr;
+	}
+
+	.wccr-admin .wccr-recovery-grid--list .wccr-recovery-item__body,
+	.wccr-admin .wccr-recovery-grid--list .wccr-email-step-card,
+	.wccr-admin .wccr-recovery-grid--grid .wccr-email-step-card {
 		grid-template-columns: 1fr;
 	}
 }

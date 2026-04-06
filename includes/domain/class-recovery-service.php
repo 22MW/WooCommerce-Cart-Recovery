@@ -19,7 +19,7 @@ final class WCCR_Recovery_Service {
 	/**
 	 * Build the public recovery URL for a cart and optional coupon.
 	 */
-	public function build_recovery_url( int $cart_id, ?string $coupon_code = null ): string {
+	public function build_recovery_url( int $cart_id, ?string $coupon_code = null, int $step = 0 ): string {
 		$token = wp_hash( $cart_id . '|' . wp_salt( 'auth' ) );
 		$args  = array(
 			'wccr_recover' => $cart_id,
@@ -28,6 +28,10 @@ final class WCCR_Recovery_Service {
 
 		if ( $coupon_code ) {
 			$args['wccr_coupon'] = $coupon_code;
+		}
+
+		if ( $step > 0 ) {
+			$args['wccr_step'] = $step;
 		}
 
 		return add_query_arg(
@@ -43,6 +47,7 @@ final class WCCR_Recovery_Service {
 		$cart_id = isset( $_GET['wccr_recover'] ) ? absint( wp_unslash( $_GET['wccr_recover'] ) ) : 0;
 		$token   = isset( $_GET['wccr_token'] ) ? sanitize_text_field( wp_unslash( $_GET['wccr_token'] ) ) : '';
 		$coupon  = isset( $_GET['wccr_coupon'] ) ? sanitize_text_field( wp_unslash( $_GET['wccr_coupon'] ) ) : '';
+		$step    = isset( $_GET['wccr_step'] ) ? absint( wp_unslash( $_GET['wccr_step'] ) ) : 0;
 
 		if ( ! $cart_id || ! $token || ! hash_equals( wp_hash( $cart_id . '|' . wp_salt( 'auth' ) ), $token ) ) {
 			return;
@@ -81,7 +86,7 @@ final class WCCR_Recovery_Service {
 			WC()->cart->apply_coupon( $coupon );
 		}
 
-		$this->cart_repository->mark_clicked( $cart_id );
+		$this->cart_repository->mark_clicked( $cart_id, $step );
 		do_action( 'wccr_cart_recovery_clicked', $cart_id );
 		wp_safe_redirect( wc_get_checkout_url() );
 		exit;

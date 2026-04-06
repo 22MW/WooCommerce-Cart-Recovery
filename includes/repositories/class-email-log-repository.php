@@ -122,6 +122,38 @@ final class WCCR_Email_Log_Repository {
 	}
 
 	/**
+	 * Return sent email snapshots indexed by step.
+	 *
+	 * @return array<int, array<string, mixed>>
+	 */
+	public function get_sent_logs_for_cart( int $cart_id ): array {
+		global $wpdb;
+
+		$rows = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT step, subject_snapshot, coupon_code, sent_at_gmt
+				FROM {$this->table}
+				WHERE cart_id = %d AND status = 'sent'
+				ORDER BY step ASC, id DESC",
+				$cart_id
+			),
+			ARRAY_A
+		);
+
+		$logs = array();
+		foreach ( $rows as $row ) {
+			$step = absint( $row['step'] ?? 0 );
+			if ( $step < 1 || isset( $logs[ $step ] ) ) {
+				continue;
+			}
+
+			$logs[ $step ] = $row;
+		}
+
+		return $logs;
+	}
+
+	/**
 	 * Delete all log rows for a cart.
 	 */
 	public function delete_for_cart( int $cart_id ): void {

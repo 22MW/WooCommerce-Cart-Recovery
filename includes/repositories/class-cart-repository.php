@@ -156,15 +156,18 @@ final class WCCR_Cart_Repository {
 	/**
 	 * Mark a cart as clicked after recovery URL usage.
 	 */
-	public function mark_clicked( int $id ): void {
-		$this->update_status(
-			array(
-				'status'         => 'clicked',
-				'clicked_at_gmt' => gmdate( 'Y-m-d H:i:s' ),
-				'updated_at_gmt' => gmdate( 'Y-m-d H:i:s' ),
-			),
-			array( 'id' => $id )
+	public function mark_clicked( int $id, int $step = 0 ): void {
+		$data = array(
+			'status'         => 'clicked',
+			'clicked_at_gmt' => gmdate( 'Y-m-d H:i:s' ),
+			'updated_at_gmt' => gmdate( 'Y-m-d H:i:s' ),
 		);
+
+		if ( $step > 0 ) {
+			$data['clicked_step'] = $step;
+		}
+
+		$this->update_status( $data, array( 'id' => $id ) );
 	}
 
 	/**

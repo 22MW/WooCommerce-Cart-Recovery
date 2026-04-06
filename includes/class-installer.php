@@ -61,6 +61,7 @@ final class WCCR_Installer {
 				last_activity_gmt DATETIME NOT NULL,
 				abandoned_at_gmt DATETIME NULL,
 				clicked_at_gmt DATETIME NULL,
+				clicked_step TINYINT UNSIGNED NULL,
 				recovered_at_gmt DATETIME NULL,
 				recovered_order_id BIGINT UNSIGNED NULL,
 				created_at_gmt DATETIME NOT NULL,

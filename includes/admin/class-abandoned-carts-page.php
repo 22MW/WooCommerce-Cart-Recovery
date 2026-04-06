@@ -25,6 +25,7 @@ final class WCCR_Abandoned_Carts_Page {
 		$this->maybe_handle_delete();
 
 		$sort     = $this->get_current_sort();
+		$view     = $this->get_current_view();
 		$carts    = $this->cart_repository->list_recovery_items( $sort );
 		$settings = $this->settings_repository->get();
 		$stats    = $this->stats_service->get_stats();
@@ -34,8 +35,8 @@ final class WCCR_Abandoned_Carts_Page {
 			<h1><?php esc_html_e( 'Cart Recovery', 'vfwoo_woocommerce-cart-recovery' ); ?></h1>
 			<?php $this->render_deleted_notice(); ?>
 			<?php $this->render_stats_grid( $stats ); ?>
-			<?php $this->render_toolbar( $sort ); ?>
-			<?php $this->render_cards_grid( $carts, $settings ); ?>
+			<?php $this->render_toolbar( $sort, $view ); ?>
+			<?php $this->render_cards_grid( $carts, $settings, $view ); ?>
 		</div>
 		<?php
 	}
@@ -116,7 +117,7 @@ final class WCCR_Abandoned_Carts_Page {
 	/**
 	 * Render the sorting toolbar.
 	 */
-	private function render_toolbar( string $sort ): void {
+	private function render_toolbar( string $sort, string $view ): void {
 		?>
 		<form method="get" class="wccr-toolbar">
 			<input type="hidden" name="page" value="wccr-cart-recovery">
@@ -124,6 +125,12 @@ final class WCCR_Abandoned_Carts_Page {
 			<select id="wccr-sort" name="sort">
 				<?php foreach ( $this->get_sort_options() as $value => $label ) : ?>
 					<option value="<?php echo esc_attr( $value ); ?>" <?php selected( $sort, $value ); ?>><?php echo esc_html( $label ); ?></option>
+				<?php endforeach; ?>
+			</select>
+			<label for="wccr-view"><?php esc_html_e( 'Vista', 'vfwoo_woocommerce-cart-recovery' ); ?></label>
+			<select id="wccr-view" name="view">
+				<?php foreach ( $this->get_view_options() as $value => $label ) : ?>
+					<option value="<?php echo esc_attr( $value ); ?>" <?php selected( $view, $value ); ?>><?php echo esc_html( $label ); ?></option>
 				<?php endforeach; ?>
 			</select>
 			<?php submit_button( __( 'Apply', 'vfwoo_woocommerce-cart-recovery' ), 'secondary', '', false ); ?>
@@ -137,9 +144,9 @@ final class WCCR_Abandoned_Carts_Page {
 	 * @param array<int, array<string, mixed>> $carts    Recovery rows.
 	 * @param array<string, mixed>             $settings Plugin settings.
 	 */
-	private function render_cards_grid( array $carts, array $settings ): void {
+	private function render_cards_grid( array $carts, array $settings, string $view ): void {
 		?>
-		<div class="wccr-recovery-grid">
+		<div class="wccr-recovery-grid wccr-recovery-grid--<?php echo esc_attr( $view ); ?>">
 			<?php foreach ( $carts as $cart ) : ?>
 				<?php $this->render_recovery_card( $cart, $settings ); ?>
 			<?php endforeach; ?>
@@ -154,11 +161,13 @@ final class WCCR_Abandoned_Carts_Page {
 	 * @param array<string, mixed> $settings Plugin settings.
 	 */
 	private function render_recovery_card( array $cart, array $settings ): void {
-		$eligibility = $this->email_eligibility_service->get_status( $cart, $settings );
 		?>
 		<article class="wccr-recovery-item">
 			<?php $this->render_card_header( $cart ); ?>
-			<?php $this->render_card_meta( $cart, $eligibility ); ?>
+			<div class="wccr-recovery-item__body">
+				<?php $this->render_card_meta( $cart ); ?>
+				<?php $this->render_email_steps( $cart ); ?>
+			</div>
 			<?php $this->render_card_actions( $cart ); ?>
 		</article>
 		<?php
@@ -170,15 +179,12 @@ final class WCCR_Abandoned_Carts_Page {
 	 * @param array<string, mixed> $cart Recovery row.
 	 */
 	private function render_card_header( array $cart ): void {
+		$title  = $this->get_card_title( $cart );
 		$email  = ! empty( $cart['email'] ) ? (string) $cart['email'] : __( 'No email', 'vfwoo_woocommerce-cart-recovery' );
 		$total  = (string) $cart['cart_total'] . ' ' . (string) $cart['currency'];
 		$status = (string) $cart['status'];
 		?>
 		<div class="wccr-recovery-item__header">
-			<div>
-				<h2 class="wccr-recovery-item__title"><?php echo esc_html( $email ); ?></h2>
-				<p class="wccr-recovery-item__total"><?php echo esc_html( $total ); ?></p>
-			</div>
 			<div class="wccr-recovery-item__badges">
 				<span class="wccr-status-badge wccr-status-badge--<?php echo esc_attr( sanitize_html_class( $status ) ); ?>">
 					<?php echo esc_html( $this->get_status_label( $status ) ); ?>
@@ -187,6 +193,15 @@ final class WCCR_Abandoned_Carts_Page {
 					<?php echo esc_html( $this->get_source_badge_label( $cart ) ); ?>
 				</span>
 			</div>
+			<div class="wccr-recovery-item__headline">
+				<p class="wccr-recovery-item__title-line">
+					<span class="wccr-recovery-item__title"><?php echo esc_html( $title ); ?></span>
+					<span class="wccr-recovery-item__separator">|</span>
+					<span class="wccr-recovery-item__subtitle"><?php echo esc_html( $email ); ?></span>
+					<span class="wccr-recovery-item__separator">|</span>
+					<span class="wccr-recovery-item__total"><?php echo esc_html( $total ); ?></span>
+				</p>
+			</div>
 		</div>
 		<?php
 	}
@@ -194,35 +209,34 @@ final class WCCR_Abandoned_Carts_Page {
 	/**
 	 * Render the card metadata list.
 	 *
-	 * @param array<string, mixed> $cart        Recovery row.
-	 * @param array<string, mixed> $eligibility Eligibility payload.
+	 * @param array<string, mixed> $cart Recovery row.
 	 */
-	private function render_card_meta( array $cart, array $eligibility ): void {
-		$meta = array(
-			__( 'Source', 'vfwoo_woocommerce-cart-recovery' )             => $this->get_source_label( $cart ),
-			__( 'Linked order', 'vfwoo_woocommerce-cart-recovery' )       => $this->get_order_link_html( absint( $cart['linked_order_id'] ?? 0 ) ),
-			__( 'Merged', 'vfwoo_woocommerce-cart-recovery' )             => $this->get_merged_label( $cart ),
-			__( 'Step', 'vfwoo_woocommerce-cart-recovery' )               => absint( $eligibility['current_step'] ?? 0 ) ?: '-',
-			__( 'Emails sent', 'vfwoo_woocommerce-cart-recovery' )        => $this->email_log_repository->count_sent_for_cart( absint( $cart['id'] ) ),
-			__( 'Coupon', 'vfwoo_woocommerce-cart-recovery' )             => $this->get_coupon_label( $cart ),
-			__( 'Eligible at', 'vfwoo_woocommerce-cart-recovery' )        => $this->email_eligibility_service->format_gmt_for_display( (string) ( $eligibility['eligible_at_gmt'] ?? '' ) ),
-			__( 'Reason', 'vfwoo_woocommerce-cart-recovery' )             => $this->email_eligibility_service->get_reason_label( (string) ( $eligibility['reason'] ?? '' ) ),
-			__( 'Clicked email link', 'vfwoo_woocommerce-cart-recovery' ) => $this->get_clicked_label( $cart ),
-			__( 'Purchased', 'vfwoo_woocommerce-cart-recovery' )          => $this->get_purchased_label( $cart ),
-			__( 'Order', 'vfwoo_woocommerce-cart-recovery' )              => $this->get_order_link_html( absint( $cart['recovered_order_id'] ?? 0 ) ),
-			__( 'Last error', 'vfwoo_woocommerce-cart-recovery' )         => $this->email_log_repository->get_last_error_for_cart( absint( $cart['id'] ) ) ?: '-',
-			__( 'Abandoned at', 'vfwoo_woocommerce-cart-recovery' )       => $this->email_eligibility_service->format_gmt_for_display( (string) ( $cart['abandoned_at_gmt'] ?? '' ) ),
-			__( 'Last update', 'vfwoo_woocommerce-cart-recovery' )        => $this->email_eligibility_service->format_gmt_for_display( (string) ( $cart['updated_at_gmt'] ?? '' ) ),
+	private function render_card_meta( array $cart ): void {
+		$meta = array_filter(
+			array(
+				$this->build_meta_item( __( 'Source', 'vfwoo_woocommerce-cart-recovery' ), $this->get_source_label( $cart ) ),
+				$this->build_meta_item( __( 'Linked order', 'vfwoo_woocommerce-cart-recovery' ), $this->get_order_link_html( absint( $cart['linked_order_id'] ?? 0 ) ) ),
+				$this->build_meta_item( __( 'Order', 'vfwoo_woocommerce-cart-recovery' ), $this->get_order_link_html( absint( $cart['recovered_order_id'] ?? 0 ) ) ),
+				$this->build_meta_item( __( 'Abandoned at', 'vfwoo_woocommerce-cart-recovery' ), $this->email_eligibility_service->format_gmt_for_display( (string) ( $cart['abandoned_at_gmt'] ?? '' ) ) ),
+				$this->build_meta_item( __( 'Last update', 'vfwoo_woocommerce-cart-recovery' ), $this->email_eligibility_service->format_gmt_for_display( (string) ( $cart['updated_at_gmt'] ?? '' ) ) ),
+			)
 		);
+
+		if ( empty( $meta ) ) {
+			return;
+		}
 		?>
-		<dl class="wccr-meta-list">
-			<?php foreach ( $meta as $label => $value ) : ?>
-				<div>
-					<dt><?php echo esc_html( $label ); ?></dt>
-					<dd><?php echo is_string( $value ) && str_contains( $value, '<a ' ) ? wp_kses_post( $value ) : esc_html( (string) $value ); ?></dd>
+		<div class="wccr-meta-line">
+			<?php foreach ( $meta as $item ) : ?>
+				<div class="wccr-meta-line__item">
+					<span class="wccr-meta-line__label"><?php echo esc_html( (string) $item['label'] ); ?></span>
+					<span class="wccr-meta-line__separator">-</span>
+					<span class="wccr-meta-line__value">
+						<?php echo ! empty( $item['is_html'] ) ? wp_kses_post( (string) $item['value'] ) : esc_html( (string) $item['value'] ); ?>
+					</span>
 				</div>
 			<?php endforeach; ?>
-		</dl>
+		</div>
 		<?php
 	}
 
@@ -234,12 +248,54 @@ final class WCCR_Abandoned_Carts_Page {
 	private function render_card_actions( array $cart ): void {
 		?>
 		<div class="wccr-actions">
-			<?php echo wp_kses_post( $this->get_recovery_url_html( $cart ) ); ?>
 			<form method="post" class="wccr-delete-form">
 				<?php wp_nonce_field( 'wccr_delete_cart_' . absint( $cart['id'] ), 'wccr_delete_nonce' ); ?>
 				<input type="hidden" name="wccr_delete_cart_id" value="<?php echo esc_attr( absint( $cart['id'] ) ); ?>">
 				<button type="submit" class="button button-link-delete"><?php esc_html_e( 'Delete', 'vfwoo_woocommerce-cart-recovery' ); ?></button>
 			</form>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Render per-email-step tracking blocks.
+	 *
+	 * @param array<string, mixed> $cart Recovery row.
+	 */
+	private function render_email_steps( array $cart ): void {
+		$sent_logs = $this->email_log_repository->get_sent_logs_for_cart( absint( $cart['id'] ) );
+		?>
+		<div class="wccr-email-steps">
+			<?php foreach ( array( 1, 2, 3 ) as $step ) : ?>
+				<?php $this->render_email_step_card( $cart, $step, $sent_logs[ $step ] ?? array() ); ?>
+			<?php endforeach; ?>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Render the tracking card for one email step.
+	 *
+	 * @param array<string, mixed> $cart Recovery row.
+	 * @param array<string, mixed> $log  Step log row.
+	 */
+	private function render_email_step_card( array $cart, int $step, array $log ): void {
+		$items = $this->get_email_step_items( $cart, $step, $log );
+		?>
+		<div class="wccr-email-step-card">
+			<h3><?php echo esc_html( sprintf( __( 'Email %d', 'vfwoo_woocommerce-cart-recovery' ), $step ) ); ?></h3>
+			<?php if ( ! empty( $items ) ) : ?>
+				<div class="wccr-email-step-card__meta">
+					<?php foreach ( $items as $item ) : ?>
+						<div class="wccr-email-step-card__item">
+							<span class="wccr-email-step-card__label"><?php echo esc_html( (string) $item['label'] ); ?></span>
+							<span class="wccr-email-step-card__separator">-</span>
+							<span class="wccr-email-step-card__value"><?php echo esc_html( (string) $item['value'] ); ?></span>
+						</div>
+					<?php endforeach; ?>
+				</div>
+			<?php endif; ?>
+			<?php echo wp_kses_post( $this->get_step_recovery_url_html( $cart, $step, (string) ( $log['coupon_code'] ?? '' ) ) ); ?>
 		</div>
 		<?php
 	}
@@ -269,6 +325,18 @@ final class WCCR_Abandoned_Carts_Page {
 	}
 
 	/**
+	 * Return supported view options.
+	 *
+	 * @return array<string, string>
+	 */
+	private function get_view_options(): array {
+		return array(
+			'grid' => __( 'Tarjetas', 'vfwoo_woocommerce-cart-recovery' ),
+			'list' => __( 'Lista', 'vfwoo_woocommerce-cart-recovery' ),
+		);
+	}
+
+	/**
 	 * Build the dashboard URL preserving current sort.
 	 *
 	 * @param array<string, scalar> $args Extra query args.
@@ -279,11 +347,31 @@ final class WCCR_Abandoned_Carts_Page {
 				array(
 					'page' => 'wccr-cart-recovery',
 					'sort' => $this->get_current_sort(),
+					'view' => $this->get_current_view(),
 				),
 				$args
 			),
 			admin_url( 'admin.php' )
 		);
+	}
+
+	/**
+	 * Return the current card layout mode.
+	 */
+	private function get_current_view(): string {
+		$user_id = get_current_user_id();
+		$view    = isset( $_GET['view'] ) ? sanitize_key( wp_unslash( $_GET['view'] ) ) : '';
+
+		if ( array_key_exists( $view, $this->get_view_options() ) ) {
+			if ( $user_id > 0 ) {
+				update_user_meta( $user_id, 'wccr_admin_view', $view );
+			}
+
+			return $view;
+		}
+
+		$stored_view = $user_id > 0 ? get_user_meta( $user_id, 'wccr_admin_view', true ) : '';
+		return is_string( $stored_view ) && array_key_exists( $stored_view, $this->get_view_options() ) ? $stored_view : 'grid';
 	}
 
 	/**
@@ -307,25 +395,15 @@ final class WCCR_Abandoned_Carts_Page {
 	 *
 	 * @param array<string, mixed> $cart Recovery row.
 	 */
-	private function get_purchased_label( array $cart ): string {
-		return ! empty( $cart['recovered_order_id'] ) && 'recovered' === ( $cart['status'] ?? '' )
-			? __( 'Yes', 'vfwoo_woocommerce-cart-recovery' )
-			: __( 'No', 'vfwoo_woocommerce-cart-recovery' );
+	private function get_card_title( array $cart ): string {
+		$name = trim( (string) ( $cart['customer_name'] ?? '' ) );
+		if ( '' !== $name ) {
+			return $name;
+		}
+
+		return ! empty( $cart['email'] ) ? (string) $cart['email'] : __( 'No email', 'vfwoo_woocommerce-cart-recovery' );
 	}
 
-	/**
-	 * Get the most recent coupon label for a cart.
-	 *
-	 * @param array<string, mixed> $cart Recovery row.
-	 */
-	private function get_coupon_label( array $cart ): string {
-		$coupon_code = $this->email_log_repository->get_last_coupon_code_for_cart( absint( $cart['id'] ?? 0 ) );
-		return '' !== $coupon_code ? $coupon_code : '-';
-	}
-
-	/**
-	 * Translate a stored cart status into an admin label.
-	 */
 	private function get_status_label( string $status ): string {
 		$labels = array(
 			'active'    => __( 'Active', 'vfwoo_woocommerce-cart-recovery' ),
@@ -368,47 +446,56 @@ final class WCCR_Abandoned_Carts_Page {
 	}
 
 	/**
-	 * Get a yes/no label for merged rows.
+	 * Build one compact meta item when it has meaningful content.
 	 *
-	 * @param array<string, mixed> $cart Recovery row.
+	 * @return array<string, mixed>|null
 	 */
-	private function get_merged_label( array $cart ): string {
-		return ! empty( $cart['is_merged'] )
-			? __( 'Yes', 'vfwoo_woocommerce-cart-recovery' )
-			: __( 'No', 'vfwoo_woocommerce-cart-recovery' );
-	}
-
-	/**
-	 * Get the clicked label with optional timestamp.
-	 *
-	 * @param array<string, mixed> $cart Recovery row.
-	 */
-	private function get_clicked_label( array $cart ): string {
-		$clicked_at = $this->email_eligibility_service->format_gmt_for_display( (string) ( $cart['clicked_at_gmt'] ?? '' ) );
-		if ( '-' === $clicked_at ) {
-			return __( 'No', 'vfwoo_woocommerce-cart-recovery' );
+	private function build_meta_item( string $label, string $value ): ?array {
+		if ( '' === trim( wp_strip_all_tags( $value ) ) || '-' === trim( $value ) ) {
+			return null;
 		}
 
-		return sprintf(
-			/* translators: %s: click timestamp */
-			__( 'Yes (%s)', 'vfwoo_woocommerce-cart-recovery' ),
-			$clicked_at
+		return array(
+			'label'   => $label,
+			'value'   => $value,
+			'is_html' => str_contains( $value, '<a ' ),
 		);
 	}
 
 	/**
-	 * Build the admin copy button for the recovery URL.
+	 * Build query arguments for a recovery URL.
+	 *
+	 * @return array<string, int|string>
+	 */
+	private function get_recovery_query_args( int $cart_id, string $coupon_code, int $step = 0 ): array {
+		$args = array(
+			'wccr_recover' => $cart_id,
+			'wccr_token'   => wp_hash( $cart_id . '|' . wp_salt( 'auth' ) ),
+		);
+
+		if ( '' !== $coupon_code ) {
+			$args['wccr_coupon'] = $coupon_code;
+		}
+
+		if ( $step > 0 ) {
+			$args['wccr_step'] = $step;
+		}
+
+		return $args;
+	}
+
+	/**
+	 * Build the copy-url button for a specific email step.
 	 *
 	 * @param array<string, mixed> $cart Recovery row.
 	 */
-	private function get_recovery_url_html( array $cart ): string {
+	private function get_step_recovery_url_html( array $cart, int $step, string $coupon_code ): string {
 		if ( empty( $cart['id'] ) ) {
 			return '-';
 		}
 
-		$coupon_code  = $this->email_log_repository->get_last_coupon_code_for_cart( absint( $cart['id'] ) );
 		$recovery_url = add_query_arg(
-			$this->get_recovery_query_args( absint( $cart['id'] ), $coupon_code ),
+			$this->get_recovery_query_args( absint( $cart['id'] ), $coupon_code, $step ),
 			function_exists( 'wc_get_cart_url' ) ? wc_get_cart_url() : home_url( '/' )
 		);
 
@@ -420,21 +507,75 @@ final class WCCR_Abandoned_Carts_Page {
 	}
 
 	/**
-	 * Build query arguments for a recovery URL.
+	 * Return whether the selected email step is the one that received the click.
 	 *
-	 * @return array<string, int|string>
+	 * @param array<string, mixed> $cart Recovery row.
 	 */
-	private function get_recovery_query_args( int $cart_id, string $coupon_code ): array {
-		$args = array(
-			'wccr_recover' => $cart_id,
-			'wccr_token'   => wp_hash( $cart_id . '|' . wp_salt( 'auth' ) ),
-		);
-
-		if ( '' !== $coupon_code ) {
-			$args['wccr_coupon'] = $coupon_code;
+	private function get_step_clicked_label( array $cart, int $step ): string {
+		$clicked_step = absint( $cart['clicked_step'] ?? 0 );
+		if ( $clicked_step < 1 ) {
+			return __( 'No', 'vfwoo_woocommerce-cart-recovery' );
 		}
 
-		return $args;
+		return $clicked_step === $step
+			? __( 'Yes', 'vfwoo_woocommerce-cart-recovery' )
+			: __( 'No', 'vfwoo_woocommerce-cart-recovery' );
+	}
+
+	/**
+	 * Build the compact list of visible values for one email step.
+	 *
+	 * @param array<string, mixed> $cart Recovery row.
+	 * @param array<string, mixed> $log  Step log row.
+	 * @return array<int, array<string, string>>
+	 */
+	private function get_email_step_items( array $cart, int $step, array $log ): array {
+		$items   = array();
+		$is_sent = ! empty( $log );
+
+		$items[] = array(
+			'label' => __( 'Sent', 'vfwoo_woocommerce-cart-recovery' ),
+			'value' => $is_sent ? __( 'Yes', 'vfwoo_woocommerce-cart-recovery' ) : __( 'No', 'vfwoo_woocommerce-cart-recovery' ),
+		);
+
+		$sent_at = $this->email_eligibility_service->format_gmt_for_display( (string) ( $log['sent_at_gmt'] ?? '' ) );
+		if ( '-' !== $sent_at ) {
+			$items[] = array(
+				'label' => __( 'Sent at', 'vfwoo_woocommerce-cart-recovery' ),
+				'value' => $sent_at,
+			);
+		}
+
+		$coupon_code = (string) ( $log['coupon_code'] ?? '' );
+		if ( '' !== $coupon_code ) {
+			$items[] = array(
+				'label' => __( 'Coupon', 'vfwoo_woocommerce-cart-recovery' ),
+				'value' => $coupon_code,
+			);
+		}
+
+		$items[] = array(
+			'label' => __( 'Clicked', 'vfwoo_woocommerce-cart-recovery' ),
+			'value' => $this->get_step_clicked_label( $cart, $step ),
+		);
+
+		$items[] = array(
+			'label' => __( 'Resolved', 'vfwoo_woocommerce-cart-recovery' ),
+			'value' => $this->get_step_resolved_label( $cart ),
+		);
+
+		return $items;
+	}
+
+	/**
+	 * Return whether the recovery flow was completed.
+	 *
+	 * @param array<string, mixed> $cart Recovery row.
+	 */
+	private function get_step_resolved_label( array $cart ): string {
+		return 'recovered' === (string) ( $cart['status'] ?? '' )
+			? __( 'Yes', 'vfwoo_woocommerce-cart-recovery' )
+			: __( 'No', 'vfwoo_woocommerce-cart-recovery' );
 	}
 
 	/**

@@ -12,6 +12,16 @@ The format is based on Keep a Changelog, and this project follows a simple `MAJO
 
 ### Fixed
 
+## [0.1.13] - 2026-04-06
+
+### Changed
+- Refined the recovery card layout with a cleaner two-line summary and per-user saved view mode.
+- Reworked email step summaries to show compact inline tracking details and keep copy links attached to each email.
+
+### Fixed
+- Removed duplicated or low-value admin fields such as merged, reason, last error and eligible-at from the card view.
+- Fixed list and card layouts so badges, summary rows and email blocks align more cleanly in both modes.
+
 ## [0.1.12] - 2026-04-06
 
 ### Changed
