@@ -181,7 +181,7 @@ final class WCCR_Abandoned_Carts_Page {
 	private function render_card_header( array $cart ): void {
 		$title  = $this->get_card_title( $cart );
 		$email  = ! empty( $cart['email'] ) ? (string) $cart['email'] : __( 'No email', 'vfwoo_woocommerce-cart-recovery' );
-		$total  = (string) $cart['cart_total'] . ' ' . (string) $cart['currency'];
+		$total  = $this->format_cart_total_label( $cart );
 		$status = (string) $cart['status'];
 		?>
 		<div class="wccr-recovery-item__header">
@@ -561,7 +561,7 @@ final class WCCR_Abandoned_Carts_Page {
 
 		$items[] = array(
 			'label' => __( 'Resolved', 'vfwoo_woocommerce-cart-recovery' ),
-			'value' => $this->get_step_resolved_label( $cart ),
+			'value' => $this->get_step_resolved_label( $cart, $step ),
 		);
 
 		return $items;
@@ -572,10 +572,39 @@ final class WCCR_Abandoned_Carts_Page {
 	 *
 	 * @param array<string, mixed> $cart Recovery row.
 	 */
-	private function get_step_resolved_label( array $cart ): string {
-		return 'recovered' === (string) ( $cart['status'] ?? '' )
-			? __( 'Yes', 'vfwoo_woocommerce-cart-recovery' )
-			: __( 'No', 'vfwoo_woocommerce-cart-recovery' );
+	private function get_step_resolved_label( array $cart, int $step ): string {
+		if ( ! $this->is_resolved_step( $cart, $step ) ) {
+			return __( 'No', 'vfwoo_woocommerce-cart-recovery' );
+		}
+
+		return sprintf(
+			/* translators: %s: recovered amount. */
+			__( 'Yes (%s)', 'vfwoo_woocommerce-cart-recovery' ),
+			$this->format_cart_total_label( $cart )
+		);
+	}
+
+	/**
+	 * Determine whether the provided email step is the one that recovered the order.
+	 *
+	 * @param array<string, mixed> $cart Recovery row.
+	 */
+	private function is_resolved_step( array $cart, int $step ): bool {
+		return 'recovered' === (string) ( $cart['status'] ?? '' ) && absint( $cart['clicked_step'] ?? 0 ) === $step;
+	}
+
+	/**
+	 * Return a consistent plain-text money label for the cart total.
+	 *
+	 * @param array<string, mixed> $cart Recovery row.
+	 */
+	private function format_cart_total_label( array $cart ): string {
+		$formatted = wc_price(
+			(float) ( $cart['cart_total'] ?? 0 ),
+			array( 'currency' => (string) ( $cart['currency'] ?? '' ) )
+		);
+
+		return trim( preg_replace( '/\s+/', ' ', wp_strip_all_tags( html_entity_decode( $formatted, ENT_QUOTES, 'UTF-8' ) ) ) );
 	}
 
 	/**

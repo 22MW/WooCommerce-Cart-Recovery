@@ -36,8 +36,9 @@ final class WCCR_Stats_Repository {
 	 */
 	public function archive_cart_metrics( array $cart, int $sent_emails ): void {
 		$stats = $this->get();
+		$status = (string) ( $cart['status'] ?? '' );
 
-		if ( in_array( (string) ( $cart['status'] ?? '' ), array( 'abandoned', 'clicked', 'recovered' ), true ) ) {
+		if ( 'abandoned' === $status ) {
 			$stats['abandoned'] = (int) $stats['abandoned'] + 1;
 		}
 
@@ -45,7 +46,7 @@ final class WCCR_Stats_Repository {
 			$stats['clicked'] = (int) $stats['clicked'] + 1;
 		}
 
-		if ( 'recovered' === ( $cart['status'] ?? '' ) ) {
+		if ( 'recovered' === $status ) {
 			$stats['recovered'] = (int) $stats['recovered'] + 1;
 			$stats['revenue']   = (float) $stats['revenue'] + (float) ( $cart['cart_total'] ?? 0 );
 		}

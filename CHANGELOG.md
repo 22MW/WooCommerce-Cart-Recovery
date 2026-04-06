@@ -12,6 +12,17 @@ The format is based on Keep a Changelog, and this project follows a simple `MAJO
 
 ### Fixed
 
+## [0.1.16] - 2026-04-06
+
+### Changed
+- Reworked the README to document the plugin flow, capture paths, recovery logic and WooCommerce/Blocks integration more clearly.
+- Updated the project development rules in `AGENTS.md` with stricter planning, editing and validation guidance.
+
+### Fixed
+- Fixed archived statistics so deleting clicked or recovered items no longer inflates abandoned cart totals.
+- Fixed admin totals to use a consistent WooCommerce money format across captured and imported cases.
+- Fixed per-email resolved tracking so only the email step that actually recovered the purchase is marked as resolved.
+
 ## [0.1.15] - 2026-04-06
 
 ### Fixed

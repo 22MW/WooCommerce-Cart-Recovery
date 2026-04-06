@@ -1,6 +1,9 @@
 # Reglas De Desarrollo
 
 ## Alcance
+
+- Pensar antes de actuar.
+- Leer los archivos existentes necesarios antes de escribir codigo.
 - Ejecutar solo el bloque aprobado.
 - No hacer refactors ocultos, mejoras extra ni cambios fuera de alcance.
 - Si aparece algo inesperado: parar y preguntar.
@@ -10,8 +13,10 @@
 - El plan debe salir de una revision real del codigo, no de suposiciones.
 - El plan debe incluir posibles causas y posibles soluciones concretas.
 - Tras entregar el plan, esperar preguntas o comando explicito para ejecutar.
+- Las instrucciones del usuario siempre tienen prioridad sobre este archivo.
 
 ## Filosofia De Codigo
+
 - Funciones pequenas y reutilizables.
 - Una sola responsabilidad por funcion.
 - Objetivo de maximo 20-30 lineas por funcion.
@@ -29,29 +34,39 @@
 - No debe cargar codigo remoto ejecutable ni hacer tracking sin consentimiento explicito.
 
 ## Reglas De Cambio
+
 - Preguntar antes de cambios mayores.
 - Reutilizar codigo existente siempre que sea posible, especialmente CSS.
+- Preferir editar antes que reescribir archivos enteros.
+- No volver a leer archivos ya revisados salvo que puedan haber cambiado.
 - No usar iconos dentro de textos de interfaz.
 - Cambios minimos: un problema, una solucion.
+- Mantener las soluciones simples y directas.
 - Si aparece una mejora adicional, comentarla antes de aplicarla.
 - Si una mejora obliga a retirar codigo viejo o consolidar logica duplicada para cumplir estas reglas, indicarlo en el plan antes de ejecutar.
 
 ## Documentacion
+
 - Anadir documentacion inline cuando aporte valor.
 - Usar PHPDoc en PHP.
 - Usar JSDoc en JavaScript.
 
 ## Validacion
+
+- Probar el codigo antes de darlo por terminado.
 - Ejecutar `php -l` si esta disponible.
 - Ejecutar `git diff --check`.
 - Revisar entradas relevantes de `error.log` cuando aplique.
 
 ## Versionado
-- Subir la version del plugin solo cuando el usuario lo pida de forma explicita.
-- No cambiar la version automaticamente.
+
 - Cuando el usuario lo pida, incrementar el ultimo numero de version del plugin salvo que indique otra estrategia.
 - Cuando haya versionado solicitado, escribir los cambios en `CHANGELOG.md` de forma corta, precisa y concreta.
+- Commit y push, todos los archivos modificados, la version del plugin solo cuando el usuario lo pida de forma explicita.
 
 ## Reporte Final
+
 - El reporte final debe ser corto.
+- Ser conciso en el output.
+- Sin introducciones aduladoras ni relleno al final.
 - Incluir: HECHO/NO HECHO, archivos tocados, validacion, in-scope/out-of-scope y siguiente paso opcional.
