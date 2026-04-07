@@ -131,7 +131,7 @@ final class WCCR_Email_Log_Repository {
 
 		$rows = $wpdb->get_results(
 			$wpdb->prepare(
-				"SELECT step, subject_snapshot, coupon_code, sent_at_gmt
+				"SELECT step, subject_snapshot, coupon_code, sent_at_gmt, clicked_at_gmt
 				FROM {$this->table}
 				WHERE cart_id = %d AND status = 'sent'
 				ORDER BY step ASC, id DESC",
@@ -151,6 +151,24 @@ final class WCCR_Email_Log_Repository {
 		}
 
 		return $logs;
+	}
+
+	/**
+	 * Mark a sent email step as clicked.
+	 */
+	public function mark_step_clicked( int $cart_id, int $step ): void {
+		global $wpdb;
+
+		$wpdb->query(
+			$wpdb->prepare(
+				"UPDATE {$this->table}
+				SET clicked_at_gmt = %s
+				WHERE cart_id = %d AND step = %d AND status = 'sent' AND clicked_at_gmt IS NULL",
+				gmdate( 'Y-m-d H:i:s' ),
+				$cart_id,
+				$step
+			)
+		);
 	}
 
 	/**

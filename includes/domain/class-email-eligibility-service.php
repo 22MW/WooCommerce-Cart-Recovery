@@ -50,6 +50,11 @@ final class WCCR_Email_Eligibility_Service {
 			return $status;
 		}
 
+		if ( $this->requires_minimum_cart_total( $step_settings ) && (float) ( $cart['cart_total'] ?? 0 ) < (float) ( $step_settings['min_cart_total'] ?? 0 ) ) {
+			$status['reason'] = 'below_min_cart_total';
+			return $status;
+		}
+
 		$delay_minutes = absint( $step_settings['delay_minutes'] ?? 0 );
 		$eligible_at   = strtotime( (string) $cart['abandoned_at_gmt'] . ' UTC' ) + ( $delay_minutes * MINUTE_IN_SECONDS );
 
@@ -77,6 +82,7 @@ final class WCCR_Email_Eligibility_Service {
 			'missing_abandoned_at'=> __( 'Missing abandoned date', 'vfwoo_woocommerce-cart-recovery' ),
 			'all_steps_sent'      => __( 'All steps sent', 'vfwoo_woocommerce-cart-recovery' ),
 			'step_disabled'       => __( 'Step disabled', 'vfwoo_woocommerce-cart-recovery' ),
+			'below_min_cart_total'=> __( 'Below minimum cart total', 'vfwoo_woocommerce-cart-recovery' ),
 			'invalid_abandoned_at'=> __( 'Invalid abandoned date', 'vfwoo_woocommerce-cart-recovery' ),
 			'waiting_delay'       => __( 'Waiting delay', 'vfwoo_woocommerce-cart-recovery' ),
 			'eligible_now'        => __( 'Ready to send', 'vfwoo_woocommerce-cart-recovery' ),
@@ -94,5 +100,15 @@ final class WCCR_Email_Eligibility_Service {
 		}
 
 		return get_date_from_gmt( $datetime_gmt, 'Y-m-d H:i:s' );
+	}
+
+	/**
+	 * Return whether this step uses a discount rule gated by a minimum cart total.
+	 *
+	 * @param array<string, mixed> $step_settings Email step settings.
+	 */
+	private function requires_minimum_cart_total( array $step_settings ): bool {
+		$discount_type = (string) ( $step_settings['discount_type'] ?? 'none' );
+		return 'none' !== $discount_type;
 	}
 }

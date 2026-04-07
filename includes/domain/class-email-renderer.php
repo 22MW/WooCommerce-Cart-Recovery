@@ -22,8 +22,8 @@ final class WCCR_Email_Renderer {
 		$order          = $this->get_email_order_context( $cart );
 		$cart_items     = $this->get_cart_items( $cart, $order );
 		$cart_total     = wc_price( (float) $cart['cart_total'], array( 'currency' => $cart['currency'] ) );
-		$coupon_label   = $this->coupon_service->get_coupon_label( $step_settings, (string) $cart['currency'], $coupon_code );
-		$discount_text  = $this->coupon_service->get_coupon_label( $step_settings, (string) $cart['currency'] );
+		$coupon_label   = $coupon_code ? $this->coupon_service->get_coupon_label( $step_settings, (string) $cart['currency'], $coupon_code ) : '';
+		$discount_text  = $coupon_code ? $this->coupon_service->get_coupon_label( $step_settings, (string) $cart['currency'] ) : '';
 		$summary_totals = $this->get_summary_totals( $cart_total, $coupon_code, $discount_text );
 		$text_align     = is_rtl() ? 'right' : 'left';
 		$price_align    = 'right';

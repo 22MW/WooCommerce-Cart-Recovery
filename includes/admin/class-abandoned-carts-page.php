@@ -556,7 +556,11 @@ final class WCCR_Abandoned_Carts_Page {
 	 *
 	 * @param array<string, mixed> $cart Recovery row.
 	 */
-	private function get_step_clicked_label( array $cart, int $step ): string {
+	private function get_step_clicked_label( array $cart, int $step, array $log ): string {
+		if ( ! empty( $log['clicked_at_gmt'] ) ) {
+			return __( 'Yes', 'vfwoo_woocommerce-cart-recovery' );
+		}
+
 		$clicked_step = absint( $cart['clicked_step'] ?? 0 );
 		if ( $clicked_step < 1 ) {
 			return __( 'No', 'vfwoo_woocommerce-cart-recovery' );
@@ -601,7 +605,7 @@ final class WCCR_Abandoned_Carts_Page {
 
 		$items[] = array(
 			'label' => __( 'Clicked', 'vfwoo_woocommerce-cart-recovery' ),
-			'value' => $this->get_step_clicked_label( $cart, $step ),
+			'value' => $this->get_step_clicked_label( $cart, $step, $log ),
 		);
 
 		$items[] = array(

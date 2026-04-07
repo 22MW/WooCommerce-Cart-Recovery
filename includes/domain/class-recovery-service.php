@@ -6,7 +6,8 @@ defined( 'ABSPATH' ) || exit;
  */
 final class WCCR_Recovery_Service {
 	public function __construct(
-		private WCCR_Cart_Repository $cart_repository
+		private WCCR_Cart_Repository $cart_repository,
+		private WCCR_Email_Log_Repository $email_log_repository
 	) {}
 
 	/**
@@ -87,6 +88,9 @@ final class WCCR_Recovery_Service {
 		}
 
 		$this->cart_repository->mark_clicked( $cart_id, $step );
+		if ( $step > 0 ) {
+			$this->email_log_repository->mark_step_clicked( $cart_id, $step );
+		}
 		do_action( 'wccr_cart_recovery_clicked', $cart_id );
 		wp_safe_redirect( wc_get_checkout_url() );
 		exit;

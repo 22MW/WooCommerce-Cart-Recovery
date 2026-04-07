@@ -59,6 +59,7 @@ final class WCCR_Installer {
 				coupon_code VARCHAR(100) NULL,
 				status VARCHAR(20) NOT NULL DEFAULT 'queued',
 				sent_at_gmt DATETIME NULL,
+				clicked_at_gmt DATETIME NULL,
 				error_message TEXT NULL,
 				created_at_gmt DATETIME NOT NULL,
 				PRIMARY KEY (id),

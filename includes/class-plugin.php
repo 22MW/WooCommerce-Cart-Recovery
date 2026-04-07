@@ -28,7 +28,7 @@ final class WCCR_Plugin {
 		$locale_resolver      = new WCCR_Locale_Resolver_Manager();
 		$email_eligibility    = new WCCR_Email_Eligibility_Service( $email_log_repository );
 		$cart_capture_service = new WCCR_Cart_Capture_Service( $cart_repository, $locale_resolver );
-		$recovery_service     = new WCCR_Recovery_Service( $cart_repository );
+		$recovery_service     = new WCCR_Recovery_Service( $cart_repository, $email_log_repository );
 		$pending_detector     = new WCCR_Pending_Order_Detector( $cart_repository, $locale_resolver, $settings_repository );
 		$coupon_service       = new WCCR_Coupon_Service();
 		$email_renderer       = new WCCR_Email_Renderer( $coupon_service );

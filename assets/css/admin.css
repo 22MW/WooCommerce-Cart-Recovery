@@ -1,3 +1,23 @@
+@import url('https://fonts.googleapis.com/css2?family=Afacad:ital,wght@0,400..700;1,400..700&family=Fredoka:wght@300..700&display=swap');
+
+:root {
+	--vfwoo-bg: #F6F5F3;
+    --vfwoo-white: #FFFFFF;
+    --vfwoo-text: #1A1A1A;
+    --vfwoo-verde: #0e415d;
+    --vfwoo-azul: #7F8BEC;
+    --vfwoo-azul-light: #d0d5fb;
+    --vfwoo-red: #B33654;
+    --vfwoo-orange: #F98C59;
+    --vfwoo-orange-light: #ffdccc;
+}
+/*
+.wccr-admin{
+	font-family: "Afacad", sans-serif;
+    font-optical-sizing: auto;
+    font-style: normal;
+}
+	*/
 .wccr-admin .wccr-stats-grid {
 	display: grid;
 	grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -10,6 +30,7 @@
 	border-radius: 12px;
 	padding: 20px;
 	margin-top: 20px;
+	text-align: center;
 }
 
 .wccr-admin .wccr-card strong {
@@ -344,6 +365,19 @@
 .wccr-admin .wccr-recovery-grid--list .wccr-email-step-card .wccr-copy-url {
 	justify-self: end;
 	align-self: center;
+}
+.wccr-admin .button{
+	border-radius: 222px;
+    background: var(--vfwoo-azul) !important;
+    color: var(--vfwoo-white) !important;
+    border-color: var(--vfwoo-azul) !important;
+    transition: background 0.3s ease;
+}
+
+.nav-tab.api-connected-tab:hover {
+    border-color: var(--vfwoo-azul) !important;
+    color: var(--vfwoo-azul) !important;
+    background-color: var(--vfwoo-white) !important;
 }
 
 @media (max-width: 782px) {

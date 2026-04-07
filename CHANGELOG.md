@@ -12,6 +12,16 @@ The format is based on Keep a Changelog, and this project follows a simple `MAJO
 
 ### Fixed
 
+## [0.1.26] - 2026-04-07
+
+### Changed
+- Skipped recovery steps with discounts when the cart total stays below the configured minimum amount.
+- Hid coupon placeholders and discount copy when no coupon is actually generated for the recovery email.
+- Refreshed the admin CSS styling bundled in this working tree.
+
+### Fixed
+- Stored click tracking per email step so the admin can show step clicks more accurately without relying only on the last clicked step.
+
 ## [0.1.25] - 2026-04-07
 
 ### Changed
