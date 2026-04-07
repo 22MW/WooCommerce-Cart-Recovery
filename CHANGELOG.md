@@ -12,6 +12,12 @@ The format is based on Keep a Changelog, and this project follows a simple `MAJO
 
 ### Fixed
 
+## [0.1.29] - 2026-04-07
+
+### Changed
+- Updated `README.md` with the latest recovery, multilingual and exclusion features.
+- Reworked `readme.txt` to match the current plugin behavior and WordPress plugin readme format.
+
 ## [0.1.28] - 2026-04-07
 
 ### Added

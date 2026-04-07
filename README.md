@@ -14,6 +14,8 @@ WooCommerce Cart Recovery ayuda a recuperar carritos abandonados y pedidos impag
 - Restaura el carrito al hacer click en el email.
 - Registra en qué email hicieron click.
 - Marca como recuperado cuando el pedido termina correctamente.
+- Permite excluir productos y términos taxonómicos completos del flujo de recovery.
+- Expande exclusiones automáticamente a traducciones WPML/Polylang.
 - Mantiene estadísticas de:
   - carritos abandonados
   - clicks de recuperación
@@ -59,6 +61,7 @@ Además enlaza pedidos creados desde Blocks usando:
 - Primero el caso queda como `active`.
 - Cuando supera el tiempo configurado sin actividad, pasa a `abandoned`.
 - La cola de emails solo trabaja sobre casos `abandoned`.
+- Las tareas recurrentes del plugin se ejecutan con `WooCommerce Action Scheduler`.
 
 ## Cómo gestiona pedidos impagados
 
@@ -69,6 +72,38 @@ El plugin puede trabajar también sobre pedidos reales de WooCommerce:
 - puede importarlos manualmente desde ajustes
 - si hay coincidencia clara con un carrito capturado, hace merge
 - cuando existe pedido, el caso pasa a apoyarse en ese pedido como fuente principal
+
+## Exclusiones de recovery
+
+El plugin permite excluir casos completos antes de entrar en el flujo.
+
+- Puedes excluir productos concretos.
+- Puedes excluir términos de taxonomías de producto.
+- Si un carrito contiene al menos una exclusión:
+  - no se captura
+  - no entra en `abandoned`
+  - no envía emails
+  - no aparece en admin
+- Si un pedido `pending` o `failed` contiene una exclusión:
+  - no se importa
+
+### Cómo se configuran
+
+En `Cart Recovery > Settings`:
+
+- `Excluded products`
+- `Excluded taxonomy terms`
+
+Los selectores funcionan con búsqueda/autocomplete y guardan la selección en forma de tokens.
+
+### Multidioma en exclusiones
+
+Si la tienda usa WPML o Polylang:
+
+- al seleccionar un producto, el plugin expande y guarda también sus traducciones
+- al seleccionar un término, el plugin expande y guarda también sus traducciones
+
+Con eso no hace falta excluir manualmente el mismo producto o término en cada idioma.
 
 ## Cómo funciona la recuperación
 
@@ -159,6 +194,13 @@ Y mantiene compatibilidad de diseño con:
 - Polylang
 - fallback WordPress estándar cuando no hay plugin multidioma
 
+Además, el plugin incluye catálogos para:
+
+- `es_ES`
+- `en_US`
+- `de_DE`
+- `ca_ES`
+
 ## Cómo marca una compra recuperada
 
 El plugin marca `recovered` cuando puede enlazar el pedido al caso de recovery y el pedido pasa por estados válidos de compra:
@@ -215,11 +257,14 @@ El plugin sigue un enfoque WordPress/WooCommerce:
   - estadísticas
   - fichas de recovery
   - estado, origen, pedido enlazado y detalle por email
+  - detalle de emails plegable por carrito
+  - acciones manuales para ejecutar cola/importación
 
 - `Settings`
   - tiempos
   - limpieza
   - steps de email
   - descuentos
+  - exclusiones de productos y taxonomías
   - importación de pedidos impagados
   - ejecución manual del detector y la cola
