@@ -251,6 +251,7 @@ final class WCCR_Abandoned_Carts_Page {
 				$this->build_meta_item( __( 'Source', 'vfwoo_woocommerce-cart-recovery' ), $this->get_source_label( $cart ) ),
 				$this->build_meta_item( __( 'Linked order', 'vfwoo_woocommerce-cart-recovery' ), $this->get_order_link_html( absint( $cart['linked_order_id'] ?? 0 ) ) ),
 				$this->build_meta_item( __( 'Order', 'vfwoo_woocommerce-cart-recovery' ), $this->get_order_link_html( absint( $cart['recovered_order_id'] ?? 0 ) ) ),
+				$this->build_meta_item( __( 'Last error', 'vfwoo_woocommerce-cart-recovery' ), $this->get_last_error_label( $cart ) ),
 				$this->build_meta_item( __( 'Abandoned at', 'vfwoo_woocommerce-cart-recovery' ), $this->email_eligibility_service->format_gmt_for_display( (string) ( $cart['abandoned_at_gmt'] ?? '' ) ) ),
 				$this->build_meta_item( __( 'Last update', 'vfwoo_woocommerce-cart-recovery' ), $this->email_eligibility_service->format_gmt_for_display( (string) ( $cart['updated_at_gmt'] ?? '' ) ) ),
 			)
@@ -494,6 +495,16 @@ final class WCCR_Abandoned_Carts_Page {
 			'value'   => $value,
 			'is_html' => str_contains( $value, '<a ' ),
 		);
+	}
+
+	/**
+	 * Return the latest email error for one cart when available.
+	 *
+	 * @param array<string, mixed> $cart Recovery row.
+	 */
+	private function get_last_error_label( array $cart ): string {
+		$error = trim( $this->email_log_repository->get_last_error_for_cart( absint( $cart['id'] ) ) );
+		return '' !== $error ? $error : '-';
 	}
 
 	/**

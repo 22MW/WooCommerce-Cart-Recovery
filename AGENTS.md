@@ -33,7 +33,7 @@
 - No debe incluir codigo ofuscado, minimizado de forma no revisable ni dependencias inseguras.
 - No debe cargar codigo remoto ejecutable ni hacer tracking sin consentimiento explicito.
 
-## Reglas De Cambio
+## Reglas
 
 - Preguntar antes de cambios mayores.
 - Reutilizar codigo existente siempre que sea posible, especialmente CSS.
@@ -42,6 +42,8 @@
 - No usar iconos dentro de textos de interfaz.
 - Cambios minimos: un problema, una solucion.
 - Mantener las soluciones simples y directas.
+- Durante la ejecucion, no narrar cada paso ni gastar tokens en seguimiento detallado salvo que el usuario lo pida.
+- Reservar la explicacion mas detallada para el plan o para casos donde haga falta justificar una decision.
 - Si aparece una mejora adicional, comentarla antes de aplicarla.
 - Si una mejora obliga a retirar codigo viejo o consolidar logica duplicada para cumplir estas reglas, indicarlo en el plan antes de ejecutar.
 

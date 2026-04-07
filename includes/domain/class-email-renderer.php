@@ -177,7 +177,7 @@ final class WCCR_Email_Renderer {
 	 */
 	private function build_payload_item( array $item, string $currency ): array {
 		$product = $this->get_payload_product( $item );
-		if ( ! $product ) {
+		if ( ! $product instanceof WC_Product ) {
 			return array();
 		}
 
@@ -200,7 +200,12 @@ final class WCCR_Email_Renderer {
 	 */
 	private function get_payload_product( array $item ): ?WC_Product {
 		$product_id = absint( $item['variation_id'] ?? 0 ) ?: absint( $item['product_id'] ?? 0 );
-		return $product_id ? wc_get_product( $product_id ) : null;
+		if ( ! $product_id ) {
+			return null;
+		}
+
+		$product = wc_get_product( $product_id );
+		return $product instanceof WC_Product ? $product : null;
 	}
 
 	/**
@@ -209,8 +214,8 @@ final class WCCR_Email_Renderer {
 	 * @param array<string, mixed> $cart_item Cart item snapshot.
 	 */
 	private function get_payload_item_meta( array $cart_item, WC_Product $product ): string {
-		if ( ! empty( $cart_item ) && function_exists( 'wc_get_formatted_cart_item_data' ) ) {
-			return wc_get_formatted_cart_item_data( $cart_item, true );
+		if ( ! $product instanceof WC_Product ) {
+			return '';
 		}
 
 		if ( ! $product->is_type( 'variation' ) ) {

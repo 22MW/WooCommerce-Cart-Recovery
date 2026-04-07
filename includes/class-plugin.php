@@ -56,48 +56,11 @@ final class WCCR_Plugin {
 		$recovery_service->init();
 		$pending_detector->register_hooks();
 
-		add_filter( 'cron_schedules', array( $this, 'register_cron_schedules' ) );
-		$this->ensure_cron_events();
-
 		add_action( 'wccr_detect_abandoned_carts', array( $detector, 'run' ) );
-		add_action( 'wccr_detect_abandoned_carts', array( $pending_detector, 'sync_stale_pending_orders' ) );
+		add_action( 'wccr_sync_unpaid_orders', array( $pending_detector, 'sync_stale_pending_orders' ) );
 		add_action( 'wccr_process_recovery_queue', array( $email_scheduler, 'process_queue' ) );
 		add_action( 'wccr_cleanup_old_data', array( $cleanup_service, 'run' ) );
-	}
 
-	/**
-	 * Register custom cron schedules.
-	 *
-	 * @param array<string, array<string, int|string>> $schedules Existing schedules.
-	 * @return array<string, array<string, int|string>>
-	 */
-	public function register_cron_schedules( array $schedules ): array {
-		$schedules['wccr_every_minute'] = array(
-			'interval' => MINUTE_IN_SECONDS,
-			'display'  => __( 'Every minute', 'vfwoo_woocommerce-cart-recovery' ),
-		);
-
-		return $schedules;
-	}
-
-	/**
-	 * Ensure plugin cron events are scheduled with the expected frequency.
-	 */
-	private function ensure_cron_events(): void {
-		$detect_event = wp_get_scheduled_event( 'wccr_detect_abandoned_carts' );
-		if ( ! $detect_event || 'wccr_every_minute' !== $detect_event->schedule ) {
-			wp_clear_scheduled_hook( 'wccr_detect_abandoned_carts' );
-			wp_schedule_event( time() + MINUTE_IN_SECONDS, 'wccr_every_minute', 'wccr_detect_abandoned_carts' );
-		}
-
-		$queue_event = wp_get_scheduled_event( 'wccr_process_recovery_queue' );
-		if ( ! $queue_event || 'wccr_every_minute' !== $queue_event->schedule ) {
-			wp_clear_scheduled_hook( 'wccr_process_recovery_queue' );
-			wp_schedule_event( time() + ( 2 * MINUTE_IN_SECONDS ), 'wccr_every_minute', 'wccr_process_recovery_queue' );
-		}
-
-		if ( ! wp_next_scheduled( 'wccr_cleanup_old_data' ) ) {
-			wp_schedule_event( time() + HOUR_IN_SECONDS, 'daily', 'wccr_cleanup_old_data' );
-		}
+		WCCR_Action_Scheduler::ensure_recurring_actions();
 	}
 }

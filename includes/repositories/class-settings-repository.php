@@ -168,31 +168,58 @@ final class WCCR_Settings_Repository {
 	 * @return array<string, string>
 	 */
 	private function find_saved_translation( array $translations, string $locale, string $default_locale ): array {
-		if ( isset( $translations[ $locale ] ) && is_array( $translations[ $locale ] ) ) {
-			return $translations[ $locale ];
+		$exact_translation = $this->get_usable_translation( $translations[ $locale ] ?? null );
+		if ( ! empty( $exact_translation ) ) {
+			return $exact_translation;
 		}
 
 		$language_code = strtok( $locale, '_' );
 		foreach ( $translations as $translation_locale => $translation ) {
-			if ( ! is_array( $translation ) || ! is_string( $translation_locale ) ) {
+			if ( ! is_string( $translation_locale ) ) {
 				continue;
 			}
 
-			if ( $language_code && $language_code === strtok( $translation_locale, '_' ) ) {
-				return $translation;
+			$usable_translation = $this->get_usable_translation( $translation );
+			if ( $language_code && $language_code === strtok( $translation_locale, '_' ) && ! empty( $usable_translation ) ) {
+				return $usable_translation;
 			}
 		}
 
-		if ( isset( $translations['en_US'] ) && is_array( $translations['en_US'] ) ) {
-			return $translations['en_US'];
+		$english_translation = $this->get_usable_translation( $translations['en_US'] ?? null );
+		if ( ! empty( $english_translation ) ) {
+			return $english_translation;
 		}
 
-		if ( isset( $translations[ $default_locale ] ) && is_array( $translations[ $default_locale ] ) ) {
-			return $translations[ $default_locale ];
+		$default_translation = $this->get_usable_translation( $translations[ $default_locale ] ?? null );
+		if ( ! empty( $default_translation ) ) {
+			return $default_translation;
 		}
 
 		$first = reset( $translations );
-		return is_array( $first ) ? $first : array();
+		return $this->get_usable_translation( $first );
+	}
+
+	/**
+	 * Return one saved translation only when it has useful content.
+	 *
+	 * @param mixed $translation Translation payload.
+	 * @return array<string, string>
+	 */
+	private function get_usable_translation( $translation ): array {
+		if ( ! is_array( $translation ) ) {
+			return array();
+		}
+
+		$subject = trim( (string) ( $translation['subject'] ?? '' ) );
+		$body    = trim( (string) ( $translation['body'] ?? '' ) );
+		if ( '' === $subject && '' === $body ) {
+			return array();
+		}
+
+		return array(
+			'subject' => $subject,
+			'body'    => $body,
+		);
 	}
 
 	/**

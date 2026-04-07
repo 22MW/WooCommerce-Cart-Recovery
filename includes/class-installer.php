@@ -3,33 +3,8 @@ defined( 'ABSPATH' ) || exit;
 
 final class WCCR_Installer {
 	public static function activate(): void {
-		add_filter(
-			'cron_schedules',
-			static function ( array $schedules ): array {
-				$schedules['wccr_every_minute'] = array(
-					'interval' => MINUTE_IN_SECONDS,
-					'display'  => 'Every minute',
-				);
-				return $schedules;
-			}
-		);
-
 		self::create_tables();
-
-		wp_clear_scheduled_hook( 'wccr_detect_abandoned_carts' );
-		wp_clear_scheduled_hook( 'wccr_process_recovery_queue' );
-
-		if ( ! wp_next_scheduled( 'wccr_detect_abandoned_carts' ) ) {
-			wp_schedule_event( time() + MINUTE_IN_SECONDS, 'wccr_every_minute', 'wccr_detect_abandoned_carts' );
-		}
-
-		if ( ! wp_next_scheduled( 'wccr_process_recovery_queue' ) ) {
-			wp_schedule_event( time() + ( 2 * MINUTE_IN_SECONDS ), 'wccr_every_minute', 'wccr_process_recovery_queue' );
-		}
-
-		if ( ! wp_next_scheduled( 'wccr_cleanup_old_data' ) ) {
-			wp_schedule_event( time() + HOUR_IN_SECONDS, 'daily', 'wccr_cleanup_old_data' );
-		}
+		WCCR_Action_Scheduler::ensure_recurring_actions();
 	}
 
 	public static function create_tables(): void {

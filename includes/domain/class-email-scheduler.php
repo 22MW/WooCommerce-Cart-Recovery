@@ -57,6 +57,17 @@ final class WCCR_Email_Scheduler {
 			$email        = $this->email_renderer->render( $cart, $step_settings, $recovery_url, $coupon_code );
 			$subject      = sanitize_text_field( (string) ( $email['subject'] ?? '' ) );
 			$message      = (string) ( $email['message'] ?? '' );
+			if ( '' === $subject || '' === trim( wp_strip_all_tags( $message ) ) ) {
+				$this->email_log_repository->insert_failed(
+					absint( $cart['id'] ),
+					$step,
+					(string) $cart['locale'],
+					$subject,
+					__( 'Localized email content is empty.', 'vfwoo_woocommerce-cart-recovery' )
+				);
+				return;
+			}
+
 			$headers      = array( 'Content-Type: text/html; charset=UTF-8' );
 
 			do_action( 'wccr_before_recovery_email_send', $cart, $step, $subject );

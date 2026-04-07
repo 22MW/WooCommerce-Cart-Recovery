@@ -12,6 +12,18 @@ The format is based on Keep a Changelog, and this project follows a simple `MAJO
 
 ### Fixed
 
+## [0.1.25] - 2026-04-07
+
+### Changed
+- Switched recurring plugin jobs from custom WP-Cron scheduling to WooCommerce Action Scheduler hooks.
+- Updated AGENTS.md communication rules to keep execution output shorter and more direct.
+
+### Fixed
+- Fixed WPML cart locale resolution during capture.
+- Fixed localized email fallback so empty saved translations no longer block usable defaults.
+- Added clearer email failure diagnostics in the carts admin screen.
+- Hardened recovery email rendering for serialized cart payloads so product rows no longer break on stored array data.
+
 ## [0.1.24] - 2026-04-07
 
 ### Added
