@@ -41,9 +41,15 @@ final class WCCR_Recovery_Service
 			$args['wccr_step'] = $step;
 		}
 
-		return add_query_arg(
-			$args,
-			wc_get_cart_url()
+		return apply_filters(
+			'wccr_recovery_url',
+			add_query_arg(
+				$args,
+				wc_get_cart_url()
+			),
+			$cart_id,
+			$coupon_code,
+			$step
 		);
 	}
 

@@ -67,8 +67,8 @@ final class WCCR_Email_Renderer
 		}
 
 		return array(
-			'subject' => sanitize_text_field($subject),
-			'message' => $content,
+			'subject' => sanitize_text_field(apply_filters('wccr_email_subject', $subject, $cart, $step_settings)),
+			'message' => apply_filters('wccr_email_content', $content, $cart, $step_settings),
 		);
 	}
 

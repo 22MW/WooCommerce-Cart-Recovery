@@ -1,7 +1,11 @@
 <?php
-defined( 'ABSPATH' ) || exit;
+defined('ABSPATH') || exit;
 
-final class WCCR_Email_Eligibility_Service {
+/**
+ * Determine whether a cart is eligible for the next recovery email step.
+ */
+final class WCCR_Email_Eligibility_Service
+{
 	public function __construct(
 		private WCCR_Email_Log_Repository $email_log_repository
 	) {}
@@ -13,7 +17,8 @@ final class WCCR_Email_Eligibility_Service {
 	 * @param array $settings Plugin settings.
 	 * @return array<string, mixed>
 	 */
-	public function get_status( array $cart, array $settings ): array {
+	public function get_status(array $cart, array $settings): array
+	{
 		$status = array(
 			'current_step' => 0,
 			'eligible_now' => false,
@@ -21,51 +26,51 @@ final class WCCR_Email_Eligibility_Service {
 			'reason' => 'not_abandoned',
 		);
 
-		if ( 'abandoned' !== ( $cart['status'] ?? '' ) ) {
+		if ('abandoned' !== ($cart['status'] ?? '')) {
 			return $status;
 		}
 
-		if ( empty( $cart['abandoned_at_gmt'] ) ) {
+		if (empty($cart['abandoned_at_gmt'])) {
 			$status['reason'] = 'missing_abandoned_at';
 			return $status;
 		}
 
-		$sent_steps = $this->email_log_repository->get_sent_steps_for_cart( absint( $cart['id'] ) );
+		$sent_steps = $this->email_log_repository->get_sent_steps_for_cart(absint($cart['id']));
 		$next_step  = 1;
 
-		while ( in_array( $next_step, $sent_steps, true ) ) {
+		while (in_array($next_step, $sent_steps, true)) {
 			$next_step++;
 		}
 
 		$status['current_step'] = $next_step;
 
-		if ( $next_step > 3 ) {
+		if ($next_step > 3) {
 			$status['reason'] = 'all_steps_sent';
 			return $status;
 		}
 
-		$step_settings = $settings['steps'][ $next_step ] ?? array();
-		if ( empty( $step_settings['enabled'] ) ) {
+		$step_settings = $settings['steps'][$next_step] ?? array();
+		if (empty($step_settings['enabled'])) {
 			$status['reason'] = 'step_disabled';
 			return $status;
 		}
 
-		if ( $this->requires_minimum_cart_total( $step_settings ) && (float) ( $cart['cart_total'] ?? 0 ) < (float) ( $step_settings['min_cart_total'] ?? 0 ) ) {
+		if ($this->requires_minimum_cart_total($step_settings) && (float) ($cart['cart_total'] ?? 0) < (float) ($step_settings['min_cart_total'] ?? 0)) {
 			$status['reason'] = 'below_min_cart_total';
 			return $status;
 		}
 
-		$delay_minutes = absint( $step_settings['delay_minutes'] ?? 0 );
-		$eligible_at   = strtotime( (string) $cart['abandoned_at_gmt'] . ' UTC' ) + ( $delay_minutes * MINUTE_IN_SECONDS );
+		$delay_minutes = absint($step_settings['delay_minutes'] ?? 0);
+		$eligible_at   = strtotime((string) $cart['abandoned_at_gmt'] . ' UTC') + ($delay_minutes * MINUTE_IN_SECONDS);
 
-		if ( false === $eligible_at ) {
+		if (false === $eligible_at) {
 			$status['reason'] = 'invalid_abandoned_at';
 			return $status;
 		}
 
-		$status['eligible_at_gmt'] = gmdate( 'Y-m-d H:i:s', $eligible_at );
+		$status['eligible_at_gmt'] = gmdate('Y-m-d H:i:s', $eligible_at);
 
-		if ( time() < $eligible_at ) {
+		if (time() < $eligible_at) {
 			$status['reason'] = 'waiting_delay';
 			return $status;
 		}
@@ -73,33 +78,45 @@ final class WCCR_Email_Eligibility_Service {
 		$status['eligible_now'] = true;
 		$status['reason']       = 'eligible_now';
 
-		return $status;
+		/**
+		 * Filter email eligibility before returning.
+		 *
+		 * @param array<string, mixed> $status   Eligibility status.
+		 * @param array<string, mixed> $cart     Cart row.
+		 * @param array<string, mixed> $settings Plugin settings.
+		 */
+		return apply_filters('wccr_email_eligibility', $status, $cart, $settings);
 	}
 
-	public function get_reason_label( string $reason ): string {
+	/**
+	 * Return a human-readable label for an eligibility reason code.
+	 */
+	public function get_reason_label(string $reason): string
+	{
 		$labels = array(
-			'not_abandoned'       => __( 'Not abandoned', 'vfwoo_woocommerce-cart-recovery' ),
-			'missing_abandoned_at'=> __( 'Missing abandoned date', 'vfwoo_woocommerce-cart-recovery' ),
-			'all_steps_sent'      => __( 'All steps sent', 'vfwoo_woocommerce-cart-recovery' ),
-			'step_disabled'       => __( 'Step disabled', 'vfwoo_woocommerce-cart-recovery' ),
-			'below_min_cart_total'=> __( 'Below minimum cart total', 'vfwoo_woocommerce-cart-recovery' ),
-			'invalid_abandoned_at'=> __( 'Invalid abandoned date', 'vfwoo_woocommerce-cart-recovery' ),
-			'waiting_delay'       => __( 'Waiting delay', 'vfwoo_woocommerce-cart-recovery' ),
-			'eligible_now'        => __( 'Ready to send', 'vfwoo_woocommerce-cart-recovery' ),
+			'not_abandoned'       => __('Not abandoned', 'vfwoo_woocommerce-cart-recovery'),
+			'missing_abandoned_at' => __('Missing abandoned date', 'vfwoo_woocommerce-cart-recovery'),
+			'all_steps_sent'      => __('All steps sent', 'vfwoo_woocommerce-cart-recovery'),
+			'step_disabled'       => __('Step disabled', 'vfwoo_woocommerce-cart-recovery'),
+			'below_min_cart_total' => __('Below minimum cart total', 'vfwoo_woocommerce-cart-recovery'),
+			'invalid_abandoned_at' => __('Invalid abandoned date', 'vfwoo_woocommerce-cart-recovery'),
+			'waiting_delay'       => __('Waiting delay', 'vfwoo_woocommerce-cart-recovery'),
+			'eligible_now'        => __('Ready to send', 'vfwoo_woocommerce-cart-recovery'),
 		);
 
-		return $labels[ $reason ] ?? $reason;
+		return $labels[$reason] ?? $reason;
 	}
 
 	/**
 	 * Convert a GMT timestamp into the local display format used in admin.
 	 */
-	public function format_gmt_for_display( string $datetime_gmt ): string {
-		if ( '' === $datetime_gmt || '0000-00-00 00:00:00' === $datetime_gmt ) {
+	public function format_gmt_for_display(string $datetime_gmt): string
+	{
+		if ('' === $datetime_gmt || '0000-00-00 00:00:00' === $datetime_gmt) {
 			return '-';
 		}
 
-		return get_date_from_gmt( $datetime_gmt, 'Y-m-d H:i:s' );
+		return get_date_from_gmt($datetime_gmt, 'Y-m-d H:i:s');
 	}
 
 	/**
@@ -107,8 +124,9 @@ final class WCCR_Email_Eligibility_Service {
 	 *
 	 * @param array<string, mixed> $step_settings Email step settings.
 	 */
-	private function requires_minimum_cart_total( array $step_settings ): bool {
-		$discount_type = (string) ( $step_settings['discount_type'] ?? 'none' );
+	private function requires_minimum_cart_total(array $step_settings): bool
+	{
+		$discount_type = (string) ($step_settings['discount_type'] ?? 'none');
 		return 'none' !== $discount_type;
 	}
 }

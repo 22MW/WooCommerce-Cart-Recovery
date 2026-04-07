@@ -490,6 +490,9 @@ final class WCCR_Abandoned_Carts_Page
 		return ! empty($cart['email']) ? (string) $cart['email'] : __('No email', 'vfwoo_woocommerce-cart-recovery');
 	}
 
+	/**
+	 * Return a translated status label.
+	 */
 	private function get_status_label(string $status): string
 	{
 		$labels = array(

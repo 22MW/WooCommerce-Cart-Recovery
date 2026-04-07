@@ -72,7 +72,7 @@ final class WCCR_Email_Scheduler
 				return;
 			}
 
-			$headers      = array('Content-Type: text/html; charset=UTF-8');
+			$headers      = apply_filters('wccr_email_headers', array('Content-Type: text/html; charset=UTF-8'), $cart, $step);
 
 			do_action('wccr_before_recovery_email_send', $cart, $step, $subject);
 

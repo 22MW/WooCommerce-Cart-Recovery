@@ -12,6 +12,19 @@ The format is based on Keep a Changelog, and this project follows a simple `MAJO
 
 ### Fixed
 
+## [0.1.33] - 2026-04-07
+
+### Added
+
+- 8 `apply_filters` hooks for extensibility: `wccr_email_subject`, `wccr_email_content`, `wccr_recovery_url`, `wccr_cleanup_days`, `wccr_abandon_after_minutes`, `wccr_coupon_args`, `wccr_email_headers`, `wccr_email_eligibility`.
+- `register_setting()` for `wccr_settings` option via Settings API.
+- PHPDoc on 14 methods and 2 classes that were missing documentation.
+
+### Changed
+
+- Runtime requirements now verify WooCommerce >= 9.0 (matching plugin header).
+- Added return type hints to 11 methods for PHP 8.1 consistency.
+
 ## [0.1.32] - 2026-04-07
 
 ### Added

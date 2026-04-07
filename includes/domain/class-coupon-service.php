@@ -30,6 +30,15 @@ final class WCCR_Coupon_Service
 		$coupon->set_usage_limit(1);
 		$coupon->set_date_expires(time() + max(1, $expiry_days) * DAY_IN_SECONDS);
 
+		/**
+		 * Filter coupon properties before saving.
+		 *
+		 * @param WC_Coupon            $coupon        The coupon object.
+		 * @param array<string, mixed> $cart          Cart row.
+		 * @param array<string, mixed> $step_settings Step settings.
+		 */
+		apply_filters('wccr_coupon_args', $coupon, $cart, $step_settings);
+
 		$coupon->save();
 		do_action('wccr_coupon_generated', $code, $cart, $step_settings);
 

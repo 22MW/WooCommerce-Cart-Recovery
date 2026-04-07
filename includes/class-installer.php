@@ -3,12 +3,18 @@ defined('ABSPATH') || exit;
 
 final class WCCR_Installer
 {
+	/**
+	 * Run activation tasks: create tables and schedule recurring actions.
+	 */
 	public static function activate(): void
 	{
 		self::create_tables();
 		WCCR_Action_Scheduler::ensure_recurring_actions();
 	}
 
+	/**
+	 * Create or update all plugin database tables.
+	 */
 	public static function create_tables(): void
 	{
 		global $wpdb;

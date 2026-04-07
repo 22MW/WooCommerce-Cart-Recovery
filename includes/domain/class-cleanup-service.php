@@ -20,7 +20,7 @@ final class WCCR_Cleanup_Service
 	public function run(): void
 	{
 		$settings = $this->settings_repository->get();
-		$days     = absint($settings['cleanup_days'] ?? 90);
+		$days     = absint(apply_filters('wccr_cleanup_days', $settings['cleanup_days'] ?? 90));
 
 		$this->cart_repository->delete_rows_without_email();
 		$this->cart_repository->delete_historical_duplicates();

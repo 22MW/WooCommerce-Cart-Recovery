@@ -12,11 +12,10 @@ final class WCCR_Admin_Menu
 		private WCCR_Stats_Page $stats_page
 	) {}
 
-	public function register_hooks(): void
-	{
-		add_action('admin_menu', array($this, 'register_menu'));
-		add_action('admin_enqueue_scripts', array($this, 'enqueue_assets'));
-	}
+	/**
+	 * Register admin menu and asset hooks.
+	 */
+	public function register_hooks(): void {}
 
 	/**
 	 * Register plugin menu pages.
