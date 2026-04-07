@@ -107,7 +107,7 @@ final class WCCR_Cart_Repository
 			$wpdb->prepare(
 				"SELECT c.* FROM {$this->table} c
 				LEFT JOIN {$wpdb->prefix}wccr_email_log l ON l.cart_id = c.id AND l.step = %d AND l.status = 'sent'
-				WHERE c.status = 'abandoned' AND c.abandoned_at_gmt IS NOT NULL AND c.abandoned_at_gmt <= %s AND c.email IS NOT NULL AND c.email != '' AND l.id IS NULL
+				WHERE c.status IN ('abandoned', 'clicked') AND c.abandoned_at_gmt IS NOT NULL AND c.abandoned_at_gmt <= %s AND c.email IS NOT NULL AND c.email != '' AND l.id IS NULL
 				ORDER BY c.id ASC LIMIT 100",
 				$step,
 				$threshold
@@ -168,15 +168,21 @@ final class WCCR_Cart_Repository
 	/**
 	 * Mark a cart as recovered and attach the resulting order.
 	 */
-	public function mark_recovered_order(int $id, int $order_id): void
+	public function mark_recovered_order(int $id, int $order_id, ?float $recovered_total = null): void
 	{
+		$data = array(
+			'status'             => 'recovered',
+			'recovered_at_gmt'   => gmdate('Y-m-d H:i:s'),
+			'recovered_order_id' => $order_id,
+			'updated_at_gmt'     => gmdate('Y-m-d H:i:s'),
+		);
+
+		if (null !== $recovered_total) {
+			$data['recovered_total'] = $recovered_total;
+		}
+
 		$this->update_status(
-			array(
-				'status'             => 'recovered',
-				'recovered_at_gmt'   => gmdate('Y-m-d H:i:s'),
-				'recovered_order_id' => $order_id,
-				'updated_at_gmt'     => gmdate('Y-m-d H:i:s'),
-			),
+			$data,
 			array('id' => $id)
 		);
 	}
@@ -350,13 +356,13 @@ final class WCCR_Cart_Repository
 	}
 
 	/**
-	 * Sum recovered revenue.
+	 * Sum recovered revenue using the real paid amount, falling back to cart_total for legacy rows.
 	 */
 	public function sum_recovered_revenue(): float
 	{
 		global $wpdb;
 
-		return (float) $wpdb->get_var("SELECT COALESCE(SUM(cart_total),0) FROM {$this->table} WHERE status = 'recovered'");
+		return (float) $wpdb->get_var("SELECT COALESCE(SUM(COALESCE(recovered_total, cart_total)),0) FROM {$this->table} WHERE status = 'recovered'");
 	}
 
 	/**

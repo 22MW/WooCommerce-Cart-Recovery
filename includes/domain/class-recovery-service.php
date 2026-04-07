@@ -81,6 +81,10 @@ final class WCCR_Recovery_Service
 			return;
 		}
 
+		if (isset($cart['status']) && 'recovered' === $cart['status']) {
+			return;
+		}
+
 		if (! defined('WCCR_IS_RESTORING_CART')) {
 			define('WCCR_IS_RESTORING_CART', true);
 		}
@@ -109,6 +113,9 @@ final class WCCR_Recovery_Service
 			WC()->cart->apply_coupon($coupon);
 		}
 
+		// Persist session to DB before redirect so guest/incognito users retain the cart.
+		$this->persist_session();
+
 		$this->cart_repository->mark_clicked($cart_id, $step);
 		if ($step > 0) {
 			$this->email_log_repository->mark_step_clicked($cart_id, $step);
@@ -117,5 +124,20 @@ final class WCCR_Recovery_Service
 		do_action('wccr_cart_recovery_clicked', $cart_id);
 		wp_safe_redirect(wc_get_checkout_url());
 		exit;
+	}
+
+	/**
+	 * Force WooCommerce to write the current session to the database
+	 * and set the session cookie so it survives the redirect to checkout.
+	 */
+	private function persist_session(): void
+	{
+		if (! WC()->session) {
+			return;
+		}
+
+		WC()->session->set_customer_session_cookie(true);
+		WC()->cart->set_session();
+		WC()->session->save_data();
 	}
 }

@@ -62,6 +62,7 @@ final class WCCR_Installer
 				clicked_step TINYINT UNSIGNED NULL,
 				recovered_at_gmt DATETIME NULL,
 				recovered_order_id BIGINT UNSIGNED NULL,
+				recovered_total DECIMAL(18,4) NULL,
 				created_at_gmt DATETIME NOT NULL,
 				updated_at_gmt DATETIME NOT NULL,
 				PRIMARY KEY (id),

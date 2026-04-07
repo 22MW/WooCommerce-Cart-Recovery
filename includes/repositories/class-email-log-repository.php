@@ -117,6 +117,25 @@ final class WCCR_Email_Log_Repository
 	}
 
 	/**
+	 * Return all coupon codes logged for a cart (across all steps).
+	 *
+	 * @return string[]
+	 */
+	public function get_all_coupon_codes_for_cart(int $cart_id): array
+	{
+		global $wpdb;
+
+		$rows = $wpdb->get_col(
+			$wpdb->prepare(
+				"SELECT DISTINCT coupon_code FROM {$this->table} WHERE cart_id = %d AND coupon_code IS NOT NULL AND coupon_code != ''",
+				$cart_id
+			)
+		);
+
+		return is_array($rows) ? array_values(array_filter($rows)) : [];
+	}
+
+	/**
 	 * Return the most recent coupon code logged for a cart.
 	 */
 	public function get_last_coupon_code_for_cart(int $cart_id): string

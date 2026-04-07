@@ -54,7 +54,7 @@ final class WCCR_Plugin
 
 		$admin = new WCCR_Admin_Menu(
 			$settings_page,
-			new WCCR_Abandoned_Carts_Page($cart_repository, $email_log_repository, $stats_repository, $settings_repository, $email_eligibility, $stats_service, $audit_logger),
+			new WCCR_Abandoned_Carts_Page($cart_repository, $email_log_repository, $stats_repository, $settings_repository, $email_eligibility, $stats_service, $audit_logger, $recovery_service),
 			new WCCR_Stats_Page($stats_service)
 		);
 		$admin->register_hooks();
@@ -66,6 +66,13 @@ final class WCCR_Plugin
 		add_action('wccr_sync_unpaid_orders', array($pending_detector, 'sync_stale_pending_orders'));
 		add_action('wccr_process_recovery_queue', array($email_scheduler, 'process_queue'));
 		add_action('wccr_cleanup_old_data', array($cleanup_service, 'run'));
+
+		add_action('wccr_cart_recovered', static function (int $cart_id) use ($email_log_repository, $coupon_service): void {
+			$codes = $email_log_repository->get_all_coupon_codes_for_cart($cart_id);
+			if ($codes) {
+				$coupon_service->revoke_coupons($codes);
+			}
+		});
 
 		WCCR_Action_Scheduler::ensure_recurring_actions();
 	}

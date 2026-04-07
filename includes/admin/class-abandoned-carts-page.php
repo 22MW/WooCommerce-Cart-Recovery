@@ -13,7 +13,8 @@ final class WCCR_Abandoned_Carts_Page
 		private WCCR_Settings_Repository $settings_repository,
 		private WCCR_Email_Eligibility_Service $email_eligibility_service,
 		private WCCR_Stats_Service $stats_service,
-		private WCCR_Audit_Logger $audit_logger
+		private WCCR_Audit_Logger $audit_logger,
+		private WCCR_Recovery_Service $recovery_service
 	) {}
 
 	/**
@@ -567,29 +568,6 @@ final class WCCR_Abandoned_Carts_Page
 	}
 
 	/**
-	 * Build query arguments for a recovery URL.
-	 *
-	 * @return array<string, int|string>
-	 */
-	private function get_recovery_query_args(int $cart_id, string $coupon_code, int $step = 0): array
-	{
-		$args = array(
-			'wccr_recover' => $cart_id,
-			'wccr_token'   => wp_hash($cart_id . '|' . wp_salt('auth')),
-		);
-
-		if ('' !== $coupon_code) {
-			$args['wccr_coupon'] = $coupon_code;
-		}
-
-		if ($step > 0) {
-			$args['wccr_step'] = $step;
-		}
-
-		return $args;
-	}
-
-	/**
 	 * Build the copy-url button for a specific email step.
 	 *
 	 * @param array<string, mixed> $cart Recovery row.
@@ -600,10 +578,7 @@ final class WCCR_Abandoned_Carts_Page
 			return '-';
 		}
 
-		$recovery_url = add_query_arg(
-			$this->get_recovery_query_args(absint($cart['id']), $coupon_code, $step),
-			function_exists('wc_get_cart_url') ? wc_get_cart_url() : home_url('/')
-		);
+		$recovery_url = $this->recovery_service->build_recovery_url(absint($cart['id']), $coupon_code ?: null, $step);
 
 		return sprintf(
 			'<button type="button" class="button button-secondary wccr-copy-url" data-url="%s">%s</button>',
@@ -702,10 +677,16 @@ final class WCCR_Abandoned_Carts_Page
 			return __('No', 'vfwoo_woocommerce-cart-recovery');
 		}
 
+		$total    = isset($cart['recovered_total']) && '' !== (string) $cart['recovered_total']
+			? (float) $cart['recovered_total']
+			: (float) ($cart['cart_total'] ?? 0);
+		$currency = (string) ($cart['currency'] ?? '');
+		$formatted = trim(preg_replace('/\s+/', ' ', wp_strip_all_tags(html_entity_decode(wc_price($total, array('currency' => $currency)), ENT_QUOTES, 'UTF-8'))));
+
 		return sprintf(
 			/* translators: %s: recovered amount. */
 			__('Yes (%s)', 'vfwoo_woocommerce-cart-recovery'),
-			$this->format_cart_total_label($cart)
+			$formatted
 		);
 	}
 

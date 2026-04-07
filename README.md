@@ -14,6 +14,9 @@ WooCommerce Cart Recovery ayuda a recuperar carritos abandonados y pedidos impag
 - Restaura el carrito al hacer click en el email.
 - Registra en qué email hicieron click.
 - Marca como recuperado cuando el pedido termina correctamente.
+- Invalida todos los enlaces de recuperación una vez el carrito está recuperado.
+- Revoca todos los cupones generados al recuperar el carrito.
+- Guarda el total real pagado (`recovered_total`) con descuentos aplicados.
 - Permite excluir productos y términos taxonómicos completos del flujo de recovery.
 - Expande exclusiones automáticamente a traducciones WPML/Polylang.
 - Mantiene estadísticas de:
@@ -114,6 +117,8 @@ Con eso no hace falta excluir manualmente el mismo producto o término en cada i
   - aplica el cupón si existe
   - registra el step clicado
   - redirige a checkout
+- Si el cliente clica sin pagar, los siguientes pasos de email siguen enviándose en su delay.
+- Una vez el carrito pasa a `recovered`, todos los enlaces dejan de funcionar y todos los cupones generados se eliminan.
 
 Mientras ese recovery está activo:
 
@@ -231,6 +236,7 @@ Cada caso de recovery tiene su propia identidad y puede guardar:
 - pedido enlazado si existe
 - step clicado
 - pedido recuperado final
+- total real pagado (`recovered_total`) cuando hay descuento aplicado
 
 ## Seguridad y buenas prácticas
 

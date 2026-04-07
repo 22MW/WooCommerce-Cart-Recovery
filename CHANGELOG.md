@@ -4,13 +4,21 @@ All notable changes to this project should be documented in this file.
 
 The format is based on Keep a Changelog, and this project follows a simple `MAJOR.MINOR.PATCH` versioning scheme.
 
-## [Unreleased]
+## [0.1.35] - 2026-04-07
+
+### Fixed
+
+- Carritos con status `clicked` ya se incluyen en la cola — los pasos 2 y 3 se envían aunque el cliente haya clicado sin pagar.
+- Los enlaces de recuperación quedan inactivos en cuanto el carrito pasa a `recovered` — ninguno de los 3 pasos funciona tras un pago exitoso.
+- Al recuperar un carrito se eliminan todos los cupones generados para ese carrito.
+- Admin: botón "Copy URL" generaba token sin `expires` — ahora usa `build_recovery_url()` con token correcto.
+- Sesión de WooCommerce no se persistía antes del redirect — usuarios invitado/incógnito llegaban al checkout con carrito vacío.
 
 ### Added
 
-### Changed
-
-### Fixed
+- Columna `recovered_total`: guarda el total real pagado (con descuentos) en lugar del total abandonado.
+- Estadísticas de ingresos usan `recovered_total` con fallback a `cart_total` para registros anteriores.
+- Botón CTA del email usa estructura `<table>` compatible con todos los clientes de email.
 
 ## [0.1.34] - 2026-04-07
 

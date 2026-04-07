@@ -101,4 +101,19 @@ final class WCCR_Coupon_Service
 
 		return 'CartRecover-' . $amount_label . '-' . $suffix;
 	}
+
+	/**
+	 * Delete WooCommerce coupon posts so they can no longer be used.
+	 *
+	 * @param string[] $codes Coupon codes to revoke.
+	 */
+	public function revoke_coupons(array $codes): void
+	{
+		foreach ($codes as $code) {
+			$coupon_id = wc_get_coupon_id_by_code($code);
+			if ($coupon_id > 0) {
+				wp_delete_post($coupon_id, true);
+			}
+		}
+	}
 }

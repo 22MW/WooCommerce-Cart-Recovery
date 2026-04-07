@@ -26,7 +26,7 @@ final class WCCR_Email_Eligibility_Service
 			'reason' => 'not_abandoned',
 		);
 
-		if ('abandoned' !== ($cart['status'] ?? '')) {
+		if (! in_array($cart['status'] ?? '', array('abandoned', 'clicked'), true)) {
 			return $status;
 		}
 

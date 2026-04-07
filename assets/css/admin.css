@@ -108,7 +108,7 @@
 	padding: 10px 30px;
 	border: 0;
 	border-radius: 999px;
-	background: transparent;
+	background: var(--vfwoo-white);
 	color: var(--vfwoo-verde);
 	font-size: 14px;
 	font-weight: 700;
