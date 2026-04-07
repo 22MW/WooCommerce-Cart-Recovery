@@ -778,8 +778,6 @@ if ( version_compare( $wc_version, '9.0', '<' ) ) {
 
 ## 🔴 CRÍTICO (Debe corregirse inmediatamente)
 
-1. **CSRF en AJAX sin nonce** - [includes/checkout/class-blocks-checkout-capture-adapter.php](includes/checkout/class-blocks-checkout-capture-adapter.php)
-   - Acción: Agregar validación de nonce
 2. **SQL Injection en uninstall.php** - [uninstall.php](uninstall.php)
    - Acción: Usar prepared statements o funciones seguras
 3. **Email sin encriptación** - [includes/repositories/class-cart-repository.php](includes/repositories/class-cart-repository.php)

@@ -1,13 +1,16 @@
 <?php
-defined( 'ABSPATH' ) || exit;
+defined('ABSPATH') || exit;
 
-final class WCCR_Installer {
-	public static function activate(): void {
+final class WCCR_Installer
+{
+	public static function activate(): void
+	{
 		self::create_tables();
 		WCCR_Action_Scheduler::ensure_recurring_actions();
 	}
 
-	public static function create_tables(): void {
+	public static function create_tables(): void
+	{
 		global $wpdb;
 
 		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
@@ -68,8 +71,8 @@ final class WCCR_Installer {
 			) {$charset_collate};"
 		);
 
-		add_option( 'wccr_settings', WCCR_Settings_Repository::default_settings() );
+		add_option('wccr_settings', WCCR_Settings_Repository::default_settings());
 
-		$wpdb->query( "UPDATE {$carts_table} SET status = 'clicked', recovered_at_gmt = NULL WHERE status = 'recovered' AND (recovered_order_id IS NULL OR recovered_order_id = 0)" );
+		$wpdb->query($wpdb->prepare("UPDATE {$carts_table} SET status = %s, recovered_at_gmt = NULL WHERE status = %s AND (recovered_order_id IS NULL OR recovered_order_id = 0)", 'clicked', 'recovered'));
 	}
 }
