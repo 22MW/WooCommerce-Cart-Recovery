@@ -6,6 +6,7 @@ global $wpdb;
 delete_option('wccr_settings');
 $wpdb->query($wpdb->prepare("DROP TABLE IF EXISTS %i", $wpdb->prefix . 'wccr_abandoned_carts'));
 $wpdb->query($wpdb->prepare("DROP TABLE IF EXISTS %i", $wpdb->prefix . 'wccr_email_log'));
+$wpdb->query($wpdb->prepare("DROP TABLE IF EXISTS %i", $wpdb->prefix . 'wccr_audit_log'));
 
 wp_clear_scheduled_hook('wccr_detect_abandoned_carts');
 wp_clear_scheduled_hook('wccr_sync_unpaid_orders');

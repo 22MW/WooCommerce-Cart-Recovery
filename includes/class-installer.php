@@ -53,6 +53,24 @@ final class WCCR_Installer
 			) {$charset_collate};"
 		);
 
+		$audit_table = $wpdb->prefix . 'wccr_audit_log';
+
+		dbDelta(
+			"CREATE TABLE {$audit_table} (
+				id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+				user_id BIGINT UNSIGNED NOT NULL DEFAULT 0,
+				action VARCHAR(50) NOT NULL,
+				object_type VARCHAR(50) NOT NULL,
+				object_id BIGINT UNSIGNED NOT NULL DEFAULT 0,
+				ip_address VARCHAR(45) NOT NULL DEFAULT '',
+				extra TEXT NULL,
+				created_at_gmt DATETIME NOT NULL,
+				PRIMARY KEY (id),
+				KEY action_object (action, object_type, object_id),
+				KEY created_at_gmt (created_at_gmt)
+			) {$charset_collate};"
+		);
+
 		dbDelta(
 			"CREATE TABLE {$emails_table} (
 				id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,

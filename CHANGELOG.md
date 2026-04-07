@@ -12,6 +12,14 @@ The format is based on Keep a Changelog, and this project follows a simple `MAJO
 
 ### Fixed
 
+## [0.1.32] - 2026-04-07
+
+### Added
+
+- GDPR audit trail: new `wccr_audit_log` table with anonymized IP addresses.
+- Audit logging for cart deletion (admin), email sends, and recovery link clicks.
+- Automatic cleanup of old audit log entries during scheduled maintenance.
+
 ## [0.1.31] - 2026-04-07
 
 ### Added

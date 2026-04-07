@@ -13,7 +13,8 @@ final class WCCR_Email_Scheduler
 		private WCCR_Email_Eligibility_Service $email_eligibility_service,
 		private WCCR_Coupon_Service $coupon_service,
 		private WCCR_Email_Renderer $email_renderer,
-		private WCCR_Recovery_Service $recovery_service
+		private WCCR_Recovery_Service $recovery_service,
+		private WCCR_Audit_Logger $audit_logger
 	) {}
 
 	/**
@@ -77,6 +78,7 @@ final class WCCR_Email_Scheduler
 
 			if (wp_mail(sanitize_email((string) $cart['email']), $subject, $message, $headers)) {
 				$this->email_log_repository->insert_sent(absint($cart['id']), $step, (string) $cart['locale'], $subject, $coupon_code);
+				$this->audit_logger->log('email_sent', 'cart', absint($cart['id']), ['step' => $step]);
 				do_action('wccr_after_recovery_email_send', $cart, $step, $subject);
 				return;
 			}
