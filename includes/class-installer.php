@@ -25,6 +25,19 @@ final class WCCR_Installer
 		$carts_table     = $wpdb->prefix . 'wccr_abandoned_carts';
 		$emails_table    = $wpdb->prefix . 'wccr_email_log';
 
+		// Drop legacy `email` index before dbDelta — TEXT columns cannot be indexed without a key length.
+		if ($wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $carts_table)) === $carts_table) {
+			$existing_indexes = $wpdb->get_results("SHOW INDEX FROM {$carts_table}", ARRAY_A);
+			if (is_array($existing_indexes)) {
+				foreach ($existing_indexes as $idx) {
+					if ('email' === ($idx['Key_name'] ?? '')) {
+						$wpdb->query("ALTER TABLE {$carts_table} DROP INDEX `email`");
+						break;
+					}
+				}
+			}
+		}
+
 		dbDelta(
 			"CREATE TABLE {$carts_table} (
 				id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,

@@ -12,6 +12,13 @@ The format is based on Keep a Changelog, and this project follows a simple `MAJO
 
 ### Fixed
 
+## [0.1.34] - 2026-04-07
+
+### Fixed
+
+- Restored admin menu hook registration so the plugin submenu loads again under WooCommerce.
+- Dropped the legacy `email` index before `dbDelta()` so schema migrations to `TEXT` no longer fail on existing installs.
+
 ## [0.1.33] - 2026-04-07
 
 ### Added
