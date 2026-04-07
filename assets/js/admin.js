@@ -362,10 +362,75 @@
 		hideExclusionResults( field );
 	}
 
+	/**
+	 * Handle clicks on "Reset to translated defaults" buttons.
+	 *
+	 * @param {MouseEvent} event Browser click event.
+	 * @return {void}
+	 */
+	function handleResetClick( event ) {
+		var button = event.target.closest( '.wccr-reset-translation' );
+		if ( ! button ) {
+			return;
+		}
+
+		var step   = button.getAttribute( 'data-step' );
+		var locale = button.getAttribute( 'data-locale' );
+		if ( ! step || ! locale ) {
+			return;
+		}
+
+		var originalLabel = typeof WCCRAdminI18n !== 'undefined' && WCCRAdminI18n.resetLabel
+			? WCCRAdminI18n.resetLabel
+			: button.textContent;
+		var resettingLabel = typeof WCCRAdminI18n !== 'undefined' && WCCRAdminI18n.resettingLabel
+			? WCCRAdminI18n.resettingLabel
+			: originalLabel;
+
+		button.disabled     = true;
+		button.textContent  = resettingLabel;
+
+		var body = new window.FormData();
+		body.append( 'action', 'wccr_reset_step_locale' );
+		body.append( 'nonce',  WCCRAdminI18n.resetNonce );
+		body.append( 'step',   step );
+		body.append( 'locale', locale );
+
+		window.fetch( WCCRAdminI18n.ajaxUrl, {
+			method:      'POST',
+			credentials: 'same-origin',
+			body:        body
+		} )
+			.then( function ( response ) {
+				return response.json();
+			} )
+			.then( function ( payload ) {
+				if ( payload && payload.success && payload.data ) {
+					var card    = button.closest( '.wccr-card' );
+					var subject = card ? card.querySelector( '[name*="[subject]"]' ) : null;
+					var bodyEl  = card ? card.querySelector( '[name*="[body]"]' ) : null;
+					if ( subject ) {
+						subject.value = payload.data.subject || '';
+					}
+					if ( bodyEl ) {
+						bodyEl.value = payload.data.body || '';
+					}
+				}
+			} )
+			.catch( function () {
+				// Silent fail — keep existing values.
+			} )
+			.finally( function () {
+				button.disabled    = false;
+				button.textContent = originalLabel;
+			} );
+	}
+
 	document.addEventListener( 'click', handleCopyClick );
 	document.addEventListener( 'click', handleLocaleTabClick );
 	document.addEventListener( 'click', handleEmailToggleClick );
 	document.addEventListener( 'click', handleExclusionFieldClick );
+	document.addEventListener( 'click', handleResetClick );
 	document.addEventListener( 'input', handleExclusionSearchInput );
 	document.addEventListener( 'submit', handleDeleteSubmit );
 }() );

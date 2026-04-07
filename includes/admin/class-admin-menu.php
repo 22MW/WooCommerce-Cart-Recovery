@@ -133,6 +133,9 @@ final class WCCR_Admin_Menu
 				'exclusionNonce'  => wp_create_nonce('wccr_exclusion_search'),
 				'searchingLabel'  => __('Searching…', 'vfwoo_woocommerce-cart-recovery'),
 				'noResultsLabel'  => __('No matches found.', 'vfwoo_woocommerce-cart-recovery'),
+				'resetNonce'      => wp_create_nonce('wccr_reset_step_locale'),
+				'resetLabel'      => __('Reset to translated defaults', 'vfwoo_woocommerce-cart-recovery'),
+				'resettingLabel'  => __('Resetting…', 'vfwoo_woocommerce-cart-recovery'),
 			)
 		);
 	}

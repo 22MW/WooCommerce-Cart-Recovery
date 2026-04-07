@@ -7,6 +7,7 @@ The format is based on Keep a Changelog, and this project follows a simple `MAJO
 ## [0.1.36] - 2026-04-08
 
 ### Fixed
+
 - GitHub Actions workflow: añadido `permissions: contents: write` para que la Action pueda crear releases.
 
 ## [0.1.35] - 2026-04-07

@@ -331,6 +331,14 @@ final class WCCR_Settings_Repository {
 	 * Return the site default locale used as settings fallback.
 	 */
 	private static function get_default_locale(): string {
+		$default_lang = apply_filters( 'wpml_default_language', null );
+		if ( is_string( $default_lang ) && '' !== $default_lang ) {
+			$locale = apply_filters( 'wpml_locale_from_language', '', $default_lang );
+			if ( is_string( $locale ) && '' !== $locale ) {
+				return $locale;
+			}
+		}
+
 		return get_locale();
 	}
 

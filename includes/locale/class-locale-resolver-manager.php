@@ -31,9 +31,18 @@ final class WCCR_Locale_Resolver_Manager
 
 	/**
 	 * Return the default locale used as fallback for translated settings.
+	 * With WPML, uses the site default language instead of the admin UI language.
 	 */
 	public function get_default_locale(): string
 	{
+		$default_lang = apply_filters('wpml_default_language', null);
+		if (is_string($default_lang) && '' !== $default_lang) {
+			$locale = apply_filters('wpml_locale_from_language', '', $default_lang);
+			if (is_string($locale) && '' !== $locale) {
+				return $locale;
+			}
+		}
+
 		return get_locale();
 	}
 

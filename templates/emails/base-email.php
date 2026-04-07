@@ -87,11 +87,7 @@ $text_align = is_rtl() ? 'right' : 'left';
 
 <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:24px;">
 	<tr>
-		<td align="center">
-			<a href="<?php echo esc_url($recovery_url); ?>" style="background-color:#000;color:#fff;padding:14px 28px;text-decoration:none;border-radius:4px;display:inline-block;font-weight:bold;mso-padding-alt:0;">
-				<?php esc_html_e('Recover your cart', 'vfwoo_woocommerce-cart-recovery'); ?>
-			</a>
-		</td>
+		<td align="center"><a href="<?php echo esc_url($recovery_url); ?>" style="background-color:#000;color:#fff;padding:14px 28px;text-decoration:none;border-radius:4px;display:inline-block;font-weight:bold;mso-padding-alt:0;"><?php esc_html_e('Recover your cart', 'vfwoo_woocommerce-cart-recovery'); ?></a></td>
 	</tr>
 </table>
 
