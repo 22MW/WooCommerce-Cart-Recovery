@@ -1,0 +1,38 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build ZIP
+        run: |
+          mkdir -p dist/woocommerce-cart-recovery
+          rsync -a \
+            --exclude='.git' \
+            --exclude='.github' \
+            --exclude='dist' \
+            --exclude='node_modules' \
+            --exclude='vendor' \
+            --exclude='*.log' \
+            --exclude='AGENTS.md' \
+            --exclude='SECURITY_STATUS.md' \
+            . dist/woocommerce-cart-recovery/
+          cd dist
+          zip -r ../woocommerce-cart-recovery.zip woocommerce-cart-recovery/
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: woocommerce-cart-recovery.zip
+          generate_release_notes: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

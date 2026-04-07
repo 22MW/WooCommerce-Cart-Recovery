@@ -24,6 +24,12 @@ define('WCCR_PLUGIN_URL', plugin_dir_url(__FILE__));
 
 require_once WCCR_PLUGIN_DIR . 'includes/class-requirements.php';
 require_once WCCR_PLUGIN_DIR . 'includes/class-installer.php';
+
+if (is_admin()) {
+	require_once WCCR_PLUGIN_DIR . 'includes/class-github-updater.php';
+	(new WCCR_Github_Updater())->register_hooks();
+}
+
 require_once WCCR_PLUGIN_DIR . 'includes/class-action-scheduler.php';
 require_once WCCR_PLUGIN_DIR . 'includes/interfaces/interface-locale-resolver.php';
 require_once WCCR_PLUGIN_DIR . 'includes/locale/class-default-locale-resolver.php';
