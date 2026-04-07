@@ -217,6 +217,20 @@ final class WCCR_Cart_Repository {
 	}
 
 	/**
+	 * Delete open cart rows for one WooCommerce session.
+	 */
+	public function delete_open_carts_by_session_key( string $session_key ): void {
+		global $wpdb;
+
+		$wpdb->query(
+			$wpdb->prepare(
+				"DELETE FROM {$this->table} WHERE session_key = %s AND status IN ('active','abandoned','clicked')",
+				$session_key
+			)
+		);
+	}
+
+	/**
 	 * Count clicked carts, including recovered carts that were clicked first.
 	 */
 	public function count_clicked(): int {

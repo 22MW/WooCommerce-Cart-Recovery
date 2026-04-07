@@ -136,13 +136,17 @@ final class WCCR_Abandoned_Carts_Page {
 		<div class="wccr-dashboard-actions">
 			<form method="post" class="wccr-run-now-form">
 				<?php wp_nonce_field( 'wccr_run_now', 'wccr_run_now_nonce' ); ?>
-				<?php submit_button( __( 'Run now', 'vfwoo_woocommerce-cart-recovery' ), 'secondary', 'wccr_run_now', false ); ?>
 				<p class="description"><?php esc_html_e( 'Runs abandoned-cart detection, unpaid-order sync and recovery email queue immediately.', 'vfwoo_woocommerce-cart-recovery' ); ?></p>
+				<div class="wccr-run-now-form__actions">
+					<?php submit_button( __( 'Run now', 'vfwoo_woocommerce-cart-recovery' ), 'secondary', 'wccr_run_now', false ); ?>
+				</div>
 			</form>
 			<form method="post" class="wccr-run-now-form">
 				<?php wp_nonce_field( 'wccr_import_unpaid_orders', 'wccr_import_unpaid_nonce' ); ?>
-				<?php submit_button( __( 'Import unpaid orders', 'vfwoo_woocommerce-cart-recovery' ), 'secondary', 'wccr_import_unpaid', false ); ?>
 				<p class="description"><?php esc_html_e( 'Imports existing pending and failed WooCommerce orders that match the recovery rules.', 'vfwoo_woocommerce-cart-recovery' ); ?></p>
+				<div class="wccr-run-now-form__actions">
+					<?php submit_button( __( 'Import unpaid orders', 'vfwoo_woocommerce-cart-recovery' ), 'secondary', 'wccr_import_unpaid', false ); ?>
+				</div>
 			</form>
 		</div>
 		<?php
@@ -262,7 +266,7 @@ final class WCCR_Abandoned_Carts_Page {
 		}
 		?>
 		<div class="wccr-meta-line">
-			<?php foreach ( $meta as $item ) : ?>
+			<?php foreach ( array_values( $meta ) as $index => $item ) : ?>
 				<div class="wccr-meta-line__item">
 					<span class="wccr-meta-line__label"><?php echo esc_html( (string) $item['label'] ); ?></span>
 					<span class="wccr-meta-line__separator">-</span>
@@ -270,6 +274,9 @@ final class WCCR_Abandoned_Carts_Page {
 						<?php echo ! empty( $item['is_html'] ) ? wp_kses_post( (string) $item['value'] ) : esc_html( (string) $item['value'] ); ?>
 					</span>
 				</div>
+				<?php if ( $index < count( $meta ) - 1 ) : ?>
+					<span class="wccr-meta-line__pipe">|</span>
+				<?php endif; ?>
 			<?php endforeach; ?>
 		</div>
 		<?php
@@ -283,11 +290,27 @@ final class WCCR_Abandoned_Carts_Page {
 	private function render_card_actions( array $cart ): void {
 		?>
 		<div class="wccr-actions">
+			<?php $this->render_email_steps_toggle( $cart ); ?>
 			<form method="post" class="wccr-delete-form">
 				<?php wp_nonce_field( 'wccr_delete_cart_' . absint( $cart['id'] ), 'wccr_delete_nonce' ); ?>
 				<input type="hidden" name="wccr_delete_cart_id" value="<?php echo esc_attr( absint( $cart['id'] ) ); ?>">
 				<button type="submit" class="button button-link-delete"><?php esc_html_e( 'Delete', 'vfwoo_woocommerce-cart-recovery' ); ?></button>
 			</form>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Render the toggle button used to show or hide email steps.
+	 *
+	 * @param array<string, mixed> $cart Recovery row.
+	 */
+	private function render_email_steps_toggle( array $cart ): void {
+		?>
+		<div class="wccr-email-steps-toggle">
+			<button type="button" class="button button-secondary wccr-email-toggle" data-target="wccr-email-steps-<?php echo esc_attr( absint( $cart['id'] ) ); ?>" aria-expanded="false">
+				<?php esc_html_e( 'View email details', 'vfwoo_woocommerce-cart-recovery' ); ?>
+			</button>
 		</div>
 		<?php
 	}
@@ -300,7 +323,7 @@ final class WCCR_Abandoned_Carts_Page {
 	private function render_email_steps( array $cart ): void {
 		$sent_logs = $this->email_log_repository->get_sent_logs_for_cart( absint( $cart['id'] ) );
 		?>
-		<div class="wccr-email-steps">
+		<div class="wccr-email-steps" id="wccr-email-steps-<?php echo esc_attr( absint( $cart['id'] ) ); ?>" hidden>
 			<?php foreach ( array( 1, 2, 3 ) as $step ) : ?>
 				<?php $this->render_email_step_card( $cart, $step, $sent_logs[ $step ] ?? array() ); ?>
 			<?php endforeach; ?>
@@ -318,15 +341,18 @@ final class WCCR_Abandoned_Carts_Page {
 		$items = $this->get_email_step_items( $cart, $step, $log );
 		?>
 		<div class="wccr-email-step-card">
-			<h3><?php echo esc_html( sprintf( /* translators: %d: email step number */ __( 'Email %d', 'vfwoo_woocommerce-cart-recovery' ), $step ) ); ?></h3>
+			<div class="wccr-card-title"><?php echo esc_html( sprintf( /* translators: %d: email step number */ __( 'Email %d', 'vfwoo_woocommerce-cart-recovery' ), $step ) ); ?></div>
 			<?php if ( ! empty( $items ) ) : ?>
 				<div class="wccr-email-step-card__meta">
-					<?php foreach ( $items as $item ) : ?>
+					<?php foreach ( array_values( $items ) as $index => $item ) : ?>
 						<div class="wccr-email-step-card__item">
 							<span class="wccr-email-step-card__label"><?php echo esc_html( (string) $item['label'] ); ?></span>
 							<span class="wccr-email-step-card__separator">-</span>
 							<span class="<?php echo esc_attr( $this->get_email_step_value_class( $item ) ); ?>"><?php echo esc_html( (string) $item['value'] ); ?></span>
 						</div>
+						<?php if ( $index < count( $items ) - 1 ) : ?>
+							<span class="wccr-email-step-card__pipe">|</span>
+						<?php endif; ?>
 					<?php endforeach; ?>
 				</div>
 			<?php endif; ?>

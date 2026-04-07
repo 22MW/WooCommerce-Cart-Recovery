@@ -26,10 +26,12 @@ final class WCCR_Plugin {
 		$email_log_repository = new WCCR_Email_Log_Repository();
 		$stats_repository     = new WCCR_Stats_Repository();
 		$locale_resolver      = new WCCR_Locale_Resolver_Manager();
+		$exclusion_service    = new WCCR_Exclusion_Service( $settings_repository );
+		$exclusion_translation_service = new WCCR_Exclusion_Translation_Service();
 		$email_eligibility    = new WCCR_Email_Eligibility_Service( $email_log_repository );
-		$cart_capture_service = new WCCR_Cart_Capture_Service( $cart_repository, $locale_resolver );
+		$cart_capture_service = new WCCR_Cart_Capture_Service( $cart_repository, $locale_resolver, $exclusion_service );
 		$recovery_service     = new WCCR_Recovery_Service( $cart_repository, $email_log_repository );
-		$pending_detector     = new WCCR_Pending_Order_Detector( $cart_repository, $locale_resolver, $settings_repository );
+		$pending_detector     = new WCCR_Pending_Order_Detector( $cart_repository, $locale_resolver, $settings_repository, $exclusion_service );
 		$coupon_service       = new WCCR_Coupon_Service();
 		$email_renderer       = new WCCR_Email_Renderer( $coupon_service );
 		$email_scheduler      = new WCCR_Email_Scheduler( $cart_repository, $email_log_repository, $settings_repository, $email_eligibility, $coupon_service, $email_renderer, $recovery_service );
@@ -43,7 +45,7 @@ final class WCCR_Plugin {
 		);
 		$checkout->register_hooks();
 
-		$settings_page = new WCCR_Settings_Page( $settings_repository, $locale_resolver, $detector, $email_scheduler, $pending_detector );
+		$settings_page = new WCCR_Settings_Page( $settings_repository, $locale_resolver, $exclusion_translation_service, $detector, $email_scheduler, $pending_detector );
 		$settings_page->register_hooks();
 
 		$admin = new WCCR_Admin_Menu(

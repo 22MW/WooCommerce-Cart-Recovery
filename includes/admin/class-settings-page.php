@@ -8,6 +8,7 @@ final class WCCR_Settings_Page {
 	public function __construct(
 		private WCCR_Settings_Repository $settings_repository,
 		private WCCR_Locale_Resolver_Manager $locale_resolver,
+		private WCCR_Exclusion_Translation_Service $exclusion_translation_service,
 		private WCCR_Abandoned_Cart_Detector $detector,
 		private WCCR_Email_Scheduler $email_scheduler,
 		private WCCR_Pending_Order_Detector $pending_order_detector
@@ -18,6 +19,8 @@ final class WCCR_Settings_Page {
 		add_action( 'admin_init', array( $this, 'maybe_save' ) );
 		add_action( 'admin_init', array( $this, 'maybe_run_now' ) );
 		add_action( 'admin_init', array( $this, 'maybe_import_unpaid_orders' ) );
+		add_action( 'wp_ajax_wccr_search_excluded_products', array( $this, 'ajax_search_excluded_products' ) );
+		add_action( 'wp_ajax_wccr_search_excluded_terms', array( $this, 'ajax_search_excluded_terms' ) );
 	}
 
 	/**
@@ -41,6 +44,8 @@ final class WCCR_Settings_Page {
 			'cleanup_days'          => absint( $_POST['cleanup_days'] ?? 90 ),
 			'coupon_expiry_days'    => absint( $_POST['coupon_expiry_days'] ?? 7 ),
 			'from_name'             => sanitize_text_field( wp_unslash( $_POST['from_name'] ?? '' ) ),
+			'excluded_product_ids'  => $this->exclusion_translation_service->expand_product_ids( $this->collect_id_list( $_POST['excluded_product_ids'] ?? array() ) ),
+			'excluded_term_ids'     => $this->exclusion_translation_service->expand_term_ids( $this->collect_id_list( $_POST['excluded_term_ids'] ?? array() ) ),
 			'steps'                 => array(),
 		);
 		$locales  = $this->locale_resolver->get_available_locales();
@@ -164,12 +169,15 @@ final class WCCR_Settings_Page {
 		?>
 		<form method="post">
 			<?php wp_nonce_field( 'wccr_save_settings', 'wccr_settings_nonce' ); ?>
-			<table class="form-table">
-				<tr><th><label for="abandon_after_minutes"><?php esc_html_e( 'Mark cart abandoned after minutes', 'vfwoo_woocommerce-cart-recovery' ); ?></label></th><td><input type="number" name="abandon_after_minutes" id="abandon_after_minutes" value="<?php echo esc_attr( $settings['abandon_after_minutes'] ); ?>" min="1"></td></tr>
-				<tr><th><label for="cleanup_days"><?php esc_html_e( 'Cleanup data after days', 'vfwoo_woocommerce-cart-recovery' ); ?></label></th><td><input type="number" name="cleanup_days" id="cleanup_days" value="<?php echo esc_attr( $settings['cleanup_days'] ); ?>" min="1"></td></tr>
-				<tr><th><label for="coupon_expiry_days"><?php esc_html_e( 'Coupon expiry days', 'vfwoo_woocommerce-cart-recovery' ); ?></label></th><td><input type="number" name="coupon_expiry_days" id="coupon_expiry_days" value="<?php echo esc_attr( $settings['coupon_expiry_days'] ); ?>" min="1"></td></tr>
-			</table>
+			<div class="wccr-card">
+				<div class="wccr-settings-top-grid">
+					<p><label for="abandon_after_minutes"><?php esc_html_e( 'Mark cart abandoned after minutes', 'vfwoo_woocommerce-cart-recovery' ); ?><br><input type="number" name="abandon_after_minutes" id="abandon_after_minutes" value="<?php echo esc_attr( $settings['abandon_after_minutes'] ); ?>" min="1"></label></p>
+					<p><label for="cleanup_days"><?php esc_html_e( 'Cleanup data after days', 'vfwoo_woocommerce-cart-recovery' ); ?><br><input type="number" name="cleanup_days" id="cleanup_days" value="<?php echo esc_attr( $settings['cleanup_days'] ); ?>" min="1"></label></p>
+					<p><label for="coupon_expiry_days"><?php esc_html_e( 'Coupon expiry days', 'vfwoo_woocommerce-cart-recovery' ); ?><br><input type="number" name="coupon_expiry_days" id="coupon_expiry_days" value="<?php echo esc_attr( $settings['coupon_expiry_days'] ); ?>" min="1"></label></p>
+				</div>
+			</div>
 
+			<?php $this->render_exclusion_settings( $settings ); ?>
 			<?php $this->render_step_cards( $settings ); ?>
 			<?php $this->render_locale_tabs( $settings, $locales ); ?>
 
@@ -227,17 +235,63 @@ final class WCCR_Settings_Page {
 	}
 
 	/**
+	 * Normalize one list of object IDs from the submitted settings form.
+	 *
+	 * @param mixed $ids Raw ID list.
+	 * @return array<int, int>
+	 */
+	private function collect_id_list( $ids ): array {
+		if ( ! is_array( $ids ) ) {
+			return array();
+		}
+
+		return array_values(
+			array_unique(
+				array_filter(
+					array_map( 'absint', $ids )
+				)
+			)
+		);
+	}
+
+	/**
+	 * Render the exclusion selectors used by capture and unpaid-order import.
+	 *
+	 * @param array<string, mixed> $settings Plugin settings.
+	 */
+	private function render_exclusion_settings( array $settings ): void {
+		$selected_products = $this->get_selected_product_items( array_map( 'absint', $settings['excluded_product_ids'] ?? array() ) );
+		$selected_terms    = $this->get_selected_term_items( array_map( 'absint', $settings['excluded_term_ids'] ?? array() ) );
+		?>
+		<div class="wccr-card">
+			<div class="wccr-section-title"><?php esc_html_e( 'Recovery exclusions', 'vfwoo_woocommerce-cart-recovery' ); ?></div>
+			<p class="description"><?php esc_html_e( 'If a cart or unpaid order contains any excluded product or taxonomy term, it will not be captured or imported into recovery.', 'vfwoo_woocommerce-cart-recovery' ); ?></p>
+			<div class="wccr-exclusion-grid">
+				<?php $this->render_exclusion_autocomplete( 'products', __( 'Excluded products', 'vfwoo_woocommerce-cart-recovery' ), __( 'Start typing a product name…', 'vfwoo_woocommerce-cart-recovery' ), 'excluded_product_ids[]', $selected_products ); ?>
+				<?php $this->render_exclusion_autocomplete( 'terms', __( 'Excluded taxonomy terms', 'vfwoo_woocommerce-cart-recovery' ), __( 'Start typing a taxonomy term…', 'vfwoo_woocommerce-cart-recovery' ), 'excluded_term_ids[]', $selected_terms ); ?>
+			</div>
+		</div>
+		<?php
+	}
+
+	/**
 	 * Render global step cards shared across every language.
 	 *
 	 * @param array<string, mixed> $settings Plugin settings.
 	 */
 	private function render_step_cards( array $settings ): void {
+		?>
+		<div class="wccr-section-title"><?php esc_html_e( 'Email configuration', 'vfwoo_woocommerce-cart-recovery' ); ?></div>
+		<div class="wccr-step-grid">
+		<?php
 		foreach ( array( 1, 2, 3 ) as $step ) {
 			$step_settings = isset( $settings['steps'][ $step ] ) && is_array( $settings['steps'][ $step ] ) ? $settings['steps'][ $step ] : array();
 			?>
 			<div class="wccr-card">
-				<h2><?php echo esc_html( sprintf( /* translators: %d: email step number */ __( 'Email step %d', 'vfwoo_woocommerce-cart-recovery' ), $step ) ); ?></h2>
-				<p><label><input type="checkbox" name="steps[<?php echo esc_attr( $step ); ?>][enabled]" value="1" <?php checked( ! empty( $step_settings['enabled'] ) ); ?>> <?php esc_html_e( 'Enabled', 'vfwoo_woocommerce-cart-recovery' ); ?></label></p>
+				<div class="wccr-step-card__header">
+					<div class="wccr-card-title"><?php echo esc_html( sprintf( /* translators: %d: email step number */ __( 'Email %d', 'vfwoo_woocommerce-cart-recovery' ), $step ) ); ?></div>
+					<label class="wccr-step-card__toggle"><input type="checkbox" name="steps[<?php echo esc_attr( $step ); ?>][enabled]" value="1" <?php checked( ! empty( $step_settings['enabled'] ) ); ?>> <span><?php esc_html_e( 'Enabled', 'vfwoo_woocommerce-cart-recovery' ); ?></span></label>
+				</div>
 				<p><label><?php esc_html_e( 'Delay minutes', 'vfwoo_woocommerce-cart-recovery' ); ?> <input type="number" name="steps[<?php echo esc_attr( $step ); ?>][delay_minutes]" value="<?php echo esc_attr( $step_settings['delay_minutes'] ?? 60 ); ?>"></label></p>
 				<p><label><?php esc_html_e( 'Discount type', 'vfwoo_woocommerce-cart-recovery' ); ?>
 					<select name="steps[<?php echo esc_attr( $step ); ?>][discount_type]">
@@ -251,6 +305,206 @@ final class WCCR_Settings_Page {
 			</div>
 			<?php
 		}
+		?>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Render one autocomplete selector with selected chips and hidden inputs.
+	 *
+	 * @param array<int, array{id:int,label:string}> $selected_items Selected items.
+	 */
+	private function render_exclusion_autocomplete( string $type, string $label, string $placeholder, string $input_name, array $selected_items ): void {
+		?>
+		<div class="wccr-exclusion-field" data-type="<?php echo esc_attr( $type ); ?>" data-input-name="<?php echo esc_attr( $input_name ); ?>">
+			<label for="wccr-exclusion-search-<?php echo esc_attr( $type ); ?>"><strong><?php echo esc_html( $label ); ?></strong></label>
+			<div class="wccr-exclusion-field__box">
+				<input type="search" id="wccr-exclusion-search-<?php echo esc_attr( $type ); ?>" class="wccr-exclusion-field__search" placeholder="<?php echo esc_attr( $placeholder ); ?>" autocomplete="off">
+				<div class="wccr-exclusion-field__results" hidden></div>
+				<div class="wccr-exclusion-field__selected">
+					<?php foreach ( $selected_items as $item ) : ?>
+						<?php $this->render_selected_exclusion_chip( $input_name, $item ); ?>
+					<?php endforeach; ?>
+				</div>
+			</div>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Render one selected exclusion chip with its hidden input.
+	 *
+	 * @param array{id:int,label:string} $item Selected item.
+	 */
+	private function render_selected_exclusion_chip( string $input_name, array $item ): void {
+		?>
+		<span class="wccr-exclusion-chip" data-id="<?php echo esc_attr( $item['id'] ); ?>">
+			<span class="wccr-exclusion-chip__label"><?php echo esc_html( $item['label'] ); ?></span>
+			<button type="button" class="wccr-exclusion-chip__remove" aria-label="<?php esc_attr_e( 'Remove exclusion', 'vfwoo_woocommerce-cart-recovery' ); ?>">×</button>
+			<input type="hidden" name="<?php echo esc_attr( $input_name ); ?>" value="<?php echo esc_attr( $item['id'] ); ?>">
+		</span>
+		<?php
+	}
+
+	/**
+	 * Build representative product chips from stored expanded IDs.
+	 *
+	 * @param array<int, int> $stored_ids Expanded stored IDs.
+	 * @return array<int, array{id:int,label:string}>
+	 */
+	private function get_selected_product_items( array $stored_ids ): array {
+		$items   = array();
+		$handled = array();
+
+		foreach ( $stored_ids as $product_id ) {
+			if ( isset( $handled[ $product_id ] ) ) {
+				continue;
+			}
+
+			$product = wc_get_product( $product_id );
+			if ( ! $product instanceof WC_Product ) {
+				continue;
+			}
+
+			foreach ( $this->exclusion_translation_service->get_related_product_ids( $product_id ) as $related_id ) {
+				$handled[ $related_id ] = true;
+			}
+
+			$items[] = array(
+				'id'    => $product_id,
+				'label' => sprintf( '%1$s (#%2$d)', $product->get_name(), $product_id ),
+			);
+		}
+
+		return $items;
+	}
+
+	/**
+	 * Build representative term chips from stored expanded IDs.
+	 *
+	 * @param array<int, int> $stored_ids Expanded stored IDs.
+	 * @return array<int, array{id:int,label:string}>
+	 */
+	private function get_selected_term_items( array $stored_ids ): array {
+		$items   = array();
+		$handled = array();
+
+		foreach ( $stored_ids as $term_id ) {
+			if ( isset( $handled[ $term_id ] ) ) {
+				continue;
+			}
+
+			$term = get_term( $term_id );
+			if ( ! $term instanceof WP_Term ) {
+				continue;
+			}
+
+			foreach ( $this->exclusion_translation_service->get_related_term_ids( $term_id ) as $related_id ) {
+				$handled[ $related_id ] = true;
+			}
+
+			$items[] = array(
+				'id'    => $term_id,
+				'label' => sprintf( '%1$s: %2$s (#%3$d)', $this->get_taxonomy_label( $term->taxonomy ), $term->name, $term_id ),
+			);
+		}
+
+		return $items;
+	}
+
+	/**
+	 * AJAX search for excluded products.
+	 */
+	public function ajax_search_excluded_products(): void {
+		$this->assert_exclusion_search_request();
+
+		$term     = isset( $_GET['term'] ) ? sanitize_text_field( wp_unslash( $_GET['term'] ) ) : '';
+		$products = wc_get_products(
+			array(
+				'limit'   => 20,
+				'status'  => array( 'publish', 'private' ),
+				'return'  => 'objects',
+				'search'  => '*' . $term . '*',
+				'orderby' => 'title',
+				'order'   => 'ASC',
+			)
+		);
+		$results  = array();
+
+		foreach ( $products as $product ) {
+			if ( ! $product instanceof WC_Product ) {
+				continue;
+			}
+
+			$results[] = array(
+				'id'    => $product->get_id(),
+				'label' => sprintf( '%1$s (#%2$d)', $product->get_name(), $product->get_id() ),
+			);
+		}
+
+		wp_send_json_success( $results );
+	}
+
+	/**
+	 * AJAX search for excluded taxonomy terms.
+	 */
+	public function ajax_search_excluded_terms(): void {
+		$this->assert_exclusion_search_request();
+
+		$term = isset( $_GET['term'] ) ? sanitize_text_field( wp_unslash( $_GET['term'] ) ) : '';
+		$terms = get_terms(
+			array(
+				'taxonomy'   => $this->get_supported_product_taxonomies(),
+				'hide_empty' => false,
+				'number'     => 20,
+				'search'     => $term,
+			)
+		);
+		$results = array();
+
+		if ( ! is_wp_error( $terms ) ) {
+			foreach ( $terms as $taxonomy_term ) {
+				if ( ! $taxonomy_term instanceof WP_Term ) {
+					continue;
+				}
+
+				$results[] = array(
+					'id'    => $taxonomy_term->term_id,
+					'label' => sprintf( '%1$s: %2$s (#%3$d)', $this->get_taxonomy_label( $taxonomy_term->taxonomy ), $taxonomy_term->name, $taxonomy_term->term_id ),
+				);
+			}
+		}
+
+		wp_send_json_success( $results );
+	}
+
+	/**
+	 * Validate one exclusion search request.
+	 */
+	private function assert_exclusion_search_request(): void {
+		check_ajax_referer( 'wccr_exclusion_search', 'nonce' );
+
+		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+			wp_send_json_error( array(), 403 );
+		}
+	}
+
+	/**
+	 * Return supported product taxonomies for term exclusions.
+	 *
+	 * @return array<int, string>
+	 */
+	private function get_supported_product_taxonomies(): array {
+		return array_values( array_diff( get_object_taxonomies( 'product', 'names' ), array( 'product_type', 'product_visibility' ) ) );
+	}
+
+	/**
+	 * Return a readable taxonomy label.
+	 */
+	private function get_taxonomy_label( string $taxonomy ): string {
+		$taxonomy_object = get_taxonomy( $taxonomy );
+		return $taxonomy_object instanceof WP_Taxonomy ? $taxonomy_object->label : $taxonomy;
 	}
 
 	/**
@@ -328,7 +582,7 @@ final class WCCR_Settings_Page {
 		$step_settings = $this->settings_repository->get_localized_step_settings( $settings, $step, $locale );
 		?>
 		<div class="wccr-card">
-			<h3><?php echo esc_html( sprintf( __( 'Email step %d', 'vfwoo_woocommerce-cart-recovery' ), $step ) ); ?></h3>
+			<div class="wccr-card-title"><?php echo esc_html( sprintf( __( 'Email %d', 'vfwoo_woocommerce-cart-recovery' ), $step ) ); ?></div>
 			<p><label><?php esc_html_e( 'Subject', 'vfwoo_woocommerce-cart-recovery' ); ?><br><input type="text" class="large-text" name="steps[<?php echo esc_attr( $step ); ?>][translations][<?php echo esc_attr( $locale ); ?>][subject]" value="<?php echo esc_attr( $step_settings['subject'] ?? '' ); ?>"></label></p>
 			<p><label><?php esc_html_e( 'Body', 'vfwoo_woocommerce-cart-recovery' ); ?><br><textarea class="large-text" rows="6" name="steps[<?php echo esc_attr( $step ); ?>][translations][<?php echo esc_attr( $locale ); ?>][body]"><?php echo esc_textarea( $step_settings['body'] ?? '' ); ?></textarea></label></p>
 			<p class="description"><?php esc_html_e( 'Available variables: {recovery_link}, {coupon_code}, {coupon_label}, {cart_total}, {site_name}, {customer_name}', 'vfwoo_woocommerce-cart-recovery' ); ?></p>

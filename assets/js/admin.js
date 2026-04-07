@@ -135,7 +135,237 @@
 		activateLocaleTab( button );
 	}
 
+	/**
+	 * Toggle email step visibility inside one recovery card.
+	 *
+	 * @param {MouseEvent} event Browser click event.
+	 * @return {void}
+	 */
+	function handleEmailToggleClick( event ) {
+		var button = event.target.closest( '.wccr-email-toggle' );
+		var targetId;
+		var panel;
+		var isExpanded;
+
+		if ( ! button ) {
+			return;
+		}
+
+		targetId = button.getAttribute( 'data-target' );
+		panel = targetId ? document.getElementById( targetId ) : null;
+		if ( ! panel ) {
+			return;
+		}
+
+		isExpanded = button.getAttribute( 'aria-expanded' ) === 'true';
+		button.setAttribute( 'aria-expanded', isExpanded ? 'false' : 'true' );
+		button.textContent = isExpanded ? getLabel( 'showEmailsLabel', 'View email details' ) : getLabel( 'hideEmailsLabel', 'Hide email details' );
+		panel.hidden = isExpanded;
+	}
+
+	/**
+	 * Build one selected exclusion chip.
+	 *
+	 * @param {string} inputName Hidden input name.
+	 * @param {Object} item      Selected item.
+	 * @return {HTMLElement}
+	 */
+	function buildExclusionChip( inputName, item ) {
+		var chip = document.createElement( 'span' );
+		var label = document.createElement( 'span' );
+		var remove = document.createElement( 'button' );
+		var input = document.createElement( 'input' );
+
+		chip.className = 'wccr-exclusion-chip';
+		chip.setAttribute( 'data-id', String( item.id ) );
+
+		label.className = 'wccr-exclusion-chip__label';
+		label.textContent = item.label;
+
+		remove.type = 'button';
+		remove.className = 'wccr-exclusion-chip__remove';
+		remove.setAttribute( 'aria-label', 'Remove exclusion' );
+		remove.textContent = '×';
+
+		input.type = 'hidden';
+		input.name = inputName;
+		input.value = String( item.id );
+
+		chip.appendChild( label );
+		chip.appendChild( remove );
+		chip.appendChild( input );
+
+		return chip;
+	}
+
+	/**
+	 * Hide results for one exclusion field.
+	 *
+	 * @param {HTMLElement} field Field wrapper.
+	 * @return {void}
+	 */
+	function hideExclusionResults( field ) {
+		var results = field.querySelector( '.wccr-exclusion-field__results' );
+		if ( ! results ) {
+			return;
+		}
+
+		results.innerHTML = '';
+		results.hidden = true;
+	}
+
+	/**
+	 * Render result buttons for one exclusion search.
+	 *
+	 * @param {HTMLElement} field   Field wrapper.
+	 * @param {Array}       results Result items.
+	 * @return {void}
+	 */
+	function renderExclusionResults( field, results ) {
+		var resultsBox = field.querySelector( '.wccr-exclusion-field__results' );
+		var selected = field.querySelector( '.wccr-exclusion-field__selected' );
+		var inputName = field.getAttribute( 'data-input-name' );
+
+		if ( ! resultsBox || ! selected || ! inputName ) {
+			return;
+		}
+
+		resultsBox.innerHTML = '';
+
+		if ( ! results.length ) {
+			resultsBox.textContent = getLabel( 'noResultsLabel', 'No matches found.' );
+			resultsBox.hidden = false;
+			return;
+		}
+
+		results.forEach( function ( item ) {
+			var button;
+
+			if ( selected.querySelector( '[data-id="' + item.id + '"]' ) ) {
+				return;
+			}
+
+			button = document.createElement( 'button' );
+			button.type = 'button';
+			button.className = 'wccr-exclusion-field__result';
+			button.textContent = item.label;
+			button.setAttribute( 'data-id', String( item.id ) );
+			button.setAttribute( 'data-label', item.label );
+			resultsBox.appendChild( button );
+		} );
+
+		resultsBox.hidden = ! resultsBox.childNodes.length;
+	}
+
+	/**
+	 * Fetch autocomplete matches for one exclusion field.
+	 *
+	 * @param {HTMLInputElement} input Search input.
+	 * @return {void}
+	 */
+	function fetchExclusionResults( input ) {
+		var field = input.closest( '.wccr-exclusion-field' );
+		var type = field ? field.getAttribute( 'data-type' ) : '';
+		var action = 'products' === type ? 'wccr_search_excluded_products' : 'wccr_search_excluded_terms';
+		var term = input.value.trim();
+		var resultsBox = field ? field.querySelector( '.wccr-exclusion-field__results' ) : null;
+
+		if ( ! field || ! resultsBox ) {
+			return;
+		}
+
+		if ( term.length < 2 ) {
+			hideExclusionResults( field );
+			return;
+		}
+
+		resultsBox.hidden = false;
+		resultsBox.textContent = getLabel( 'searchingLabel', 'Searching…' );
+
+		window.fetch(
+			WCCRAdminI18n.ajaxUrl + '?action=' + encodeURIComponent( action ) + '&nonce=' + encodeURIComponent( WCCRAdminI18n.exclusionNonce ) + '&term=' + encodeURIComponent( term ),
+			{ credentials: 'same-origin' }
+		)
+			.then( function ( response ) {
+				return response.json();
+			} )
+			.then( function ( payload ) {
+				renderExclusionResults( field, payload && payload.success && Array.isArray( payload.data ) ? payload.data : [] );
+			} )
+			.catch( function () {
+				hideExclusionResults( field );
+			} );
+	}
+
+	/**
+	 * Handle search input for exclusion fields.
+	 *
+	 * @param {InputEvent} event Browser input event.
+	 * @return {void}
+	 */
+	function handleExclusionSearchInput( event ) {
+		var input = event.target.closest( '.wccr-exclusion-field__search' );
+		if ( ! input ) {
+			return;
+		}
+
+		window.clearTimeout( input._wccrTimer );
+		input._wccrTimer = window.setTimeout( function () {
+			fetchExclusionResults( input );
+		}, 180 );
+	}
+
+	/**
+	 * Handle clicks on exclusion search results and remove buttons.
+	 *
+	 * @param {MouseEvent} event Browser click event.
+	 * @return {void}
+	 */
+	function handleExclusionFieldClick( event ) {
+		var remove = event.target.closest( '.wccr-exclusion-chip__remove' );
+		var result = event.target.closest( '.wccr-exclusion-field__result' );
+		var field;
+		var selected;
+		var input;
+
+		if ( remove ) {
+			remove.closest( '.wccr-exclusion-chip' ).remove();
+			return;
+		}
+
+		if ( ! result ) {
+			return;
+		}
+
+		field = result.closest( '.wccr-exclusion-field' );
+		selected = field ? field.querySelector( '.wccr-exclusion-field__selected' ) : null;
+		input = field ? field.querySelector( '.wccr-exclusion-field__search' ) : null;
+
+		if ( ! field || ! selected ) {
+			return;
+		}
+
+		selected.appendChild(
+			buildExclusionChip(
+				field.getAttribute( 'data-input-name' ),
+				{
+					id: result.getAttribute( 'data-id' ),
+					label: result.getAttribute( 'data-label' )
+				}
+			)
+		);
+
+		if ( input ) {
+			input.value = '';
+		}
+
+		hideExclusionResults( field );
+	}
+
 	document.addEventListener( 'click', handleCopyClick );
 	document.addEventListener( 'click', handleLocaleTabClick );
+	document.addEventListener( 'click', handleEmailToggleClick );
+	document.addEventListener( 'click', handleExclusionFieldClick );
+	document.addEventListener( 'input', handleExclusionSearchInput );
 	document.addEventListener( 'submit', handleDeleteSubmit );
 }() );

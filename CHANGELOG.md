@@ -12,6 +12,18 @@ The format is based on Keep a Changelog, and this project follows a simple `MAJO
 
 ### Fixed
 
+## [0.1.27] - 2026-04-07
+
+### Added
+- Added recovery exclusions for products and taxonomy terms, including autocomplete selectors and multilingual expansion across translated items.
+
+### Changed
+- Refined the Cart Recovery admin layout, header, settings cards, stats cards and cart cards for a cleaner responsive WooCommerce-style interface.
+- Added per-cart email detail toggles and moved the email details action next to delete in the cart card footer.
+
+### Fixed
+- Prevented excluded carts and excluded unpaid orders from being captured or imported into recovery.
+
 ## [0.1.26] - 2026-04-07
 
 ### Changed

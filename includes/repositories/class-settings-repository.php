@@ -20,6 +20,8 @@ final class WCCR_Settings_Repository {
 			'cleanup_days'          => 90,
 			'coupon_expiry_days'    => 7,
 			'from_name'             => get_bloginfo( 'name' ),
+			'excluded_product_ids'  => array(),
+			'excluded_term_ids'     => array(),
 			'steps'                 => self::get_default_steps( $default_locale ),
 		);
 	}
@@ -80,6 +82,9 @@ final class WCCR_Settings_Repository {
 	private function normalize_settings( array $settings ): array {
 		$default_locale = self::get_default_locale();
 		$default_steps  = self::get_default_steps( $default_locale );
+
+		$settings['excluded_product_ids'] = $this->normalize_id_list( $settings['excluded_product_ids'] ?? array() );
+		$settings['excluded_term_ids']    = $this->normalize_id_list( $settings['excluded_term_ids'] ?? array() );
 
 		foreach ( array( 1, 2, 3 ) as $step ) {
 			$step_settings            = isset( $settings['steps'][ $step ] ) && is_array( $settings['steps'][ $step ] ) ? $settings['steps'][ $step ] : array();
@@ -327,5 +332,25 @@ final class WCCR_Settings_Repository {
 	 */
 	private static function get_default_locale(): string {
 		return get_locale();
+	}
+
+	/**
+	 * Normalize one list of stored object IDs.
+	 *
+	 * @param mixed $ids Raw ID payload.
+	 * @return array<int, int>
+	 */
+	private function normalize_id_list( $ids ): array {
+		if ( ! is_array( $ids ) ) {
+			return array();
+		}
+
+		return array_values(
+			array_unique(
+				array_filter(
+					array_map( 'absint', $ids )
+				)
+			)
+		);
 	}
 }

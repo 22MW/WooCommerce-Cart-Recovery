@@ -3,7 +3,7 @@
  * Plugin Name:       WooCommerce Cart Recovery
  * Plugin URI:        https://example.com/plugins/woocommerce-cart-recovery
  * Description:       Recover abandoned WooCommerce carts and pending orders with scheduled reminders, native coupons and locale-aware emails.
- * Version:           0.1.26
+ * Version:           0.1.27
  * Requires at least: 6.7
  * Requires PHP:      8.1
  * Author:            22MW
@@ -16,7 +16,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'WCCR_VERSION', '0.1.26' );
+define( 'WCCR_VERSION', '0.1.27' );
 define( 'WCCR_PLUGIN_FILE', __FILE__ );
 define( 'WCCR_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'WCCR_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
@@ -37,6 +37,8 @@ require_once WCCR_PLUGIN_DIR . 'includes/repositories/class-stats-repository.php
 require_once WCCR_PLUGIN_DIR . 'includes/domain/class-cart-capture-service.php';
 require_once WCCR_PLUGIN_DIR . 'includes/domain/class-abandoned-cart-detector.php';
 require_once WCCR_PLUGIN_DIR . 'includes/domain/class-pending-order-detector.php';
+require_once WCCR_PLUGIN_DIR . 'includes/domain/class-exclusion-service.php';
+require_once WCCR_PLUGIN_DIR . 'includes/domain/class-exclusion-translation-service.php';
 require_once WCCR_PLUGIN_DIR . 'includes/domain/class-coupon-service.php';
 require_once WCCR_PLUGIN_DIR . 'includes/domain/class-email-eligibility-service.php';
 require_once WCCR_PLUGIN_DIR . 'includes/domain/class-email-renderer.php';

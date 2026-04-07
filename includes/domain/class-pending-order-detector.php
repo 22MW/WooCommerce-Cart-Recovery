@@ -8,7 +8,8 @@ final class WCCR_Pending_Order_Detector {
 	public function __construct(
 		private WCCR_Cart_Repository $cart_repository,
 		private WCCR_Locale_Resolver_Manager $locale_resolver,
-		private WCCR_Settings_Repository $settings_repository
+		private WCCR_Settings_Repository $settings_repository,
+		private WCCR_Exclusion_Service $exclusion_service
 	) {}
 
 	/**
@@ -111,6 +112,10 @@ final class WCCR_Pending_Order_Detector {
 		$items = $this->get_order_items_snapshot( $order );
 
 		if ( empty( $items ) ) {
+			return 'skipped';
+		}
+
+		if ( $this->exclusion_service->payload_is_excluded( $items ) ) {
 			return 'skipped';
 		}
 

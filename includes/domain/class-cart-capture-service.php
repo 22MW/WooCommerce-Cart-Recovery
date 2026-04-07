@@ -7,7 +7,8 @@ defined( 'ABSPATH' ) || exit;
 final class WCCR_Cart_Capture_Service {
 	public function __construct(
 		private WCCR_Cart_Repository $cart_repository,
-		private WCCR_Locale_Resolver_Manager $locale_resolver
+		private WCCR_Locale_Resolver_Manager $locale_resolver,
+		private WCCR_Exclusion_Service $exclusion_service
 	) {}
 
 	/**
@@ -40,6 +41,12 @@ final class WCCR_Cart_Capture_Service {
 			return;
 		}
 
+		$session_key = (string) WC()->session->get_customer_id();
+		if ( $this->exclusion_service->payload_is_excluded( $items ) ) {
+			$this->cart_repository->delete_open_carts_by_session_key( $session_key );
+			return;
+		}
+
 		$user_id = get_current_user_id() ?: null;
 		$email   = $email ?: ( is_user_logged_in() ? wp_get_current_user()->user_email : null );
 		$email   = $email ? sanitize_email( $email ) : '';
@@ -51,7 +58,7 @@ final class WCCR_Cart_Capture_Service {
 		$customer_name = $customer_name ?: $this->get_current_customer_name();
 
 		$this->cart_repository->upsert_active_cart(
-			(string) WC()->session->get_customer_id(),
+			$session_key,
 			$user_id,
 			$email,
 			$customer_name ? sanitize_text_field( $customer_name ) : null,
