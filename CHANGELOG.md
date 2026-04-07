@@ -4,6 +4,18 @@ All notable changes to this project should be documented in this file.
 
 The format is based on Keep a Changelog, and this project follows a simple `MAJOR.MINOR.PATCH` versioning scheme.
 
+## [0.1.37] - 2026-04-08
+
+### Fixed
+
+- GitHub updater: `filter_plugin_updates()` acepta `object|false` para evitar fatal error cuando el transient no está inicializado.
+- Email CTA: eliminado whitespace entre `<td>` y `<a>` para evitar que `wpautop` inyecte un `<br>` en el botón de recuperación.
+- WPML: `get_default_locale()` usa los filtros `wpml_default_language` y `wpml_locale_from_language` en lugar de `get_locale()` para obtener el idioma por defecto del sitio, no el del admin.
+
+### Added
+
+- Botón "Reset to translated defaults" funciona via AJAX sin recargar la página.
+
 ## [0.1.36] - 2026-04-08
 
 ### Fixed

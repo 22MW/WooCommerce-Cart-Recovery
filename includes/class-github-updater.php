@@ -91,12 +91,12 @@ final class WCCR_Github_Updater
 	/**
 	 * Inject update info into the WP update transient.
 	 *
-	 * @param object $transient
-	 * @return object
+	 * @param object|false $transient
+	 * @return object|false
 	 */
-	public function filter_plugin_updates(object $transient): object
+	public function filter_plugin_updates(object|false $transient): object|false
 	{
-		if (! isset($transient->checked) || ! is_array($transient->checked)) {
+		if (! is_object($transient) || ! isset($transient->checked) || ! is_array($transient->checked)) {
 			return $transient;
 		}
 
