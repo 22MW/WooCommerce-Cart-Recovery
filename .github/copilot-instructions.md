@@ -64,7 +64,16 @@
 
 - Cuando el usuario lo pida, incrementar el ultimo numero de version del plugin salvo que indique otra estrategia.
 - Cuando haya versionado solicitado, escribir los cambios en `CHANGELOG.md` de forma corta, precisa y concreta.
+- Actualizar `README.md` y `readme.txt` si alguna funcionalidad nueva lo requiere.
 - Commit y push, todos los archivos modificados, la version del plugin solo cuando el usuario lo pida de forma explicita.
+- El flujo completo de publicacion es:
+  1. Bump version en header del plugin y en `define('WCCR_VERSION', ...)`
+  2. Entrada en `CHANGELOG.md`
+  3. Actualizar `README.md` / `readme.txt` si aplica
+  4. `php -l` en archivos tocados + `git diff --check`
+  5. Commit + push a `dev`
+  6. Merge `dev` → `main` + push `main`
+  7. Tag `vX.Y.Z` + push tag → GitHub Action crea el Release con el ZIP automaticamente
 
 ## Reporte Final
 
