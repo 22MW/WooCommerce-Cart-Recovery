@@ -4,6 +4,11 @@ All notable changes to this project should be documented in this file.
 
 The format is based on Keep a Changelog, and this project follows a simple `MAJOR.MINOR.PATCH` versioning scheme.
 
+## [0.1.36] - 2026-04-08
+
+### Fixed
+- GitHub Actions workflow: añadido `permissions: contents: write` para que la Action pueda crear releases.
+
 ## [0.1.35] - 2026-04-07
 
 ### Fixed
