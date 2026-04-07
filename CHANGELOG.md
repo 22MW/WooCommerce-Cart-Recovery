@@ -12,6 +12,24 @@ The format is based on Keep a Changelog, and this project follows a simple `MAJO
 
 ### Fixed
 
+## [0.1.31] - 2026-04-07
+
+### Added
+
+- AES-256-CBC encryption for email and cart payload columns (GDPR Art. 32).
+- SHA-256 `email_hash` column for secure email lookups without exposing plaintext.
+- Automatic migration of existing plaintext PII on plugin activation.
+
+### Changed
+
+- Recovery tokens now expire after 30 days.
+- Session validation prevents reusing a cart row owned by a different logged-in user.
+- Error messages in email log sanitized and truncated to 500 characters.
+
+### Fixed
+
+- Deduplication queries now use `email_hash` instead of plaintext email.
+
 ## [0.1.30] - 2026-04-07
 
 ### Fixed

@@ -16,6 +16,7 @@
 	font-family: "Afacad", sans-serif;
 	color: var(--vfwoo-text);
 	padding-top: 24px;
+
 }
 
 .wccr-admin p,
@@ -25,6 +26,7 @@
 .wccr-admin textarea,
 .wccr-admin button {
 	font-family: inherit;
+	font-size: 18px;
 }
 
 .wccr-layout__header {
@@ -249,12 +251,13 @@
 .wccr-admin input[type="search"],
 .wccr-admin select,
 .wccr-admin textarea {
-	border: 0;
-	border-radius: 18px;
-	background: var(--vfwoo-bg);
-	box-shadow: none;
-	padding: 12px 16px;
-	color: var(--vfwoo-text);
+    border: 0;
+    border-radius: 18px;
+    background: var(--vfwoo-bg);
+    box-shadow: none;
+    padding: 3px 16px;
+    color: var(--vfwoo-text);
+    min-width: 200px;
 }
 
 .wccr-admin textarea {
@@ -580,7 +583,7 @@
 }
 
 .wccr-admin .wccr-meta-line__label {
-	font-size: 13px;
+	font-size: 16px;
 	font-weight: 700;
 	color: var(--vfwoo-verde);
 }
@@ -624,13 +627,13 @@
 }
 
 .wccr-admin .wccr-email-step-card__label {
-	font-size: 13px;
+	font-size: 16px;
 	font-weight: 700;
 	color: var(--vfwoo-verde);
 }
 
 .wccr-admin .wccr-email-step-card__value {
-	font-size: 13px;
+	font-size: 16px;
 	color: var(--vfwoo-text);
 }
 
@@ -655,6 +658,7 @@
 	border: 0;
 	background: var(--vfwoo-azul);
 	color: var(--vfwoo-white);
+	font-size: 16px;
 }
 
 .wccr-admin .button:hover,

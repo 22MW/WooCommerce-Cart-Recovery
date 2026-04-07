@@ -24,7 +24,8 @@ final class WCCR_Installer
 				id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
 				session_key VARCHAR(191) NOT NULL,
 				user_id BIGINT UNSIGNED NULL,
-				email VARCHAR(190) NULL,
+				email TEXT NULL,
+				email_hash VARCHAR(64) NOT NULL DEFAULT '',
 				customer_name VARCHAR(190) NULL,
 				locale VARCHAR(20) NOT NULL DEFAULT '',
 				cart_hash VARCHAR(64) NOT NULL DEFAULT '',
@@ -47,7 +48,7 @@ final class WCCR_Installer
 				PRIMARY KEY (id),
 				KEY session_key (session_key),
 				KEY status_activity (status, last_activity_gmt),
-				KEY email (email),
+				KEY email_hash (email_hash),
 				KEY linked_order_id (linked_order_id)
 			) {$charset_collate};"
 		);
@@ -74,5 +75,7 @@ final class WCCR_Installer
 		add_option('wccr_settings', WCCR_Settings_Repository::default_settings());
 
 		$wpdb->query($wpdb->prepare("UPDATE {$carts_table} SET status = %s, recovered_at_gmt = NULL WHERE status = %s AND (recovered_order_id IS NULL OR recovered_order_id = 0)", 'clicked', 'recovered'));
+
+		WCCR_Cart_Repository::migrate_encrypt_pii();
 	}
 }

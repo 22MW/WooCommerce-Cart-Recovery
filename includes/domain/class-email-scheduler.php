@@ -1,10 +1,11 @@
 <?php
-defined( 'ABSPATH' ) || exit;
+defined('ABSPATH') || exit;
 
 /**
  * Process the recovery email queue.
  */
-final class WCCR_Email_Scheduler {
+final class WCCR_Email_Scheduler
+{
 	public function __construct(
 		private WCCR_Cart_Repository $cart_repository,
 		private WCCR_Email_Log_Repository $email_log_repository,
@@ -18,23 +19,24 @@ final class WCCR_Email_Scheduler {
 	/**
 	 * Iterate eligible abandoned carts and send the next email step.
 	 */
-	public function process_queue(): void {
+	public function process_queue(): void
+	{
 		$settings = $this->settings_repository->get();
 		$carts    = $this->cart_repository->get_abandoned_carts();
 
-		foreach ( $carts as $cart ) {
-			$eligibility = $this->email_eligibility_service->get_status( $cart, $settings );
-			if ( empty( $eligibility['eligible_now'] ) ) {
+		foreach ($carts as $cart) {
+			$eligibility = $this->email_eligibility_service->get_status($cart, $settings);
+			if (empty($eligibility['eligible_now'])) {
 				continue;
 			}
 
-			$step          = absint( $eligibility['current_step'] ?? 0 );
-			$step_settings = $this->settings_repository->get_localized_step_settings( $settings, $step, (string) ( $cart['locale'] ?? '' ) );
-			if ( ! $step ) {
+			$step          = absint($eligibility['current_step'] ?? 0);
+			$step_settings = $this->settings_repository->get_localized_step_settings($settings, $step, (string) ($cart['locale'] ?? ''));
+			if (! $step) {
 				continue;
 			}
 
-			$this->send_step_email( $cart, $step, $step_settings, absint( $settings['coupon_expiry_days'] ?? 7 ) );
+			$this->send_step_email($cart, $step, $step_settings, absint($settings['coupon_expiry_days'] ?? 7));
 		}
 	}
 
@@ -44,51 +46,52 @@ final class WCCR_Email_Scheduler {
 	 * @param array<string, mixed> $cart          Cart row.
 	 * @param array<string, mixed> $step_settings Step settings.
 	 */
-	private function send_step_email( array $cart, int $step, array $step_settings, int $coupon_expiry_days ): void {
+	private function send_step_email(array $cart, int $step, array $step_settings, int $coupon_expiry_days): void
+	{
 		$email = array(
-			'subject' => sanitize_text_field( (string) ( $step_settings['subject'] ?? '' ) ),
+			'subject' => sanitize_text_field((string) ($step_settings['subject'] ?? '')),
 			'message' => '',
 		);
-		$switched = $this->switch_to_email_locale( (string) ( $cart['locale'] ?? '' ) );
+		$switched = $this->switch_to_email_locale((string) ($cart['locale'] ?? ''));
 
 		try {
-			$coupon_code  = $this->coupon_service->maybe_generate_coupon( $cart, $step_settings, $coupon_expiry_days );
-			$recovery_url = $this->recovery_service->build_recovery_url( absint( $cart['id'] ), $coupon_code, $step );
-			$email        = $this->email_renderer->render( $cart, $step_settings, $recovery_url, $coupon_code );
-			$subject      = sanitize_text_field( (string) ( $email['subject'] ?? '' ) );
-			$message      = (string) ( $email['message'] ?? '' );
-			if ( '' === $subject || '' === trim( wp_strip_all_tags( $message ) ) ) {
+			$coupon_code  = $this->coupon_service->maybe_generate_coupon($cart, $step_settings, $coupon_expiry_days);
+			$recovery_url = $this->recovery_service->build_recovery_url(absint($cart['id']), $coupon_code, $step);
+			$email        = $this->email_renderer->render($cart, $step_settings, $recovery_url, $coupon_code);
+			$subject      = sanitize_text_field((string) ($email['subject'] ?? ''));
+			$message      = (string) ($email['message'] ?? '');
+			if ('' === $subject || '' === trim(wp_strip_all_tags($message))) {
 				$this->email_log_repository->insert_failed(
-					absint( $cart['id'] ),
+					absint($cart['id']),
 					$step,
 					(string) $cart['locale'],
 					$subject,
-					__( 'Localized email content is empty.', 'vfwoo_woocommerce-cart-recovery' )
+					__('Localized email content is empty.', 'vfwoo_woocommerce-cart-recovery')
 				);
 				return;
 			}
 
-			$headers      = array( 'Content-Type: text/html; charset=UTF-8' );
+			$headers      = array('Content-Type: text/html; charset=UTF-8');
 
-			do_action( 'wccr_before_recovery_email_send', $cart, $step, $subject );
+			do_action('wccr_before_recovery_email_send', $cart, $step, $subject);
 
-			if ( wp_mail( sanitize_email( (string) $cart['email'] ), $subject, $message, $headers ) ) {
-				$this->email_log_repository->insert_sent( absint( $cart['id'] ), $step, (string) $cart['locale'], $subject, $coupon_code );
-				do_action( 'wccr_after_recovery_email_send', $cart, $step, $subject );
+			if (wp_mail(sanitize_email((string) $cart['email']), $subject, $message, $headers)) {
+				$this->email_log_repository->insert_sent(absint($cart['id']), $step, (string) $cart['locale'], $subject, $coupon_code);
+				do_action('wccr_after_recovery_email_send', $cart, $step, $subject);
 				return;
 			}
 
-			$this->email_log_repository->insert_failed( absint( $cart['id'] ), $step, (string) $cart['locale'], $subject, 'wp_mail failed' );
-		} catch ( Throwable $throwable ) {
+			$this->email_log_repository->insert_failed(absint($cart['id']), $step, (string) $cart['locale'], $subject, 'wp_mail failed');
+		} catch (Throwable $throwable) {
 			$this->email_log_repository->insert_failed(
-				absint( $cart['id'] ),
+				absint($cart['id']),
 				$step,
 				(string) $cart['locale'],
-				sanitize_text_field( (string) ( $email['subject'] ?? $step_settings['subject'] ?? '' ) ),
-				$throwable->getMessage()
+				sanitize_text_field((string) ($email['subject'] ?? $step_settings['subject'] ?? '')),
+				substr(sanitize_text_field($throwable->getMessage()), 0, 500)
 			);
 		} finally {
-			if ( $switched ) {
+			if ($switched) {
 				WCCR_Plugin_Locale_Switcher::restore_previous_locale();
 			}
 		}
@@ -97,7 +100,8 @@ final class WCCR_Email_Scheduler {
 	/**
 	 * Switch WordPress locale before rendering and sending an email.
 	 */
-	private function switch_to_email_locale( string $locale ): bool {
-		return WCCR_Plugin_Locale_Switcher::switch_to_locale( $locale );
+	private function switch_to_email_locale(string $locale): bool
+	{
+		return WCCR_Plugin_Locale_Switcher::switch_to_locale($locale);
 	}
 }
