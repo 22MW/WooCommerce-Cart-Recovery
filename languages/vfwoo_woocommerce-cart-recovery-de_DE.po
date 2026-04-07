@@ -484,24 +484,24 @@ msgid "{customer_name}, you left something in your cart"
 msgstr "{customer_name}, du hast etwas in deinem Warenkorb gelassen"
 
 #: includes/repositories/class-settings-repository.php:269
-msgid "Hi {customer_name}, your cart is still available. Click the button below to complete your order: {recovery_link}"
-msgstr "Hallo {customer_name}, dein Warenkorb ist noch verfügbar. Klicke auf die Schaltfläche unten, um deine Bestellung abzuschließen: {recovery_link}"
+msgid "Your cart is still available. Click the button below to complete your order."
+msgstr "Dein Warenkorb ist noch verfügbar. Klicke auf die Schaltfläche unten, um deine Bestellung abzuschließen."
 
 #: includes/repositories/class-settings-repository.php:277
 msgid "{customer_name}, your cart is waiting for you"
 msgstr "{customer_name}, dein Warenkorb wartet auf dich"
 
 #: includes/repositories/class-settings-repository.php:278
-msgid "Hi {customer_name}, complete your purchase here: {recovery_link}. Discount: {coupon_label}. Code: {coupon_code}"
-msgstr "Hallo {customer_name}, schließe hier deinen Kauf ab: {recovery_link}. Rabatt: {coupon_label}. Code: {coupon_code}"
+msgid "Complete your purchase below. Discount: {coupon_label}. Code: {coupon_code}"
+msgstr "Schließe deinen Kauf unten ab. Rabatt: {coupon_label}. Code: {coupon_code}"
 
 #: includes/repositories/class-settings-repository.php:286
 msgid "{customer_name}, last reminder for your cart"
 msgstr "{customer_name}, letzte Erinnerung an deinen Warenkorb"
 
 #: includes/repositories/class-settings-repository.php:287
-msgid "Hi {customer_name}, your cart can still be recovered here: {recovery_link}. Discount: {coupon_label}. Code: {coupon_code}"
-msgstr "Hallo {customer_name}, du kannst deinen Warenkorb hier noch wiederherstellen: {recovery_link}. Rabatt: {coupon_label}. Code: {coupon_code}"
+msgid "Your cart can still be recovered. Discount: {coupon_label}. Code: {coupon_code}"
+msgstr "Du kannst deinen Warenkorb noch wiederherstellen. Rabatt: {coupon_label}. Code: {coupon_code}"
 
 #. translators: %s: customer name
 #: templates/emails/base-email.php:9

@@ -484,24 +484,24 @@ msgid "{customer_name}, you left something in your cart"
 msgstr "{customer_name}, dejaste algo en tu carrito"
 
 #: includes/repositories/class-settings-repository.php:269
-msgid "Hi {customer_name}, your cart is still available. Click the button below to complete your order: {recovery_link}"
-msgstr "Hola {customer_name}, tu carrito sigue disponible. Haz clic en el botón de abajo para completar tu pedido: {recovery_link}"
+msgid "Your cart is still available. Click the button below to complete your order."
+msgstr "Tu carrito sigue disponible. Haz clic en el botón de abajo para completar tu pedido."
 
 #: includes/repositories/class-settings-repository.php:277
 msgid "{customer_name}, your cart is waiting for you"
 msgstr "{customer_name}, tu carrito te está esperando"
 
 #: includes/repositories/class-settings-repository.php:278
-msgid "Hi {customer_name}, complete your purchase here: {recovery_link}. Discount: {coupon_label}. Code: {coupon_code}"
-msgstr "Hola {customer_name}, completa tu compra aquí: {recovery_link}. Descuento: {coupon_label}. Código: {coupon_code}"
+msgid "Complete your purchase below. Discount: {coupon_label}. Code: {coupon_code}"
+msgstr "Completa tu compra a continuación. Descuento: {coupon_label}. Código: {coupon_code}"
 
 #: includes/repositories/class-settings-repository.php:286
 msgid "{customer_name}, last reminder for your cart"
 msgstr "{customer_name}, último recordatorio para tu carrito"
 
 #: includes/repositories/class-settings-repository.php:287
-msgid "Hi {customer_name}, your cart can still be recovered here: {recovery_link}. Discount: {coupon_label}. Code: {coupon_code}"
-msgstr "Hola {customer_name}, todavía puedes recuperar tu carrito aquí: {recovery_link}. Descuento: {coupon_label}. Código: {coupon_code}"
+msgid "Your cart can still be recovered. Discount: {coupon_label}. Code: {coupon_code}"
+msgstr "Todavía puedes recuperar tu carrito. Descuento: {coupon_label}. Código: {coupon_code}"
 
 #. translators: %s: customer name
 #: templates/emails/base-email.php:9

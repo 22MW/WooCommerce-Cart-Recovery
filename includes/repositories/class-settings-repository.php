@@ -266,7 +266,7 @@ final class WCCR_Settings_Repository {
 				'discount_amount' => 0,
 				'min_cart_total'  => 0,
 				'subject'         => __( '{customer_name}, you left something in your cart', 'vfwoo_woocommerce-cart-recovery' ),
-				'body'            => __( 'Hi {customer_name}, your cart is still available. Click the button below to complete your order: {recovery_link}', 'vfwoo_woocommerce-cart-recovery' ),
+				'body'            => __( 'Your cart is still available. Click the button below to complete your order.', 'vfwoo_woocommerce-cart-recovery' ),
 			),
 			2 => array(
 				'enabled'         => 1,
@@ -275,7 +275,7 @@ final class WCCR_Settings_Repository {
 				'discount_amount' => 5,
 				'min_cart_total'  => 0,
 				'subject'         => __( '{customer_name}, your cart is waiting for you', 'vfwoo_woocommerce-cart-recovery' ),
-				'body'            => __( 'Hi {customer_name}, complete your purchase here: {recovery_link}. Discount: {coupon_label}. Code: {coupon_code}', 'vfwoo_woocommerce-cart-recovery' ),
+				'body'            => __( 'Complete your purchase below. Discount: {coupon_label}. Code: {coupon_code}', 'vfwoo_woocommerce-cart-recovery' ),
 			),
 			3 => array(
 				'enabled'         => 1,
@@ -284,7 +284,7 @@ final class WCCR_Settings_Repository {
 				'discount_amount' => 10,
 				'min_cart_total'  => 0,
 				'subject'         => __( '{customer_name}, last reminder for your cart', 'vfwoo_woocommerce-cart-recovery' ),
-				'body'            => __( 'Hi {customer_name}, your cart can still be recovered here: {recovery_link}. Discount: {coupon_label}. Code: {coupon_code}', 'vfwoo_woocommerce-cart-recovery' ),
+				'body'            => __( 'Your cart can still be recovered. Discount: {coupon_label}. Code: {coupon_code}', 'vfwoo_woocommerce-cart-recovery' ),
 			),
 		);
 

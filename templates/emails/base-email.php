@@ -85,8 +85,8 @@ $text_align = is_rtl() ? 'right' : 'left';
 	</div>
 <?php endif; ?>
 
-<p style="margin-top:24px;">
-	<a href="<?php echo esc_url( $recovery_url ); ?>" class="button">
+<p style="margin-top:24px;text-align:center;">
+	<a href="<?php echo esc_url( $recovery_url ); ?>" style="background-color:#000;color:#fff;padding:14px 28px;text-decoration:none;border-radius:4px;display:inline-block;font-weight:bold;">
 		<?php esc_html_e( 'Recover your cart', 'vfwoo_woocommerce-cart-recovery' ); ?>
 	</a>
 </p>
