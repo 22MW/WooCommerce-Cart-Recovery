@@ -12,6 +12,15 @@ The format is based on Keep a Changelog, and this project follows a simple `MAJO
 
 ### Fixed
 
+## [0.1.28] - 2026-04-07
+
+### Added
+- Added Catalan catalog files (`ca_ES`) for the plugin strings.
+
+### Changed
+- Refreshed the translation catalogs (`pot/po/mo`) for Spanish, English and German with the latest admin and email strings.
+- Included the current admin CSS refinements in this release.
+
 ## [0.1.27] - 2026-04-07
 
 ### Added

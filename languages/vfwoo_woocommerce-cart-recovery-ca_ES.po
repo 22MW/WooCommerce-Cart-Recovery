@@ -4,19 +4,21 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WooCommerce Cart Recovery 0.1.27\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/woocommerce-cart-recovery\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
+"Last-Translator: 22MW <info@22mw.com>\n"
+"Language-Team: Català <info@22mw.com>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-04-07T04:44:45+00:00\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"X-Generator: WP-CLI 2.6.0\n"
+"Language: ca_ES\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"PO-Revision-Date: 2026-04-07 06:51+0200\n"
+"X-Generator: Codex\n"
 "X-Domain: vfwoo_woocommerce-cart-recovery\n"
+""
 
 #. Plugin Name of the plugin
 msgid "WooCommerce Cart Recovery"
-msgstr ""
+msgstr "WooCommerce Cart Recovery"
 
 #. Plugin URI of the plugin
 msgid "https://example.com/plugins/woocommerce-cart-recovery"
@@ -24,7 +26,7 @@ msgstr ""
 
 #. Description of the plugin
 msgid "Recover abandoned WooCommerce carts and pending orders with scheduled reminders, native coupons and locale-aware emails."
-msgstr ""
+msgstr "Recupera carrets abandonats de WooCommerce i comandes pendents amb recordatoris programats, cupons natius i emails adaptats a l’idioma."
 
 #. Author of the plugin
 msgid "22MW"
@@ -37,496 +39,496 @@ msgstr ""
 #: includes/admin/class-settings-page.php:164
 #: includes/admin/class-stats-page.php:17
 msgid "You do not have permission to access this page."
-msgstr ""
+msgstr "No tens permisos per accedir a aquesta pàgina."
 
 #: includes/admin/class-abandoned-carts-page.php:27
 #: includes/admin/class-admin-menu.php:28
 #: includes/admin/class-admin-menu.php:29
 #: includes/admin/class-admin-menu.php:55
 msgid "Cart Recovery"
-msgstr ""
+msgstr "Recuperació de carrets"
 
 #: includes/admin/class-abandoned-carts-page.php:104
 msgid "Recovery item and linked unpaid order deleted."
-msgstr ""
+msgstr "S’ha eliminat l’element de recuperació i la comanda impagada enllaçada."
 
 #: includes/admin/class-abandoned-carts-page.php:105
 msgid "Recovery item deleted."
-msgstr ""
+msgstr "S’ha eliminat l’element de recuperació."
 
 #: includes/admin/class-abandoned-carts-page.php:121
 #: includes/admin/class-stats-page.php:25
 msgid "Abandoned carts"
-msgstr ""
+msgstr "Carrets abandonats"
 
 #: includes/admin/class-abandoned-carts-page.php:122
 #: includes/admin/class-stats-page.php:26
 msgid "Recovery clicks"
-msgstr ""
+msgstr "Clics de recuperació"
 
 #: includes/admin/class-abandoned-carts-page.php:123
 #: includes/admin/class-stats-page.php:27
 msgid "Recovered carts"
-msgstr ""
+msgstr "Carrets recuperats"
 
 #: includes/admin/class-abandoned-carts-page.php:124
 #: includes/admin/class-stats-page.php:28
 msgid "Recovery rate"
-msgstr ""
+msgstr "Taxa de recuperació"
 
 #: includes/admin/class-abandoned-carts-page.php:125
 #: includes/admin/class-stats-page.php:29
 msgid "Recovered revenue"
-msgstr ""
+msgstr "Ingressos recuperats"
 
 #: includes/admin/class-abandoned-carts-page.php:126
 #: includes/admin/class-stats-page.php:30
 msgid "Emails sent"
-msgstr ""
+msgstr "Emails enviats"
 
 #: includes/admin/class-abandoned-carts-page.php:139
 msgid "Runs abandoned-cart detection, unpaid-order sync and recovery email queue immediately."
-msgstr ""
+msgstr "Executa immediatament la detecció de carrets abandonats, la sincronització de comandes impagades i la cua d’emails de recuperació."
 
 #: includes/admin/class-abandoned-carts-page.php:141
 msgid "Run now"
-msgstr ""
+msgstr "Executa ara"
 
 #: includes/admin/class-abandoned-carts-page.php:146
 msgid "Imports existing pending and failed WooCommerce orders that match the recovery rules."
-msgstr ""
+msgstr "Importa les comandes pendents i fallides de WooCommerce que compleixen les regles de recuperació."
 
 #: includes/admin/class-abandoned-carts-page.php:148
 msgid "Import unpaid orders"
-msgstr ""
+msgstr "Importa comandes impagades"
 
 #: includes/admin/class-abandoned-carts-page.php:162
 msgid "Sort by"
-msgstr ""
+msgstr "Ordena per"
 
 #: includes/admin/class-abandoned-carts-page.php:168
 msgid "Vista"
-msgstr ""
+msgstr "Vista"
 
 #: includes/admin/class-abandoned-carts-page.php:174
 msgid "Apply"
-msgstr ""
+msgstr "Aplica"
 
 #: includes/admin/class-abandoned-carts-page.php:221
 #: includes/admin/class-abandoned-carts-page.php:465
 msgid "No email"
-msgstr ""
+msgstr "Sense email"
 
 #: includes/admin/class-abandoned-carts-page.php:255
 msgid "Source"
-msgstr ""
+msgstr "Origen"
 
 #: includes/admin/class-abandoned-carts-page.php:256
 msgid "Linked order"
-msgstr ""
+msgstr "Comanda enllaçada"
 
 #: includes/admin/class-abandoned-carts-page.php:257
 #: includes/admin/class-abandoned-carts-page.php:488
 msgid "Order"
-msgstr ""
+msgstr "Comanda"
 
 #: includes/admin/class-abandoned-carts-page.php:258
 msgid "Last error"
-msgstr ""
+msgstr "Últim error"
 
 #: includes/admin/class-abandoned-carts-page.php:259
 msgid "Abandoned at"
-msgstr ""
+msgstr "Abandonat a"
 
 #: includes/admin/class-abandoned-carts-page.php:260
 msgid "Last update"
-msgstr ""
+msgstr "Última actualització"
 
 #: includes/admin/class-abandoned-carts-page.php:297
 msgid "Delete"
-msgstr ""
+msgstr "Esborra"
 
 #: includes/admin/class-abandoned-carts-page.php:312
 #: includes/admin/class-admin-menu.php:127
 msgid "View email details"
-msgstr ""
+msgstr "Veure detall dels emails"
 
 #. translators: %d: email step number
 #: includes/admin/class-abandoned-carts-page.php:344
 #: includes/admin/class-settings-page.php:292
 #: includes/admin/class-settings-page.php:585
 msgid "Email %d"
-msgstr ""
+msgstr "Email %d"
 
 #: includes/admin/class-abandoned-carts-page.php:379
 msgid "Most recent"
-msgstr ""
+msgstr "Més recents"
 
 #: includes/admin/class-abandoned-carts-page.php:380
 msgid "Oldest first"
-msgstr ""
+msgstr "Més antics primer"
 
 #: includes/admin/class-abandoned-carts-page.php:381
 msgid "Abandoned date"
-msgstr ""
+msgstr "Data d’abandonament"
 
 #: includes/admin/class-abandoned-carts-page.php:382
 msgid "Email A-Z"
-msgstr ""
+msgstr "Email A-Z"
 
 #: includes/admin/class-abandoned-carts-page.php:383
 msgid "Status"
-msgstr ""
+msgstr "Estat"
 
 #: includes/admin/class-abandoned-carts-page.php:384
 msgid "Purchased first"
-msgstr ""
+msgstr "Comprats primer"
 
 #: includes/admin/class-abandoned-carts-page.php:395
 msgid "Tarjetas"
-msgstr ""
+msgstr "Targetes"
 
 #: includes/admin/class-abandoned-carts-page.php:396
 msgid "Lista"
-msgstr ""
+msgstr "Llista"
 
 #: includes/admin/class-abandoned-carts-page.php:470
 msgid "Active"
-msgstr ""
+msgstr "Actiu"
 
 #: includes/admin/class-abandoned-carts-page.php:471
 msgid "Abandoned"
-msgstr ""
+msgstr "Abandonat"
 
 #: includes/admin/class-abandoned-carts-page.php:472
 #: includes/admin/class-abandoned-carts-page.php:633
 msgid "Clicked"
-msgstr ""
+msgstr "Clicat"
 
 #: includes/admin/class-abandoned-carts-page.php:473
 msgid "Recovered"
-msgstr ""
+msgstr "Recuperat"
 
 #: includes/admin/class-abandoned-carts-page.php:487
 msgid "Cart"
-msgstr ""
+msgstr "Carret"
 
 #: includes/admin/class-abandoned-carts-page.php:503
 msgid "Imported"
-msgstr ""
+msgstr "Importat"
 
 #: includes/admin/class-abandoned-carts-page.php:506
 msgid "Captured"
-msgstr ""
+msgstr "Capturat"
 
 #: includes/admin/class-abandoned-carts-page.php:576
 #: includes/admin/class-admin-menu.php:124
 msgid "Copy URL"
-msgstr ""
+msgstr "Copia URL"
 
 #: includes/admin/class-abandoned-carts-page.php:587
 #: includes/admin/class-abandoned-carts-page.php:596
 #: includes/admin/class-abandoned-carts-page.php:613
 msgid "Yes"
-msgstr ""
+msgstr "Sí"
 
 #: includes/admin/class-abandoned-carts-page.php:592
 #: includes/admin/class-abandoned-carts-page.php:597
 #: includes/admin/class-abandoned-carts-page.php:613
 #: includes/admin/class-abandoned-carts-page.php:663
 msgid "No"
-msgstr ""
+msgstr "No"
 
 #: includes/admin/class-abandoned-carts-page.php:612
 msgid "Sent"
-msgstr ""
+msgstr "Enviat"
 
 #: includes/admin/class-abandoned-carts-page.php:619
 msgid "Sent at"
-msgstr ""
+msgstr "Enviat el"
 
 #: includes/admin/class-abandoned-carts-page.php:627
 msgid "Coupon"
-msgstr ""
+msgstr "Cupó"
 
 #: includes/admin/class-abandoned-carts-page.php:638
 msgid "Resolved"
-msgstr ""
+msgstr "Resolt"
 
 #. translators: %s: recovered amount.
 #: includes/admin/class-abandoned-carts-page.php:668
 msgid "Yes (%s)"
-msgstr ""
+msgstr "Sí (%s)"
 
 #: includes/admin/class-admin-menu.php:53
 msgid "Plugin logo"
-msgstr ""
+msgstr "Logotip del plugin"
 
 #: includes/admin/class-admin-menu.php:58
 msgid "Cart Recovery sections"
-msgstr ""
+msgstr "Seccions de Recuperació de carrets"
 
 #: includes/admin/class-admin-menu.php:60
 msgid "Carts"
-msgstr ""
+msgstr "Carrets"
 
 #: includes/admin/class-admin-menu.php:63
 msgid "Settings"
-msgstr ""
+msgstr "Ajustos"
 
 #: includes/admin/class-admin-menu.php:125
 msgid "Copied"
-msgstr ""
+msgstr "Copiat"
 
 #: includes/admin/class-admin-menu.php:126
 msgid "Delete this recovery item?"
-msgstr ""
+msgstr "Vols esborrar aquest element de recuperació?"
 
 #: includes/admin/class-admin-menu.php:128
 msgid "Hide email details"
-msgstr ""
+msgstr "Ocultar detall dels emails"
 
 #: includes/admin/class-admin-menu.php:131
 msgid "Searching…"
-msgstr ""
+msgstr "Cercant…"
 
 #: includes/admin/class-admin-menu.php:132
 msgid "No matches found."
-msgstr ""
+msgstr "No s’han trobat coincidències."
 
 #: includes/admin/class-settings-page.php:70
 msgid "Settings saved."
-msgstr ""
+msgstr "Ajustos desats."
 
 #: includes/admin/class-settings-page.php:98
 msgid "Translated defaults restored."
-msgstr ""
+msgstr "S’han restaurat els valors predeterminats traduïts."
 
 #: includes/admin/class-settings-page.php:117
 msgid "Recovery detector and email queue executed manually."
-msgstr ""
+msgstr "El detector de recuperació i la cua d’emails s’han executat manualment."
 
 #: includes/admin/class-settings-page.php:152
 msgid "Cart Recovery Settings"
-msgstr ""
+msgstr "Ajustos de Recuperació de carrets"
 
 #: includes/admin/class-settings-page.php:174
 msgid "Mark cart abandoned after minutes"
-msgstr ""
+msgstr "Marca el carret com abandonat després de minuts"
 
 #: includes/admin/class-settings-page.php:175
 msgid "Cleanup data after days"
-msgstr ""
+msgstr "Neteja dades després de dies"
 
 #: includes/admin/class-settings-page.php:176
 msgid "Coupon expiry days"
-msgstr ""
+msgstr "Dies de caducitat del cupó"
 
 #: includes/admin/class-settings-page.php:184
 msgid "Save settings"
-msgstr ""
+msgstr "Desa ajustos"
 
 #: includes/admin/class-settings-page.php:196
 msgid "No eligible pending or failed orders were found."
-msgstr ""
+msgstr "No s’han trobat comandes pendents o fallides elegibles."
 
 #. translators: 1: reviewed count, 2: imported count, 3: merged count, 4: updated count, 5: skipped count
 #: includes/admin/class-settings-page.php:201
 msgid "Unpaid orders reviewed: %1$d. Imported: %2$d. Merged: %3$d. Updated: %4$d. Skipped: %5$d."
-msgstr ""
+msgstr "Comandes impagades revisades: %1$d. Importades: %2$d. Fusionades: %3$d. Actualitzades: %4$d. Omeses: %5$d."
 
 #: includes/admin/class-settings-page.php:267
 msgid "Recovery exclusions"
-msgstr ""
+msgstr "Exclusions de recuperació"
 
 #: includes/admin/class-settings-page.php:268
 msgid "If a cart or unpaid order contains any excluded product or taxonomy term, it will not be captured or imported into recovery."
-msgstr ""
+msgstr "Si un carret o una comanda impagada conté qualsevol producte o terme taxonòmic exclòs, no es capturarà ni s’importarà a la recuperació."
 
 #: includes/admin/class-settings-page.php:270
 msgid "Excluded products"
-msgstr ""
+msgstr "Productes exclosos"
 
 #: includes/admin/class-settings-page.php:270
 msgid "Start typing a product name…"
-msgstr ""
+msgstr "Comença a escriure un nom de producte…"
 
 #: includes/admin/class-settings-page.php:271
 msgid "Excluded taxonomy terms"
-msgstr ""
+msgstr "Termes taxonòmics exclosos"
 
 #: includes/admin/class-settings-page.php:271
 msgid "Start typing a taxonomy term…"
-msgstr ""
+msgstr "Comença a escriure un terme taxonòmic…"
 
 #: includes/admin/class-settings-page.php:284
 msgid "Email configuration"
-msgstr ""
+msgstr "Configuració d’emails"
 
 #. translators: %d: email step number
 #: includes/admin/class-settings-page.php:293
 msgid "Enabled"
-msgstr ""
+msgstr "Activat"
 
 #: includes/admin/class-settings-page.php:295
 msgid "Delay minutes"
-msgstr ""
+msgstr "Minuts d’espera"
 
 #: includes/admin/class-settings-page.php:296
 msgid "Discount type"
-msgstr ""
+msgstr "Tipus de descompte"
 
 #: includes/admin/class-settings-page.php:298
 msgid "None"
-msgstr ""
+msgstr "Cap"
 
 #: includes/admin/class-settings-page.php:299
 msgid "Percentage"
-msgstr ""
+msgstr "Percentatge"
 
 #: includes/admin/class-settings-page.php:300
 msgid "Fixed cart"
-msgstr ""
+msgstr "Import fix al carret"
 
 #: includes/admin/class-settings-page.php:303
 msgid "Discount amount"
-msgstr ""
+msgstr "Import del descompte"
 
 #: includes/admin/class-settings-page.php:304
 msgid "Minimum cart total"
-msgstr ""
+msgstr "Total mínim del carret"
 
 #: includes/admin/class-settings-page.php:344
 msgid "Remove exclusion"
-msgstr ""
+msgstr "Treu exclusió"
 
 #: includes/admin/class-settings-page.php:519
 msgid "Email languages"
-msgstr ""
+msgstr "Idiomes d’email"
 
 #: includes/admin/class-settings-page.php:586
 msgid "Subject"
-msgstr ""
+msgstr "Assumpte"
 
 #: includes/admin/class-settings-page.php:587
 msgid "Body"
-msgstr ""
+msgstr "Cos"
 
 #: includes/admin/class-settings-page.php:588
 msgid "Available variables: {recovery_link}, {coupon_code}, {coupon_label}, {cart_total}, {site_name}, {customer_name}"
-msgstr ""
+msgstr "Variables disponibles: {recovery_link}, {coupon_code}, {coupon_label}, {cart_total}, {site_name}, {customer_name}"
 
 #: includes/admin/class-settings-page.php:590
 msgid "Reset to translated defaults"
-msgstr ""
+msgstr "Restableix als valors predeterminats traduïts"
 
 #: includes/admin/class-stats-page.php:23
 msgid "Cart Recovery Statistics"
-msgstr ""
+msgstr "Estadístiques de Recuperació de carrets"
 
 #: includes/class-requirements.php:23
 msgid "WooCommerce Cart Recovery requires WooCommerce active and PHP 8.1 or higher."
-msgstr ""
+msgstr "WooCommerce Cart Recovery requereix WooCommerce actiu i PHP 8.1 o superior."
 
 #. translators: %s: formatted discount label.
 #: includes/domain/class-coupon-service.php:62
 msgid "%s off"
-msgstr ""
+msgstr "%s de descompte"
 
 #: includes/domain/class-email-eligibility-service.php:81
 msgid "Not abandoned"
-msgstr ""
+msgstr "No abandonat"
 
 #: includes/domain/class-email-eligibility-service.php:82
 msgid "Missing abandoned date"
-msgstr ""
+msgstr "Falta la data d’abandonament"
 
 #: includes/domain/class-email-eligibility-service.php:83
 msgid "All steps sent"
-msgstr ""
+msgstr "Tots els passos enviats"
 
 #: includes/domain/class-email-eligibility-service.php:84
 msgid "Step disabled"
-msgstr ""
+msgstr "Pas desactivat"
 
 #: includes/domain/class-email-eligibility-service.php:85
 msgid "Below minimum cart total"
-msgstr ""
+msgstr "Per sota del total mínim del carret"
 
 #: includes/domain/class-email-eligibility-service.php:86
 msgid "Invalid abandoned date"
-msgstr ""
+msgstr "Data d’abandonament no vàlida"
 
 #: includes/domain/class-email-eligibility-service.php:87
 msgid "Waiting delay"
-msgstr ""
+msgstr "Esperant retard"
 
 #: includes/domain/class-email-eligibility-service.php:88
 msgid "Ready to send"
-msgstr ""
+msgstr "A punt per enviar"
 
 #: includes/domain/class-email-renderer.php:252
 msgid "Total"
-msgstr ""
+msgstr "Total"
 
 #: includes/domain/class-email-renderer.php:266
 msgid "Discount code"
-msgstr ""
+msgstr "Codi de descompte"
 
 #: includes/domain/class-email-scheduler.php:66
 msgid "Localized email content is empty."
-msgstr ""
+msgstr "El contingut localitzat de l’email és buit."
 
 #: includes/repositories/class-settings-repository.php:268
 msgid "{customer_name}, you left something in your cart"
-msgstr ""
+msgstr "{customer_name}, vas deixar alguna cosa al teu carret"
 
 #: includes/repositories/class-settings-repository.php:269
 msgid "Hi {customer_name}, your cart is still available. Click the button below to complete your order: {recovery_link}"
-msgstr ""
+msgstr "Hola {customer_name}, el teu carret encara està disponible. Fes clic al botó de sota per completar la teva comanda: {recovery_link}"
 
 #: includes/repositories/class-settings-repository.php:277
 msgid "{customer_name}, your cart is waiting for you"
-msgstr ""
+msgstr "{customer_name}, el teu carret t’està esperant"
 
 #: includes/repositories/class-settings-repository.php:278
 msgid "Hi {customer_name}, complete your purchase here: {recovery_link}. Discount: {coupon_label}. Code: {coupon_code}"
-msgstr ""
+msgstr "Hola {customer_name}, completa la teva compra aquí: {recovery_link}. Descompte: {coupon_label}. Codi: {coupon_code}"
 
 #: includes/repositories/class-settings-repository.php:286
 msgid "{customer_name}, last reminder for your cart"
-msgstr ""
+msgstr "{customer_name}, últim recordatori del teu carret"
 
 #: includes/repositories/class-settings-repository.php:287
 msgid "Hi {customer_name}, your cart can still be recovered here: {recovery_link}. Discount: {coupon_label}. Code: {coupon_code}"
-msgstr ""
+msgstr "Hola {customer_name}, encara pots recuperar el teu carret aquí: {recovery_link}. Descompte: {coupon_label}. Codi: {coupon_code}"
 
 #. translators: %s: customer name
 #: templates/emails/base-email.php:9
 msgid "Hello %s,"
-msgstr ""
+msgstr "Hola %s,"
 
 #. translators: %s: discount label
 #: templates/emails/base-email.php:20
 msgid "Complete your order with %s."
-msgstr ""
+msgstr "Completa la teva comanda amb %s."
 
 #: templates/emails/base-email.php:30
 msgid "Your cart summary"
-msgstr ""
+msgstr "Resum del teu carret"
 
 #: templates/emails/base-email.php:35
 msgid "Product"
-msgstr ""
+msgstr "Producte"
 
 #: templates/emails/base-email.php:36
 msgid "Quantity"
-msgstr ""
+msgstr "Quantitat"
 
 #: templates/emails/base-email.php:37
 msgid "Price"
-msgstr ""
+msgstr "Preu"
 
 #: templates/emails/base-email.php:90
 msgid "Recover your cart"
-msgstr ""
+msgstr "Recupera el teu carret"

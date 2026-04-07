@@ -40,7 +40,7 @@
 	justify-content: space-between;
 	flex-wrap: wrap;
 	gap: 20px;
-	padding: 10px 0 10px 30px;
+	padding: 10px 30px;
 	background: var(--vfwoo-white);
 	border-radius: 20px;
 }
@@ -137,11 +137,6 @@
 }
 .wccr-admin .wccr-admin-pill{
 	min-height: 16px;
-}
-.wccr-admin .wccr-admin-pill.is-active {
-	background: var(--vfwoo-white);
-	color: var(--vfwoo-verde);
-	opacity: 1;
 }
 
 .wccr-admin .wccr-locale-tabs__button.is-active {
