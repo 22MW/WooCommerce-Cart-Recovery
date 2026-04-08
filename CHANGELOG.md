@@ -4,6 +4,12 @@ All notable changes to this project should be documented in this file.
 
 The format is based on Keep a Changelog, and this project follows a simple `MAJOR.MINOR.PATCH` versioning scheme.
 
+## [0.1.39] - 2026-04-08
+
+### Improved
+
+- Updater: modal de actualización muestra pestaña "Registro de cambios" con el body del release de GitHub, metadatos `requires` y `requires_php`, y autor con enlace.
+
 ## [0.1.38] - 2026-04-08
 
 ### Added

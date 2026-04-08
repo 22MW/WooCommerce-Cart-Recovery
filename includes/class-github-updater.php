@@ -150,14 +150,48 @@ final class WCCR_Github_Updater
 		$info->name          = 'WooCommerce Cart Recovery';
 		$info->slug          = self::SLUG;
 		$info->version       = $this->get_remote_version($release);
-		$info->author        = '22MW';
+		$info->author        = '<a href="https://github.com/22MW">22MW</a>';
 		$info->homepage      = 'https://github.com/' . self::REPO;
+		$info->requires      = '6.7';
+		$info->requires_php  = '8.1';
 		$info->download_link = $this->get_package_url($release);
 		$info->sections      = array(
 			'description' => 'Recover abandoned WooCommerce carts with scheduled emails, native coupons and locale-aware templates.',
+			'changelog'   => $this->format_release_changelog($release),
 		);
 
 		return $info;
+	}
+
+	/**
+	 * Convert GitHub release body (Markdown-like) to basic HTML for the WP changelog section.
+	 *
+	 * @param array<string,mixed> $release
+	 */
+	private function format_release_changelog(array $release): string
+	{
+		$body    = trim((string) ($release['body'] ?? ''));
+		$version = $this->get_remote_version($release);
+		$date    = substr((string) ($release['published_at'] ?? ''), 0, 10);
+
+		if ('' === $body) {
+			return '<p><strong>' . esc_html($version) . '</strong>' . ($date ? ' — ' . esc_html($date) : '') . '</p>';
+		}
+
+		// Convert markdown headings and lists to HTML.
+		$lines  = explode("\n", $body);
+		$output = '<p><strong>' . esc_html($version) . '</strong>' . ($date ? ' — ' . esc_html($date) : '') . '</p><ul>';
+		foreach ($lines as $line) {
+			$line = trim($line);
+			if ('' === $line) {
+				continue;
+			}
+			// Strip markdown list prefixes.
+			$line    = preg_replace('/^[-*]\s+/', '', $line) ?? $line;
+			$output .= '<li>' . esc_html($line) . '</li>';
+		}
+		$output .= '</ul>';
+		return $output;
 	}
 
 	/**
