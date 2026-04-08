@@ -363,10 +363,66 @@
 	}
 
 	/**
-	 * Handle clicks on "Reset to translated defaults" buttons.
+	 * Handle clicks on email sub-tab buttons inside a locale panel.
 	 *
 	 * @param {MouseEvent} event Browser click event.
 	 * @return {void}
+	 */
+	function handleEmailTabClick( event ) {
+		var button = event.target.closest( '.wccr-email-tabs__button' );
+		if ( ! button || button.disabled ) {
+			return;
+		}
+
+		var step  = button.getAttribute( 'data-email-tab' );
+		var panel = button.closest( '.wccr-locale-tabs__panel' );
+		if ( ! step || ! panel ) {
+			return;
+		}
+
+		panel.querySelectorAll( '.wccr-email-tabs__button' ).forEach( function ( btn ) {
+			var isActive = btn === button;
+			btn.classList.toggle( 'is-active', isActive );
+			btn.setAttribute( 'aria-selected', isActive ? 'true' : 'false' );
+		} );
+
+		panel.querySelectorAll( '.wccr-email-tabs__panel' ).forEach( function ( pane ) {
+			pane.classList.toggle( 'is-active', pane.getAttribute( 'data-email-panel' ) === step );
+		} );
+	}
+
+	/**
+	 * Sync disabled state of email tab buttons across all locale panels
+	 * based on the enabled switch for each step.
+	 *
+	 * @param {HTMLFormElement} form The settings form.
+	 * @return {void}
+	 */
+	function updateEmailTabStates( form ) {
+		[ 1, 2, 3 ].forEach( function ( step ) {
+			var checkbox = form.querySelector( 'input[name="steps[' + step + '][enabled]"]' );
+			var isEnabled = checkbox ? checkbox.checked : false;
+
+			form.querySelectorAll( '.wccr-email-tabs__button[data-step="' + step + '"]' ).forEach( function ( btn ) {
+				btn.disabled = ! isEnabled;
+				btn.classList.toggle( 'wccr-email-tab--disabled', ! isEnabled );
+
+				// If the active tab gets disabled, activate tab 1 instead.
+				if ( ! isEnabled && btn.classList.contains( 'is-active' ) ) {
+					var panel = btn.closest( '.wccr-locale-tabs__panel' );
+					if ( panel ) {
+						var firstBtn = panel.querySelector( '.wccr-email-tabs__button[data-step="1"]' );
+						if ( firstBtn ) {
+							firstBtn.click();
+						}
+					}
+				}
+			} );
+		} );
+	}
+
+	/**
+	 * Handle clicks on "Reset to translated defaults" buttons.
 	 */
 	function handleResetClick( event ) {
 		var button = event.target.closest( '.wccr-reset-translation' );
@@ -431,6 +487,7 @@
 	document.addEventListener( 'click', handleEmailToggleClick );
 	document.addEventListener( 'click', handleExclusionFieldClick );
 	document.addEventListener( 'click', handleResetClick );
+	document.addEventListener( 'click', handleEmailTabClick );
 	document.addEventListener( 'input', handleExclusionSearchInput );
 	document.addEventListener( 'submit', handleDeleteSubmit );
 
@@ -566,6 +623,7 @@
 			// Update step card visual state when its switch changes.
 			if ( target && target.type === 'checkbox' && target.name && target.name.indexOf( '[enabled]' ) !== -1 ) {
 				updateStepCardState( target );
+				updateEmailTabStates( form );
 			}
 
 			debouncedSave();
@@ -588,6 +646,7 @@
 				updateStepCardState( cb );
 			} );
 
+			updateEmailTabStates( form );
 			form.addEventListener( 'change', handleFormChange );
 		}
 

@@ -147,6 +147,75 @@
 	opacity: 1;
 }
 
+/* Locale sidebar: botones apilados verticalmente */
+.wccr-admin .wccr-locale-tabs__nav {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.wccr-admin .wccr-locale-tabs__nav .wccr-locale-tabs__button {
+	width: 100%;
+	justify-content: flex-start;
+	padding: 10px 18px;
+	border-radius: 14px;
+}
+
+/* Email sub-tabs horizontales */
+.wccr-admin .wccr-email-tabs__nav {
+	display: flex;
+	gap: 8px;
+	margin-bottom: 16px;
+	flex-wrap: wrap;
+}
+
+.wccr-admin .wccr-email-tabs__button {
+	appearance: none;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 38px;
+	padding: 6px 22px;
+	border: 0;
+	border-radius: 999px;
+	background: var(--vfwoo-white);
+	color: var(--vfwoo-verde);
+	font-size: 13px;
+	font-weight: 700;
+	text-transform: uppercase;
+	opacity: .75;
+	cursor: pointer;
+	transition: opacity .18s ease, background-color .18s ease;
+}
+
+.wccr-admin .wccr-email-tabs__button:hover {
+	background: var(--vfwoo-verde);
+	color: var(--vfwoo-white);
+	opacity: 1;
+}
+
+.wccr-admin .wccr-email-tabs__button.is-active {
+	background: var(--vfwoo-azul);
+	color: var(--vfwoo-white);
+	opacity: 1;
+}
+
+.wccr-admin .wccr-email-tab--disabled,
+.wccr-admin .wccr-email-tabs__button[disabled] {
+	opacity: 0.35;
+	pointer-events: none;
+	cursor: not-allowed;
+}
+
+/* Email sub-panels */
+.wccr-admin .wccr-email-tabs__panel {
+	display: none;
+}
+
+.wccr-admin .wccr-email-tabs__panel.is-active {
+	display: block;
+}
+
 .wccr-admin .notice,
 .wccr-admin div.updated,
 .wccr-admin div.error {
@@ -482,7 +551,7 @@
 .wccr-toast {
 	position: fixed;
 	right: -200px;
-	top: 44px;
+	top: 75px;
 	opacity: 0;
 	transition: right .4s ease, opacity .4s ease;
 	border-radius: 22px;
@@ -501,13 +570,13 @@
 }
 
 .wccr-toast.success {
-	background: var(--vfwoo-verde);
-	color: #fff;
+	background: var(--vfwoo-azul);
+	color: var(--vfwoo-white);
 }
 
 .wccr-toast.error {
-	background: #c0392b;
-	color: #fff;
+	background: var(--vfwoo-rojo);
+	color: var(--vfwoo-white);
 }
 
 .wccr-admin .wccr-step-grid .wccr-card input[type="number"],
@@ -525,8 +594,26 @@
 	margin-top: 75px;
 }
 
+/* ── Settings 2-col layout ──────────────────────────────── */
+.wccr-admin .wccr-settings-layout {
+	display: flex;
+	gap: 24px;
+	margin-top: 32px;
+	align-items: flex-start;
+}
+
+.wccr-admin .wccr-settings-layout__sidebar {
+	width: 160px;
+	flex-shrink: 0;
+}
+
+.wccr-admin .wccr-settings-layout__content {
+	flex: 1;
+	min-width: 0;
+}
+
 .wccr-admin .wccr-locale-tabs__panels {
-	margin-top: 18px;
+	margin-top: 0;
 }
 
 .wccr-admin .wccr-locale-tabs__panel {

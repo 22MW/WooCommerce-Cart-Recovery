@@ -608,16 +608,20 @@ final class WCCR_Settings_Page
 	private function render_locale_tabs(array $settings, array $locales): void
 	{
 	?>
-		<div class="wccr-locale-tabs">
-			<div class="wccr-locale-tabs__nav" role="tablist" aria-label="<?php esc_attr_e('Email languages', 'vfwoo_woocommerce-cart-recovery'); ?>">
-				<?php foreach (array_values($locales) as $index => $locale) : ?>
-					<?php $this->render_locale_tab_button($locale, 0 === $index); ?>
-				<?php endforeach; ?>
+		<div class="wccr-settings-layout">
+			<div class="wccr-settings-layout__sidebar">
+				<div class="wccr-locale-tabs__nav" role="tablist" aria-label="<?php esc_attr_e('Email languages', 'vfwoo_woocommerce-cart-recovery'); ?>">
+					<?php foreach (array_values($locales) as $index => $locale) : ?>
+						<?php $this->render_locale_tab_button($locale, 0 === $index); ?>
+					<?php endforeach; ?>
+				</div>
 			</div>
-			<div class="wccr-locale-tabs__panels">
-				<?php foreach (array_values($locales) as $index => $locale) : ?>
-					<?php $this->render_locale_tab_panel($settings, $locale, 0 === $index); ?>
-				<?php endforeach; ?>
+			<div class="wccr-settings-layout__content">
+				<div class="wccr-locale-tabs__panels">
+					<?php foreach (array_values($locales) as $index => $locale) : ?>
+						<?php $this->render_locale_tab_panel($settings, $locale, 0 === $index); ?>
+					<?php endforeach; ?>
+				</div>
 			</div>
 		</div>
 	<?php
@@ -659,9 +663,29 @@ final class WCCR_Settings_Page
 			id="wccr-locale-panel-<?php echo esc_attr($locale_key); ?>"
 			role="tabpanel"
 			aria-labelledby="wccr-locale-tab-<?php echo esc_attr($locale_key); ?>">
-			<?php foreach (array(1, 2, 3) as $step) : ?>
-				<?php $this->render_locale_translation_card($settings, $step, (string) $locale['locale']); ?>
-			<?php endforeach; ?>
+			<div class="wccr-email-tabs__nav" role="tablist">
+				<?php foreach (array(1, 2, 3) as $step) :
+					$step_enabled = ! empty($settings['steps'][$step]['enabled']);
+				?>
+					<button
+						type="button"
+						class="wccr-email-tabs__button<?php echo esc_attr(1 === $step ? ' is-active' : ''); ?><?php echo esc_attr(! $step_enabled ? ' wccr-email-tab--disabled' : ''); ?>"
+						data-email-tab="<?php echo esc_attr($step); ?>"
+						data-step="<?php echo esc_attr($step); ?>"
+						<?php echo ! $step_enabled ? 'disabled aria-disabled="true"' : ''; ?>
+						role="tab"
+						aria-selected="<?php echo esc_attr(1 === $step ? 'true' : 'false'); ?>">
+						<?php echo esc_html(sprintf(__('Email %d', 'vfwoo_woocommerce-cart-recovery'), $step)); ?>
+					</button>
+				<?php endforeach; ?>
+			</div>
+			<div class="wccr-email-tabs__panels">
+				<?php foreach (array(1, 2, 3) as $step) : ?>
+					<div class="wccr-email-tabs__panel<?php echo esc_attr(1 === $step ? ' is-active' : ''); ?>" data-email-panel="<?php echo esc_attr($step); ?>">
+						<?php $this->render_locale_translation_card($settings, $step, (string) $locale['locale']); ?>
+					</div>
+				<?php endforeach; ?>
+			</div>
 		</div>
 	<?php
 	}
