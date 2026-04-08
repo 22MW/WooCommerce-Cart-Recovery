@@ -55,7 +55,7 @@ final class WCCR_Cart_Repository
 	 * @param float       $cart_total     Order total.
 	 * @param string      $currency       Order currency.
 	 */
-	public function upsert_unpaid_order(int $order_id, ?int $user_id, ?string $email, ?string $customer_name, string $locale, array $cart_payload, float $cart_total, string $currency): string
+	public function upsert_unpaid_order(int $order_id, ?int $user_id, ?string $email, ?string $customer_name, string $locale, array $cart_payload, float $cart_total, string $currency, string $order_date_gmt = ''): string
 	{
 		$cart_hash   = $this->build_cart_hash($cart_payload, $cart_total);
 		$existing_id = $this->find_merge_candidate_for_order($order_id, $email, $cart_hash, $cart_total);
@@ -68,8 +68,29 @@ final class WCCR_Cart_Repository
 			return ! empty($existing['linked_order_id']) ? 'updated' : 'merged';
 		}
 
-		$this->insert_new_abandoned_order_cart($data, $now_gmt);
+		$this->insert_new_abandoned_order_cart($data, $now_gmt, $order_date_gmt);
 		return 'imported';
+	}
+
+	/**
+	 * Return true if an open order-backed recovery row already exists for this email.
+	 */
+	public function has_open_recovery_row_for_email(string $email): bool
+	{
+		global $wpdb;
+
+		if ('' === $email) {
+			return false;
+		}
+
+		$email_hash = self::compute_email_hash($email);
+
+		return (bool) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT id FROM {$this->table} WHERE email_hash = %s AND status IN ('abandoned','clicked') AND primary_source = 'order' LIMIT 1",
+				$email_hash
+			)
+		);
 	}
 
 	/**
@@ -479,14 +500,16 @@ final class WCCR_Cart_Repository
 	 *
 	 * @param array<string, mixed> $data Row values.
 	 */
-	private function insert_new_abandoned_order_cart(array $data, string $now_gmt): void
+	private function insert_new_abandoned_order_cart(array $data, string $now_gmt, string $order_date_gmt = ''): void
 	{
 		global $wpdb;
 
+		$date_to_use = ('' !== $order_date_gmt) ? $order_date_gmt : $now_gmt;
+
 		$data['status']            = 'abandoned';
-		$data['last_activity_gmt'] = $now_gmt;
-		$data['abandoned_at_gmt']  = $now_gmt;
-		$data['created_at_gmt']    = $now_gmt;
+		$data['last_activity_gmt'] = $date_to_use;
+		$data['abandoned_at_gmt']  = $date_to_use;
+		$data['created_at_gmt']    = $date_to_use;
 
 		$wpdb->insert($this->table, $data);
 	}

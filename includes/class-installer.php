@@ -111,7 +111,7 @@ final class WCCR_Installer
 		);
 
 		add_option('wccr_settings', WCCR_Settings_Repository::default_settings());
-
+                add_option('wccr_first_activated_at', gmdate('Y-m-d H:i:s'));
 		$wpdb->query($wpdb->prepare("UPDATE {$carts_table} SET status = %s, recovered_at_gmt = NULL WHERE status = %s AND (recovered_order_id IS NULL OR recovered_order_id = 0)", 'clicked', 'recovered'));
 
 		WCCR_Cart_Repository::migrate_encrypt_pii();

@@ -55,16 +55,24 @@ final class WCCR_Pending_Order_Detector
 		$results  = $this->get_empty_import_results();
 		$settings = $this->settings_repository->get();
 		$minutes  = max(1, absint($settings['abandon_after_minutes'] ?? 60));
-		$orders   = wc_get_orders(
-			array(
-				'status'       => array('pending', 'failed'),
-				'limit'        => $manual_import ? 200 : 50,
-				'orderby'      => 'date',
-				'order'        => 'ASC',
-				'date_created' => '<=' . gmdate('Y-m-d H:i:s', time() - ($minutes * MINUTE_IN_SECONDS)),
-				'return'       => 'ids',
-			)
+
+		$query = array(
+			'status'       => array('pending', 'failed'),
+			'limit'        => $manual_import ? 200 : 50,
+			'orderby'      => 'date',
+			'order'        => 'ASC',
+			'date_created' => '<=' . gmdate('Y-m-d H:i:s', time() - ($minutes * MINUTE_IN_SECONDS)),
+			'return'       => 'ids',
 		);
+
+		if (! $manual_import) {
+			$first_activated = (string) get_option('wccr_first_activated_at', '');
+			if ('' !== $first_activated) {
+				$query['date_created'] .= '&>=' . $first_activated;
+			}
+		}
+
+		$orders = wc_get_orders($query);
 
 		foreach ($orders as $order_id) {
 			++$results['reviewed'];
@@ -126,11 +134,24 @@ final class WCCR_Pending_Order_Detector
 			return 'skipped';
 		}
 
-		$user_id = $order->get_user_id() ? absint($order->get_user_id()) : null;
-		$email   = $order->get_billing_email() ? sanitize_email($order->get_billing_email()) : null;
-		$name    = trim(trim((string) $order->get_billing_first_name()) . ' ' . trim((string) $order->get_billing_last_name()));
-		$locale  = $order->get_meta('_wccr_locale', true);
-		$locale  = is_string($locale) && '' !== $locale ? sanitize_text_field($locale) : sanitize_text_field($this->locale_resolver->resolve_locale($user_id));
+		$user_id    = $order->get_user_id() ? absint($order->get_user_id()) : null;
+		$email      = $order->get_billing_email() ? sanitize_email($order->get_billing_email()) : null;
+		$order_date = $order->get_date_created();
+		$order_ts   = $order_date ? $order_date->getTimestamp() : 0;
+
+		if ($email && $order_ts && $this->customer_has_later_completed_order($email, $order_ts)) {
+			return 'skipped';
+		}
+
+		if ($email && $this->cart_repository->has_open_recovery_row_for_email($email)) {
+			return 'skipped';
+		}
+
+		$name   = trim(trim((string) $order->get_billing_first_name()) . ' ' . trim((string) $order->get_billing_last_name()));
+		$locale = $order->get_meta('_wccr_locale', true);
+		$locale = is_string($locale) && '' !== $locale ? sanitize_text_field($locale) : sanitize_text_field($this->locale_resolver->resolve_locale($user_id));
+
+		$order_date_gmt = $order_date ? $order_date->date('Y-m-d H:i:s') : '';
 
 		$result = $this->cart_repository->upsert_unpaid_order(
 			absint($order->get_id()),
@@ -141,6 +162,7 @@ final class WCCR_Pending_Order_Detector
 			$items,
 			(float) $order->get_total('edit'),
 			$order->get_currency(),
+			$order_date_gmt,
 		);
 
 		$this->mark_order_as_plugin_managed($order);
@@ -268,6 +290,24 @@ final class WCCR_Pending_Order_Detector
 		if (function_exists('WC') && WC()->session) {
 			WC()->session->__unset('wccr_recovered_cart_id');
 		}
+	}
+
+	/**
+	 * Return true if the customer has a later completed/processing/on-hold order.
+	 */
+	private function customer_has_later_completed_order(string $email, int $order_timestamp): bool
+	{
+		$later_orders = wc_get_orders(
+			array(
+				'billing_email' => $email,
+				'status'        => array('completed', 'processing', 'on-hold'),
+				'date_created'  => '>=' . gmdate('Y-m-d H:i:s', $order_timestamp + 1),
+				'limit'         => 1,
+				'return'        => 'ids',
+			)
+		);
+
+		return ! empty($later_orders);
 	}
 
 	/**

@@ -4,6 +4,15 @@ All notable changes to this project should be documented in this file.
 
 The format is based on Keep a Changelog, and this project follows a simple `MAJOR.MINOR.PATCH` versioning scheme.
 
+## [0.1.46] - 2026-04-08
+
+### Fixed
+
+- Pending/failed orders created before the plugin was activated are no longer auto-imported by the recurring sync task; only orders created after activation are considered. The manual import button still covers the full historical backlog.
+- Orders whose customer email has a later completed, processing, or on-hold order are now skipped during import, preventing recovery emails to customers who already purchased.
+- When a customer has multiple failed or pending orders, only the oldest eligible one is imported; subsequent orders for the same email are skipped to avoid duplicate recovery flows.
+- Imported order-backed carts now use the original order date for `created_at_gmt`, `last_activity_gmt`, and `abandoned_at_gmt` instead of the import timestamp.
+
 ## [0.1.45] - 2026-04-08
 
 ### Fixed
