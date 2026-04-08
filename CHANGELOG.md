@@ -4,6 +4,13 @@ All notable changes to this project should be documented in this file.
 
 The format is based on Keep a Changelog, and this project follows a simple `MAJOR.MINOR.PATCH` versioning scheme.
 
+## [0.1.43] - 2026-04-08
+
+### Changed
+
+- Improved default email body text for all 3 steps: removed inline coupon dump, replaced with natural 2-3 sentence copy per step
+- Updated translations for en_US, es_ES, de_DE, ca_ES
+
 ## [0.1.42] - 2026-04-08
 
 ### Fixed

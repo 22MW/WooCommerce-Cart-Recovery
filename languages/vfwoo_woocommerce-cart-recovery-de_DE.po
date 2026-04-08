@@ -484,24 +484,24 @@ msgid "{customer_name}, you left something in your cart"
 msgstr "{customer_name}, du hast etwas in deinem Warenkorb gelassen"
 
 #: includes/repositories/class-settings-repository.php:269
-msgid "Your cart is still available. Click the button below to complete your order."
-msgstr "Dein Warenkorb ist noch verfügbar. Klicke auf die Schaltfläche unten, um deine Bestellung abzuschließen."
+msgid "Hi {customer_name}, you left some items in your cart at {site_name}. We saved everything for you — just click the button below to complete your order in a few clicks."
+msgstr "Hallo {customer_name}, du hast einige Artikel in deinem Warenkorb bei {site_name} gelassen. Wir haben alles gespeichert — klicke auf die Schaltfläche unten, um deine Bestellung in wenigen Schritten abzuschließen."
 
 #: includes/repositories/class-settings-repository.php:277
 msgid "{customer_name}, your cart is waiting for you"
 msgstr "{customer_name}, dein Warenkorb wartet auf dich"
 
 #: includes/repositories/class-settings-repository.php:278
-msgid "Complete your purchase below. Discount: {coupon_label}. Code: {coupon_code}"
-msgstr "Schließe deinen Kauf unten ab. Rabatt: {coupon_label}. Code: {coupon_code}"
+msgid "Hi {customer_name}, your cart at {site_name} is still waiting. We have added a special discount for you — use the code {coupon_code} at checkout. Don't wait too long!"
+msgstr "Hallo {customer_name}, dein Warenkorb bei {site_name} wartet noch auf dich. Wir haben einen Sonderrabatt für dich hinzugefügt — verwende den Code {coupon_code} beim Checkout. Zögere nicht zu lange!"
 
 #: includes/repositories/class-settings-repository.php:286
 msgid "{customer_name}, last reminder for your cart"
 msgstr "{customer_name}, letzte Erinnerung an deinen Warenkorb"
 
 #: includes/repositories/class-settings-repository.php:287
-msgid "Your cart can still be recovered. Discount: {coupon_label}. Code: {coupon_code}"
-msgstr "Du kannst deinen Warenkorb noch wiederherstellen. Rabatt: {coupon_label}. Code: {coupon_code}"
+msgid "Hi {customer_name}, this is your last reminder. Your cart at {site_name} is about to expire, and so is your exclusive discount code {coupon_code}. Complete your order today before it is too late."
+msgstr "Hallo {customer_name}, dies ist deine letzte Erinnerung. Dein Warenkorb bei {site_name} läuft bald ab, ebenso wie dein exklusiver Rabattcode {coupon_code}. Schließe deine Bestellung noch heute ab, bevor es zu spät ist."
 
 #. translators: %s: customer name
 #: templates/emails/base-email.php:9

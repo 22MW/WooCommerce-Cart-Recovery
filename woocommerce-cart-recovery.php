@@ -4,7 +4,7 @@
  * Plugin Name:       WooCommerce Cart Recovery
  * Plugin URI:        https://example.com/plugins/woocommerce-cart-recovery
  * Description:       Recover abandoned WooCommerce carts and pending orders with scheduled reminders, native coupons and locale-aware emails.
- * Version:           0.1.42
+ * Version:           0.1.43
  * Requires at least: 6.7
  * Requires PHP:      8.1
  * Author:            22MW
@@ -17,7 +17,7 @@
 
 defined('ABSPATH') || exit;
 
-define('WCCR_VERSION', '0.1.42');
+define('WCCR_VERSION', '0.1.43');
 define('WCCR_PLUGIN_FILE', __FILE__);
 define('WCCR_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('WCCR_PLUGIN_URL', plugin_dir_url(__FILE__));

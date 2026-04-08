@@ -484,24 +484,24 @@ msgid "{customer_name}, you left something in your cart"
 msgstr "{customer_name}, vas deixar alguna cosa al teu carret"
 
 #: includes/repositories/class-settings-repository.php:269
-msgid "Your cart is still available. Click the button below to complete your order."
-msgstr "El teu carret encara està disponible. Fes clic al botó de sota per completar la teva comanda."
+msgid "Hi {customer_name}, you left some items in your cart at {site_name}. We saved everything for you — just click the button below to complete your order in a few clicks."
+msgstr "Hola {customer_name}, vas deixar alguns articles al teu carret a {site_name}. Ho hem guardat tot — fes clic al botó de sota per completar la teva comanda en pocs passos."
 
 #: includes/repositories/class-settings-repository.php:277
 msgid "{customer_name}, your cart is waiting for you"
 msgstr "{customer_name}, el teu carret t’està esperant"
 
 #: includes/repositories/class-settings-repository.php:278
-msgid "Complete your purchase below. Discount: {coupon_label}. Code: {coupon_code}"
-msgstr "Completa la teva compra a continuació. Descompte: {coupon_label}. Codi: {coupon_code}"
+msgid "Hi {customer_name}, your cart at {site_name} is still waiting. We have added a special discount for you — use the code {coupon_code} at checkout. Don't wait too long!"
+msgstr "Hola {customer_name}, el teu carret a {site_name} t'està esperant. Hem afegit un descompte especial per a tu — fes servir el codi {coupon_code} en finalitzar la compra. No esperis gaire!"
 
 #: includes/repositories/class-settings-repository.php:286
 msgid "{customer_name}, last reminder for your cart"
 msgstr "{customer_name}, últim recordatori del teu carret"
 
 #: includes/repositories/class-settings-repository.php:287
-msgid "Your cart can still be recovered. Discount: {coupon_label}. Code: {coupon_code}"
-msgstr "Encara pots recuperar el teu carret. Descompte: {coupon_label}. Codi: {coupon_code}"
+msgid "Hi {customer_name}, this is your last reminder. Your cart at {site_name} is about to expire, and so is your exclusive discount code {coupon_code}. Complete your order today before it is too late."
+msgstr "Hola {customer_name}, aquest és el teu últim recordatori. El teu carret a {site_name} està a punt de caducar, igual que el teu codi de descompte exclusiu {coupon_code}. Completa la teva comanda avui abans que sigui massa tard."
 
 #. translators: %s: customer name
 #: templates/emails/base-email.php:9

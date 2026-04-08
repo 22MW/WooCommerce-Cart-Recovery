@@ -1,10 +1,11 @@
 <?php
-defined( 'ABSPATH' ) || exit;
+defined('ABSPATH') || exit;
 
 /**
  * Repository for persisted plugin settings.
  */
-final class WCCR_Settings_Repository {
+final class WCCR_Settings_Repository
+{
 	private const OPTION_KEY = 'wccr_settings';
 
 	/**
@@ -12,17 +13,18 @@ final class WCCR_Settings_Repository {
 	 *
 	 * @return array<string, mixed>
 	 */
-	public static function default_settings(): array {
+	public static function default_settings(): array
+	{
 		$default_locale = self::get_default_locale();
 
 		return array(
 			'abandon_after_minutes' => 60,
 			'cleanup_days'          => 90,
 			'coupon_expiry_days'    => 7,
-			'from_name'             => get_bloginfo( 'name' ),
+			'from_name'             => get_bloginfo('name'),
 			'excluded_product_ids'  => array(),
 			'excluded_term_ids'     => array(),
-			'steps'                 => self::get_default_steps( $default_locale ),
+			'steps'                 => self::get_default_steps($default_locale),
 		);
 	}
 
@@ -31,10 +33,11 @@ final class WCCR_Settings_Repository {
 	 *
 	 * @return array<string, mixed>
 	 */
-	public function get(): array {
-		$settings = get_option( self::OPTION_KEY, array() );
-		$settings = wp_parse_args( is_array( $settings ) ? $settings : array(), self::default_settings() );
-		return $this->normalize_settings( $settings );
+	public function get(): array
+	{
+		$settings = get_option(self::OPTION_KEY, array());
+		$settings = wp_parse_args(is_array($settings) ? $settings : array(), self::default_settings());
+		return $this->normalize_settings($settings);
 	}
 
 	/**
@@ -42,8 +45,9 @@ final class WCCR_Settings_Repository {
 	 *
 	 * @param array<string, mixed> $settings Settings payload.
 	 */
-	public function save( array $settings ): void {
-		update_option( self::OPTION_KEY, $settings );
+	public function save(array $settings): void
+	{
+		update_option(self::OPTION_KEY, $settings);
 	}
 
 	/**
@@ -52,14 +56,15 @@ final class WCCR_Settings_Repository {
 	 * @param array<string, mixed> $settings Plugin settings.
 	 * @return array<string, mixed>
 	 */
-	public function get_localized_step_settings( array $settings, int $step, string $locale ): array {
-		$step_settings  = isset( $settings['steps'][ $step ] ) && is_array( $settings['steps'][ $step ] ) ? $settings['steps'][ $step ] : array();
-		$translations   = isset( $step_settings['translations'] ) && is_array( $step_settings['translations'] ) ? $step_settings['translations'] : array();
+	public function get_localized_step_settings(array $settings, int $step, string $locale): array
+	{
+		$step_settings  = isset($settings['steps'][$step]) && is_array($settings['steps'][$step]) ? $settings['steps'][$step] : array();
+		$translations   = isset($step_settings['translations']) && is_array($step_settings['translations']) ? $step_settings['translations'] : array();
 		$default_locale = self::get_default_locale();
-		$translation    = $this->find_translation( $translations, $locale, $default_locale, $step );
+		$translation    = $this->find_translation($translations, $locale, $default_locale, $step);
 
-		$step_settings['subject'] = (string) ( $translation['subject'] ?? $step_settings['subject'] ?? '' );
-		$step_settings['body']    = (string) ( $translation['body'] ?? $step_settings['body'] ?? '' );
+		$step_settings['subject'] = (string) ($translation['subject'] ?? $step_settings['subject'] ?? '');
+		$step_settings['body']    = (string) ($translation['body'] ?? $step_settings['body'] ?? '');
 
 		return $step_settings;
 	}
@@ -69,8 +74,9 @@ final class WCCR_Settings_Repository {
 	 *
 	 * @return array{subject:string,body:string}
 	 */
-	public function get_translated_default_step_settings( int $step, string $locale ): array {
-		return $this->get_default_translation_with_fallback( $step, $locale, self::get_default_locale() );
+	public function get_translated_default_step_settings(int $step, string $locale): array
+	{
+		return $this->get_default_translation_with_fallback($step, $locale, self::get_default_locale());
 	}
 
 	/**
@@ -79,16 +85,17 @@ final class WCCR_Settings_Repository {
 	 * @param array<string, mixed> $settings Raw settings payload.
 	 * @return array<string, mixed>
 	 */
-	private function normalize_settings( array $settings ): array {
+	private function normalize_settings(array $settings): array
+	{
 		$default_locale = self::get_default_locale();
-		$default_steps  = self::get_default_steps( $default_locale );
+		$default_steps  = self::get_default_steps($default_locale);
 
-		$settings['excluded_product_ids'] = $this->normalize_id_list( $settings['excluded_product_ids'] ?? array() );
-		$settings['excluded_term_ids']    = $this->normalize_id_list( $settings['excluded_term_ids'] ?? array() );
+		$settings['excluded_product_ids'] = $this->normalize_id_list($settings['excluded_product_ids'] ?? array());
+		$settings['excluded_term_ids']    = $this->normalize_id_list($settings['excluded_term_ids'] ?? array());
 
-		foreach ( array( 1, 2, 3 ) as $step ) {
-			$step_settings            = isset( $settings['steps'][ $step ] ) && is_array( $settings['steps'][ $step ] ) ? $settings['steps'][ $step ] : array();
-			$settings['steps'][ $step ] = $this->normalize_step_settings( $step_settings, $default_steps[ $step ], $default_locale );
+		foreach (array(1, 2, 3) as $step) {
+			$step_settings            = isset($settings['steps'][$step]) && is_array($settings['steps'][$step]) ? $settings['steps'][$step] : array();
+			$settings['steps'][$step] = $this->normalize_step_settings($step_settings, $default_steps[$step], $default_locale);
 		}
 
 		return $settings;
@@ -101,20 +108,21 @@ final class WCCR_Settings_Repository {
 	 * @param array<string, mixed> $default_step  Default step settings.
 	 * @return array<string, mixed>
 	 */
-	private function normalize_step_settings( array $step_settings, array $default_step, string $default_locale ): array {
-		$step_settings = wp_parse_args( $step_settings, $default_step );
-		$translations  = isset( $step_settings['translations'] ) && is_array( $step_settings['translations'] ) ? $step_settings['translations'] : array();
+	private function normalize_step_settings(array $step_settings, array $default_step, string $default_locale): array
+	{
+		$step_settings = wp_parse_args($step_settings, $default_step);
+		$translations  = isset($step_settings['translations']) && is_array($step_settings['translations']) ? $step_settings['translations'] : array();
 		$translations  = $this->normalize_translations(
 			$translations,
-			(string) ( $step_settings['subject'] ?? '' ),
-			(string) ( $step_settings['body'] ?? '' ),
+			(string) ($step_settings['subject'] ?? ''),
+			(string) ($step_settings['body'] ?? ''),
 			$default_locale,
 			$default_step
 		);
 
 		$step_settings['translations'] = $translations;
-		$step_settings['subject']      = (string) $translations[ $default_locale ]['subject'];
-		$step_settings['body']         = (string) $translations[ $default_locale ]['body'];
+		$step_settings['subject']      = (string) $translations[$default_locale]['subject'];
+		$step_settings['body']         = (string) $translations[$default_locale]['body'];
 
 		return $step_settings;
 	}
@@ -126,24 +134,25 @@ final class WCCR_Settings_Repository {
 	 * @param array<string, mixed> $default_step Default step settings.
 	 * @return array<string, array{subject:string,body:string}>
 	 */
-	private function normalize_translations( array $translations, string $legacy_subject, string $legacy_body, string $default_locale, array $default_step ): array {
+	private function normalize_translations(array $translations, string $legacy_subject, string $legacy_body, string $default_locale, array $default_step): array
+	{
 		$normalized = array();
 
-		foreach ( $translations as $locale => $translation ) {
-			if ( ! is_string( $locale ) || '' === $locale || ! is_array( $translation ) ) {
+		foreach ($translations as $locale => $translation) {
+			if (! is_string($locale) || '' === $locale || ! is_array($translation)) {
 				continue;
 			}
 
-			$normalized[ $locale ] = array(
-				'subject' => (string) ( $translation['subject'] ?? '' ),
-				'body'    => (string) ( $translation['body'] ?? '' ),
+			$normalized[$locale] = array(
+				'subject' => (string) ($translation['subject'] ?? ''),
+				'body'    => (string) ($translation['body'] ?? ''),
 			);
 		}
 
-		if ( ! isset( $normalized[ $default_locale ] ) ) {
-			$normalized[ $default_locale ] = array(
-				'subject' => '' !== $legacy_subject ? $legacy_subject : (string) ( $default_step['subject'] ?? '' ),
-				'body'    => '' !== $legacy_body ? $legacy_body : (string) ( $default_step['body'] ?? '' ),
+		if (! isset($normalized[$default_locale])) {
+			$normalized[$default_locale] = array(
+				'subject' => '' !== $legacy_subject ? $legacy_subject : (string) ($default_step['subject'] ?? ''),
+				'body'    => '' !== $legacy_body ? $legacy_body : (string) ($default_step['body'] ?? ''),
 			);
 		}
 
@@ -156,14 +165,15 @@ final class WCCR_Settings_Repository {
 	 * @param array<string, mixed> $translations Step translations.
 	 * @return array<string, string>
 	 */
-	private function find_translation( array $translations, string $locale, string $default_locale, int $step ): array {
-		$locale = sanitize_text_field( $locale );
-		$translation = $this->find_saved_translation( $translations, $locale, $default_locale );
-		if ( ! empty( $translation ) ) {
+	private function find_translation(array $translations, string $locale, string $default_locale, int $step): array
+	{
+		$locale = sanitize_text_field($locale);
+		$translation = $this->find_saved_translation($translations, $locale, $default_locale);
+		if (! empty($translation)) {
 			return $translation;
 		}
 
-		return $this->get_default_translation_with_fallback( $step, $locale, $default_locale );
+		return $this->get_default_translation_with_fallback($step, $locale, $default_locale);
 	}
 
 	/**
@@ -172,36 +182,37 @@ final class WCCR_Settings_Repository {
 	 * @param array<string, mixed> $translations Step translations.
 	 * @return array<string, string>
 	 */
-	private function find_saved_translation( array $translations, string $locale, string $default_locale ): array {
-		$exact_translation = $this->get_usable_translation( $translations[ $locale ] ?? null );
-		if ( ! empty( $exact_translation ) ) {
+	private function find_saved_translation(array $translations, string $locale, string $default_locale): array
+	{
+		$exact_translation = $this->get_usable_translation($translations[$locale] ?? null);
+		if (! empty($exact_translation)) {
 			return $exact_translation;
 		}
 
-		$language_code = strtok( $locale, '_' );
-		foreach ( $translations as $translation_locale => $translation ) {
-			if ( ! is_string( $translation_locale ) ) {
+		$language_code = strtok($locale, '_');
+		foreach ($translations as $translation_locale => $translation) {
+			if (! is_string($translation_locale)) {
 				continue;
 			}
 
-			$usable_translation = $this->get_usable_translation( $translation );
-			if ( $language_code && $language_code === strtok( $translation_locale, '_' ) && ! empty( $usable_translation ) ) {
+			$usable_translation = $this->get_usable_translation($translation);
+			if ($language_code && $language_code === strtok($translation_locale, '_') && ! empty($usable_translation)) {
 				return $usable_translation;
 			}
 		}
 
-		$english_translation = $this->get_usable_translation( $translations['en_US'] ?? null );
-		if ( ! empty( $english_translation ) ) {
+		$english_translation = $this->get_usable_translation($translations['en_US'] ?? null);
+		if (! empty($english_translation)) {
 			return $english_translation;
 		}
 
-		$default_translation = $this->get_usable_translation( $translations[ $default_locale ] ?? null );
-		if ( ! empty( $default_translation ) ) {
+		$default_translation = $this->get_usable_translation($translations[$default_locale] ?? null);
+		if (! empty($default_translation)) {
 			return $default_translation;
 		}
 
-		$first = reset( $translations );
-		return $this->get_usable_translation( $first );
+		$first = reset($translations);
+		return $this->get_usable_translation($first);
 	}
 
 	/**
@@ -210,14 +221,15 @@ final class WCCR_Settings_Repository {
 	 * @param mixed $translation Translation payload.
 	 * @return array<string, string>
 	 */
-	private function get_usable_translation( $translation ): array {
-		if ( ! is_array( $translation ) ) {
+	private function get_usable_translation($translation): array
+	{
+		if (! is_array($translation)) {
 			return array();
 		}
 
-		$subject = trim( (string) ( $translation['subject'] ?? '' ) );
-		$body    = trim( (string) ( $translation['body'] ?? '' ) );
-		if ( '' === $subject && '' === $body ) {
+		$subject = trim((string) ($translation['subject'] ?? ''));
+		$body    = trim((string) ($translation['body'] ?? ''));
+		if ('' === $subject && '' === $body) {
 			return array();
 		}
 
@@ -232,15 +244,16 @@ final class WCCR_Settings_Repository {
 	 *
 	 * @return array{subject:string,body:string}
 	 */
-	private function get_default_translation_with_fallback( int $step, string $locale, string $default_locale ): array {
-		foreach ( $this->get_default_locale_candidates( $locale, $default_locale ) as $candidate_locale ) {
-			$translation = self::get_default_step_translation( $step, $candidate_locale );
-			if ( '' !== $translation['subject'] || '' !== $translation['body'] ) {
+	private function get_default_translation_with_fallback(int $step, string $locale, string $default_locale): array
+	{
+		foreach ($this->get_default_locale_candidates($locale, $default_locale) as $candidate_locale) {
+			$translation = self::get_default_step_translation($step, $candidate_locale);
+			if ('' !== $translation['subject'] || '' !== $translation['body']) {
 				return $translation;
 			}
 		}
 
-		return array( 'subject' => '', 'body' => '' );
+		return array('subject' => '', 'body' => '');
 	}
 
 	/**
@@ -248,8 +261,9 @@ final class WCCR_Settings_Repository {
 	 *
 	 * @return array<int, string>
 	 */
-	private function get_default_locale_candidates( string $locale, string $default_locale ): array {
-		return WCCR_Plugin_Locale_Switcher::get_locale_candidates( $locale, $default_locale );
+	private function get_default_locale_candidates(string $locale, string $default_locale): array
+	{
+		return WCCR_Plugin_Locale_Switcher::get_locale_candidates($locale, $default_locale);
 	}
 
 	/**
@@ -257,7 +271,8 @@ final class WCCR_Settings_Repository {
 	 *
 	 * @return array<int, array<string, mixed>>
 	 */
-	private static function get_default_steps( string $default_locale ): array {
+	private static function get_default_steps(string $default_locale): array
+	{
 		$steps = array(
 			1 => array(
 				'enabled'         => 1,
@@ -265,8 +280,8 @@ final class WCCR_Settings_Repository {
 				'discount_type'   => 'none',
 				'discount_amount' => 0,
 				'min_cart_total'  => 0,
-				'subject'         => __( '{customer_name}, you left something in your cart', 'vfwoo_woocommerce-cart-recovery' ),
-				'body'            => __( 'Your cart is still available. Click the button below to complete your order.', 'vfwoo_woocommerce-cart-recovery' ),
+				'subject'         => __('{customer_name}, you left something in your cart', 'vfwoo_woocommerce-cart-recovery'),
+				'body'            => __('Hi {customer_name}, you left some items in your cart at {site_name}. We saved everything for you — just click the button below to complete your order in a few clicks.', 'vfwoo_woocommerce-cart-recovery'),
 			),
 			2 => array(
 				'enabled'         => 1,
@@ -274,8 +289,8 @@ final class WCCR_Settings_Repository {
 				'discount_type'   => 'percent',
 				'discount_amount' => 5,
 				'min_cart_total'  => 0,
-				'subject'         => __( '{customer_name}, your cart is waiting for you', 'vfwoo_woocommerce-cart-recovery' ),
-				'body'            => __( 'Complete your purchase below. Discount: {coupon_label}. Code: {coupon_code}', 'vfwoo_woocommerce-cart-recovery' ),
+				'subject'         => __('{customer_name}, your cart is waiting for you', 'vfwoo_woocommerce-cart-recovery'),
+				'body'            => __('Hi {customer_name}, your cart at {site_name} is still waiting. We have added a special discount for you — use the code {coupon_code} at checkout. Don\'t wait too long!', 'vfwoo_woocommerce-cart-recovery'),
 			),
 			3 => array(
 				'enabled'         => 1,
@@ -283,13 +298,13 @@ final class WCCR_Settings_Repository {
 				'discount_type'   => 'percent',
 				'discount_amount' => 10,
 				'min_cart_total'  => 0,
-				'subject'         => __( '{customer_name}, last reminder for your cart', 'vfwoo_woocommerce-cart-recovery' ),
-				'body'            => __( 'Your cart can still be recovered. Discount: {coupon_label}. Code: {coupon_code}', 'vfwoo_woocommerce-cart-recovery' ),
+				'subject'         => __('{customer_name}, last reminder for your cart', 'vfwoo_woocommerce-cart-recovery'),
+				'body'            => __('Hi {customer_name}, this is your last reminder. Your cart at {site_name} is about to expire, and so is your exclusive discount code {coupon_code}. Complete your order today before it is too late.', 'vfwoo_woocommerce-cart-recovery'),
 			),
 		);
 
-		foreach ( $steps as $step => $step_settings ) {
-			$steps[ $step ]['translations'] = array(
+		foreach ($steps as $step => $step_settings) {
+			$steps[$step]['translations'] = array(
 				$default_locale => array(
 					'subject' => (string) $step_settings['subject'],
 					'body'    => (string) $step_settings['body'],
@@ -305,36 +320,39 @@ final class WCCR_Settings_Repository {
 	 *
 	 * @return array{subject:string,body:string}
 	 */
-	private static function get_default_step_translation( int $step, string $locale ): array {
-		$switched = self::switch_to_settings_locale( $locale );
-		$steps    = self::get_default_steps( $locale );
+	private static function get_default_step_translation(int $step, string $locale): array
+	{
+		$switched = self::switch_to_settings_locale($locale);
+		$steps    = self::get_default_steps($locale);
 
-		if ( $switched ) {
+		if ($switched) {
 			WCCR_Plugin_Locale_Switcher::restore_previous_locale();
 		}
 
-		$step_settings = isset( $steps[ $step ] ) && is_array( $steps[ $step ] ) ? $steps[ $step ] : array();
+		$step_settings = isset($steps[$step]) && is_array($steps[$step]) ? $steps[$step] : array();
 		return array(
-			'subject' => (string) ( $step_settings['subject'] ?? '' ),
-			'body'    => (string) ( $step_settings['body'] ?? '' ),
+			'subject' => (string) ($step_settings['subject'] ?? ''),
+			'body'    => (string) ($step_settings['body'] ?? ''),
 		);
 	}
 
 	/**
 	 * Switch locale temporarily while building translated defaults.
 	 */
-	private static function switch_to_settings_locale( string $locale ): bool {
-		return WCCR_Plugin_Locale_Switcher::switch_to_locale( $locale );
+	private static function switch_to_settings_locale(string $locale): bool
+	{
+		return WCCR_Plugin_Locale_Switcher::switch_to_locale($locale);
 	}
 
 	/**
 	 * Return the site default locale used as settings fallback.
 	 */
-	private static function get_default_locale(): string {
-		$default_lang = apply_filters( 'wpml_default_language', null );
-		if ( is_string( $default_lang ) && '' !== $default_lang ) {
-			$locale = apply_filters( 'wpml_locale_from_language', '', $default_lang );
-			if ( is_string( $locale ) && '' !== $locale ) {
+	private static function get_default_locale(): string
+	{
+		$default_lang = apply_filters('wpml_default_language', null);
+		if (is_string($default_lang) && '' !== $default_lang) {
+			$locale = apply_filters('wpml_locale_from_language', '', $default_lang);
+			if (is_string($locale) && '' !== $locale) {
 				return $locale;
 			}
 		}
@@ -348,15 +366,16 @@ final class WCCR_Settings_Repository {
 	 * @param mixed $ids Raw ID payload.
 	 * @return array<int, int>
 	 */
-	private function normalize_id_list( $ids ): array {
-		if ( ! is_array( $ids ) ) {
+	private function normalize_id_list($ids): array
+	{
+		if (! is_array($ids)) {
 			return array();
 		}
 
 		return array_values(
 			array_unique(
 				array_filter(
-					array_map( 'absint', $ids )
+					array_map('absint', $ids)
 				)
 			)
 		);

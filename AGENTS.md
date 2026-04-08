@@ -63,7 +63,7 @@
 ## Versionado
 
 - Cuando el usuario lo pida, incrementar el ultimo numero de version del plugin salvo que indique otra estrategia.
-- Cuando haya versionado solicitado, escribir los cambios en `CHANGELOG.md` de forma corta, precisa y concreta.
+- Cuando haya versionado solicitado, escribir los cambios en `CHANGELOG.md` de forma corta, precisa y concreta y en ingles.
 - Actualizar `README.md` y `readme.txt` si alguna funcionalidad nueva lo requiere.
 - Commit y push, todos los archivos modificados, la version del plugin solo cuando el usuario lo pida de forma explicita.
 - El flujo completo de publicacion es:
