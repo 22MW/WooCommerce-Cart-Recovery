@@ -4,6 +4,11 @@ All notable changes to this project should be documented in this file.
 
 The format is based on Keep a Changelog, and this project follows a simple `MAJOR.MINOR.PATCH` versioning scheme.
 
+## [0.1.44] - 2026-04-08
+
+### Fixed
+- Strip stale `_booking_id` from WooCommerce Bookings cart items before saving the payload, so a fresh booking is created on recovery instead of failing with a missing/expired booking
+
 ## [0.1.43] - 2026-04-08
 
 ### Changed
