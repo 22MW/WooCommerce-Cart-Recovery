@@ -4,6 +4,12 @@ All notable changes to this project should be documented in this file.
 
 The format is based on Keep a Changelog, and this project follows a simple `MAJOR.MINOR.PATCH` versioning scheme.
 
+## [0.1.41] - 2026-04-08
+
+### Fixed
+
+- `get_abandoned_carts()` now includes `clicked` status so steps 2 and 3 are sent after the customer clicks a recovery link without completing the purchase.
+
 ## [0.1.40] - 2026-04-08
 
 ### Fixed
@@ -17,8 +23,6 @@ The format is based on Keep a Changelog, and this project follows a simple `MAJO
 - Settings: layout 2 columnas — idiomas en sidebar izquierda, sub-tabs Email 1/2/3 a la derecha por locale.
 - Settings: tab de email deshabilitado cuando su step está OFF.
 - Settings: texto de referencia de minutos bajo el campo "Marcar carrito abandonado".
-
-
 
 ### Improved
 
