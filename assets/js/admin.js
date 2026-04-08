@@ -330,6 +330,9 @@
 
 		if ( remove ) {
 			remove.closest( '.wccr-exclusion-chip' ).remove();
+			if ( typeof WCCRSettingsSaver !== 'undefined' ) {
+				WCCRSettingsSaver.triggerSave();
+			}
 			return;
 		}
 
@@ -357,6 +360,10 @@
 
 		if ( input ) {
 			input.value = '';
+		}
+
+		if ( typeof WCCRSettingsSaver !== 'undefined' ) {
+			WCCRSettingsSaver.triggerSave();
 		}
 
 		hideExclusionResults( field );
@@ -650,7 +657,7 @@
 			form.addEventListener( 'change', handleFormChange );
 		}
 
-		return { init: init };
+		return { init: init, triggerSave: debouncedSave };
 	}() );
 
 	WCCRSettingsSaver.init();
