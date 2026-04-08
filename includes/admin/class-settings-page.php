@@ -364,7 +364,6 @@ final class WCCR_Settings_Page
 	private function render_step_cards(array $settings): void
 	{
 	?>
-		<div class="wccr-section-title"><?php esc_html_e('Email configuration', 'vfwoo_woocommerce-cart-recovery'); ?></div>
 		<div class="wccr-step-grid">
 			<?php
 			foreach (array(1, 2, 3) as $step) {
@@ -375,16 +374,18 @@ final class WCCR_Settings_Page
 						<div class="wccr-card-title"><?php echo esc_html(sprintf( /* translators: %d: email step number */__('Email %d', 'vfwoo_woocommerce-cart-recovery'), $step)); ?></div>
 						<label class="wccr-step-card__toggle wccr-switch" aria-label="<?php esc_attr_e('Enabled', 'vfwoo_woocommerce-cart-recovery'); ?>"><input type="checkbox" name="steps[<?php echo esc_attr($step); ?>][enabled]" value="1" <?php checked(! empty($step_settings['enabled'])); ?>><span class="wccr-switch-slider"></span></label>
 					</div>
-					<p><label><?php esc_html_e('Delay minutes', 'vfwoo_woocommerce-cart-recovery'); ?> <input type="number" name="steps[<?php echo esc_attr($step); ?>][delay_minutes]" value="<?php echo esc_attr($step_settings['delay_minutes'] ?? 60); ?>"></label></p>
-					<p><label><?php esc_html_e('Discount type', 'vfwoo_woocommerce-cart-recovery'); ?>
-							<select name="steps[<?php echo esc_attr($step); ?>][discount_type]">
-								<option value="none" <?php selected($step_settings['discount_type'] ?? 'none', 'none'); ?>><?php esc_html_e('None', 'vfwoo_woocommerce-cart-recovery'); ?></option>
-								<option value="percent" <?php selected($step_settings['discount_type'] ?? 'none', 'percent'); ?>><?php esc_html_e('Percentage', 'vfwoo_woocommerce-cart-recovery'); ?></option>
-								<option value="fixed_cart" <?php selected($step_settings['discount_type'] ?? 'none', 'fixed_cart'); ?>><?php esc_html_e('Fixed cart', 'vfwoo_woocommerce-cart-recovery'); ?></option>
-							</select>
-						</label></p>
-					<p><label><?php esc_html_e('Discount amount', 'vfwoo_woocommerce-cart-recovery'); ?> <input type="number" step="0.01" name="steps[<?php echo esc_attr($step); ?>][discount_amount]" value="<?php echo esc_attr($step_settings['discount_amount'] ?? 0); ?>"></label></p>
-					<p><label><?php esc_html_e('Minimum cart total', 'vfwoo_woocommerce-cart-recovery'); ?> <input type="number" step="0.01" name="steps[<?php echo esc_attr($step); ?>][min_cart_total]" value="<?php echo esc_attr($step_settings['min_cart_total'] ?? 0); ?>"></label></p>
+					<div class="wccr-step-card__config">
+						<p><label><?php esc_html_e('Delay minutes', 'vfwoo_woocommerce-cart-recovery'); ?> <input type="number" name="steps[<?php echo esc_attr($step); ?>][delay_minutes]" value="<?php echo esc_attr($step_settings['delay_minutes'] ?? 60); ?>"></label></p>
+						<p><label><?php esc_html_e('Discount type', 'vfwoo_woocommerce-cart-recovery'); ?>
+								<select name="steps[<?php echo esc_attr($step); ?>][discount_type]">
+									<option value="none" <?php selected($step_settings['discount_type'] ?? 'none', 'none'); ?>><?php esc_html_e('None', 'vfwoo_woocommerce-cart-recovery'); ?></option>
+									<option value="percent" <?php selected($step_settings['discount_type'] ?? 'none', 'percent'); ?>><?php esc_html_e('Percentage', 'vfwoo_woocommerce-cart-recovery'); ?></option>
+									<option value="fixed_cart" <?php selected($step_settings['discount_type'] ?? 'none', 'fixed_cart'); ?>><?php esc_html_e('Fixed cart', 'vfwoo_woocommerce-cart-recovery'); ?></option>
+								</select>
+							</label></p>
+						<p><label><?php esc_html_e('Discount amount', 'vfwoo_woocommerce-cart-recovery'); ?> <input type="number" step="0.01" name="steps[<?php echo esc_attr($step); ?>][discount_amount]" value="<?php echo esc_attr($step_settings['discount_amount'] ?? 0); ?>"></label></p>
+						<p><label><?php esc_html_e('Minimum cart total', 'vfwoo_woocommerce-cart-recovery'); ?> <input type="number" step="0.01" name="steps[<?php echo esc_attr($step); ?>][min_cart_total]" value="<?php echo esc_attr($step_settings['min_cart_total'] ?? 0); ?>"></label></p>
+					</div>
 				</div>
 			<?php
 			}

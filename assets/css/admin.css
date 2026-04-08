@@ -466,6 +466,7 @@
 	grid-template-columns: minmax(0, 1fr) 170px;
 	align-items: center;
 	gap: 14px;
+	margin: 7px 0px;
 }
 
 .wccr-admin .wccr-step-grid .wccr-card p label {
@@ -545,13 +546,14 @@
 .wccr-admin .wccr-step-card--disabled .wccr-step-card__config {
 	opacity: 0.3;
 	pointer-events: none;
+	user-select: none;
 }
 
 /* ── Toast notification ─────────────────────────────────── */
 .wccr-toast {
 	position: fixed;
 	right: -200px;
-	top: 75px;
+	top:44px;
 	opacity: 0;
 	transition: right .4s ease, opacity .4s ease;
 	border-radius: 22px;
