@@ -4,6 +4,12 @@ All notable changes to this project should be documented in this file.
 
 The format is based on Keep a Changelog, and this project follows a simple `MAJOR.MINOR.PATCH` versioning scheme.
 
+## [0.1.42] - 2026-04-08
+
+### Fixed
+
+- Auto-save now triggers when exclusion chips are added or removed (chip changes do not fire a DOM `change` event).
+
 ## [0.1.41] - 2026-04-08
 
 ### Fixed
