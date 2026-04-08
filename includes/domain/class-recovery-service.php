@@ -18,6 +18,7 @@ final class WCCR_Recovery_Service
 	public function init(): void
 	{
 		add_action('template_redirect', array($this, 'maybe_restore_cart'));
+		add_filter('woocommerce_checkout_get_value', array($this, 'prefill_checkout_email'), 10, 2);
 	}
 
 	/**
@@ -113,6 +114,11 @@ final class WCCR_Recovery_Service
 			WC()->cart->apply_coupon($coupon);
 		}
 
+		// Store cart email in session so checkout can pre-fill billing_email.
+		if (! empty($cart['email']) && WC()->session) {
+			WC()->session->set('wccr_prefill_email', sanitize_email((string) $cart['email']));
+		}
+
 		// Persist session to DB before redirect so guest/incognito users retain the cart.
 		$this->persist_session();
 
@@ -124,6 +130,29 @@ final class WCCR_Recovery_Service
 		do_action('wccr_cart_recovery_clicked', $cart_id);
 		wp_safe_redirect(wc_get_checkout_url());
 		exit;
+	}
+
+	/**
+	 * Pre-fill billing_email in checkout with the email stored in session.
+	 *
+	 * Only fills when the field has no value (guest / incognito checkout).
+	 *
+	 * @param mixed  $value Field value.
+	 * @param string $input Field key.
+	 * @return mixed
+	 */
+	public function prefill_checkout_email(mixed $value, string $input): mixed
+	{
+		if ('billing_email' !== $input || ! empty($value)) {
+			return $value;
+		}
+
+		if (! WC()->session) {
+			return $value;
+		}
+
+		$email = sanitize_email((string) WC()->session->get('wccr_prefill_email', ''));
+		return '' !== $email ? $email : $value;
 	}
 
 	/**

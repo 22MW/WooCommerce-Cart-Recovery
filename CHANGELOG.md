@@ -4,6 +4,12 @@ All notable changes to this project should be documented in this file.
 
 The format is based on Keep a Changelog, and this project follows a simple `MAJOR.MINOR.PATCH` versioning scheme.
 
+## [0.1.38] - 2026-04-08
+
+### Added
+
+- Pre-rellena `billing_email` en checkout con el email del carrito abandonado via sesión WC (`woocommerce_checkout_get_value`).
+
 ## [0.1.37] - 2026-04-08
 
 ### Fixed
