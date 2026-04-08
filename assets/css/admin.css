@@ -303,6 +303,18 @@
 	margin: 0;
 }
 
+.wccr-admin .wccr-settings-top-grid p {
+	display: grid;
+	gap: 0;
+}
+
+.wccr-admin .wccr-settings-top-grid p .description {
+	font-size: 12px;
+	color: rgba(26,26,26,0.5);
+	margin-top: 6px;
+	font-weight: 400;
+}
+
 .wccr-admin .wccr-settings-top-grid label {
 	display: grid;
 	gap: 10px;

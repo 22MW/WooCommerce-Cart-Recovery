@@ -251,7 +251,7 @@ final class WCCR_Settings_Page
 			<?php wp_nonce_field('wccr_save_settings', 'wccr_settings_nonce'); ?>
 			<div class="wccr-card">
 				<div class="wccr-settings-top-grid">
-					<p><label for="abandon_after_minutes"><?php esc_html_e('Mark cart abandoned after minutes', 'vfwoo_woocommerce-cart-recovery'); ?><br><input type="number" name="abandon_after_minutes" id="abandon_after_minutes" value="<?php echo esc_attr($settings['abandon_after_minutes']); ?>" min="1"></label></p>
+					<p><label for="abandon_after_minutes"><?php esc_html_e('Mark cart abandoned after minutes', 'vfwoo_woocommerce-cart-recovery'); ?><br><input type="number" name="abandon_after_minutes" id="abandon_after_minutes" value="<?php echo esc_attr($settings['abandon_after_minutes']); ?>" min="1"></label><span class="description"><?php esc_html_e('2h = 120 · 10h = 600 · 1d = 1440 · 10d = 14400 · 30d = 43200', 'vfwoo_woocommerce-cart-recovery'); ?></span></p>
 					<p><label for="cleanup_days"><?php esc_html_e('Cleanup data after days', 'vfwoo_woocommerce-cart-recovery'); ?><br><input type="number" name="cleanup_days" id="cleanup_days" value="<?php echo esc_attr($settings['cleanup_days']); ?>" min="1"></label></p>
 					<p><label for="coupon_expiry_days"><?php esc_html_e('Coupon expiry days', 'vfwoo_woocommerce-cart-recovery'); ?><br><input type="number" name="coupon_expiry_days" id="coupon_expiry_days" value="<?php echo esc_attr($settings['coupon_expiry_days']); ?>" min="1"></label></p>
 				</div>
