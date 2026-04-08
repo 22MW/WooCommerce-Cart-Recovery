@@ -433,4 +433,166 @@
 	document.addEventListener( 'click', handleResetClick );
 	document.addEventListener( 'input', handleExclusionSearchInput );
 	document.addEventListener( 'submit', handleDeleteSubmit );
+
+	/* ─────────────────────────────────────────────────────────────
+	 * WCCRSettingsSaver
+	 * Handles auto-save of #wccr-settings-form via AJAX with
+	 * debounce and a toast notification. No submit button needed.
+	 * ───────────────────────────────────────────────────────────── */
+
+	/**
+	 * Auto-save module for the plugin settings form.
+	 *
+	 * @namespace WCCRSettingsSaver
+	 */
+	var WCCRSettingsSaver = ( function () {
+
+		/** @type {HTMLFormElement|null} */
+		var form = document.getElementById( 'wccr-settings-form' );
+
+		/** @type {HTMLElement|null} */
+		var toast = null;
+
+		/** @type {number|null} */
+		var toastTimer = null;
+
+		/**
+		 * Return a debounced version of fn.
+		 *
+		 * @param {Function} fn    Original function.
+		 * @param {number}   delay Milliseconds to wait.
+		 * @return {Function}
+		 */
+		function debounce( fn, delay ) {
+			var timer;
+			return function () {
+				clearTimeout( timer );
+				timer = setTimeout( fn, delay );
+			};
+		}
+
+		/**
+		 * Create and insert the toast element once.
+		 *
+		 * @return {HTMLElement}
+		 */
+		function getToast() {
+			if ( toast ) {
+				return toast;
+			}
+			toast = document.createElement( 'div' );
+			toast.className = 'wccr-toast';
+			toast.setAttribute( 'aria-live', 'polite' );
+			document.body.appendChild( toast );
+			return toast;
+		}
+
+		/**
+		 * Show a toast message for 2 seconds.
+		 *
+		 * @param {string} message Text to display.
+		 * @param {'success'|'error'|''} type  Visual variant.
+		 * @return {void}
+		 */
+		function showToast( message, type ) {
+			var el = getToast();
+			clearTimeout( toastTimer );
+			el.textContent = message;
+			el.className = 'wccr-toast show' + ( type ? ' ' + type : '' );
+			toastTimer = setTimeout( function () {
+				el.className = 'wccr-toast';
+			}, 2200 );
+		}
+
+		/**
+		 * Serialize the settings form and POST it to admin-ajax.php.
+		 *
+		 * @return {void}
+		 */
+		function saveSettings() {
+			if ( ! form || typeof WCCRAdminI18n === 'undefined' ) {
+				return;
+			}
+
+			var data = new window.FormData( form );
+			data.set( 'action', 'wccr_save_settings' );
+			data.set( 'nonce',  WCCRAdminI18n.saveNonce );
+
+			showToast( WCCRAdminI18n.savingLabel || 'Guardando…', '' );
+
+			window.fetch( WCCRAdminI18n.ajaxUrl, {
+				method:      'POST',
+				credentials: 'same-origin',
+				body:        data,
+			} )
+				.then( function ( response ) {
+					return response.json();
+				} )
+				.then( function ( payload ) {
+					if ( payload && payload.success ) {
+						showToast( WCCRAdminI18n.savedLabel || 'Guardado', 'success' );
+					} else {
+						showToast( WCCRAdminI18n.saveErrorLabel || 'Error al guardar', 'error' );
+					}
+				} )
+				.catch( function () {
+					showToast( WCCRAdminI18n.saveErrorLabel || 'Error al guardar', 'error' );
+				} );
+		}
+
+		/**
+		 * Toggle the disabled visual state of a step card based on its switch.
+		 *
+		 * @param {HTMLInputElement} checkbox The enabled checkbox/switch input.
+		 * @return {void}
+		 */
+		function updateStepCardState( checkbox ) {
+			var card = checkbox.closest( '.wccr-card' );
+			if ( ! card ) {
+				return;
+			}
+			card.classList.toggle( 'wccr-step-card--disabled', ! checkbox.checked );
+		}
+
+		/**
+		 * Handle change events on the settings form.
+		 *
+		 * @param {Event} event DOM change event.
+		 * @return {void}
+		 */
+		function handleFormChange( event ) {
+			var target = event.target;
+
+			// Update step card visual state when its switch changes.
+			if ( target && target.type === 'checkbox' && target.name && target.name.indexOf( '[enabled]' ) !== -1 ) {
+				updateStepCardState( target );
+			}
+
+			debouncedSave();
+		}
+
+		var debouncedSave = debounce( saveSettings, 600 );
+
+		/**
+		 * Initialise: attach listener and set initial card states.
+		 *
+		 * @return {void}
+		 */
+		function init() {
+			if ( ! form ) {
+				return;
+			}
+
+			// Set initial disabled state for each step card.
+			form.querySelectorAll( 'input[type="checkbox"][name*="[enabled]"]' ).forEach( function ( cb ) {
+				updateStepCardState( cb );
+			} );
+
+			form.addEventListener( 'change', handleFormChange );
+		}
+
+		return { init: init };
+	}() );
+
+	WCCRSettingsSaver.init();
 }() );

@@ -136,6 +136,10 @@ final class WCCR_Admin_Menu
 				'resetNonce'      => wp_create_nonce('wccr_reset_step_locale'),
 				'resetLabel'      => __('Reset to translated defaults', 'vfwoo_woocommerce-cart-recovery'),
 				'resettingLabel'  => __('Resetting…', 'vfwoo_woocommerce-cart-recovery'),
+				'saveNonce'       => wp_create_nonce('wccr_save_settings_ajax'),
+				'savingLabel'     => __('Guardando…', 'vfwoo_woocommerce-cart-recovery'),
+				'savedLabel'      => __('Guardado', 'vfwoo_woocommerce-cart-recovery'),
+				'saveErrorLabel'  => __('Error al guardar', 'vfwoo_woocommerce-cart-recovery'),
 			)
 		);
 	}

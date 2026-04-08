@@ -28,6 +28,7 @@ final class WCCR_Settings_Page
 		add_action('wp_ajax_wccr_search_excluded_products', array($this, 'ajax_search_excluded_products'));
 		add_action('wp_ajax_wccr_search_excluded_terms', array($this, 'ajax_search_excluded_terms'));
 		add_action('wp_ajax_wccr_reset_step_locale', array($this, 'ajax_reset_step_locale'));
+		add_action('wp_ajax_wccr_save_settings', array($this, 'ajax_save_settings'));
 	}
 
 	/**
@@ -60,6 +61,37 @@ final class WCCR_Settings_Page
 			return;
 		}
 
+		$settings = $this->parse_posted_settings();
+		$this->settings_repository->save($settings);
+		add_settings_error('wccr_settings', 'wccr_saved', __('Settings saved.', 'vfwoo_woocommerce-cart-recovery'), 'updated');
+	}
+
+	/**
+	 * AJAX: save all settings without page reload.
+	 */
+	public function ajax_save_settings(): void
+	{
+		check_ajax_referer('wccr_save_settings_ajax', 'nonce');
+
+		if (! current_user_can('manage_woocommerce')) {
+			wp_send_json_error(array('message' => 'Forbidden'), 403);
+		}
+
+		$settings = $this->parse_posted_settings();
+		$this->settings_repository->save($settings);
+		wp_send_json_success(array('message' => __('Settings saved.', 'vfwoo_woocommerce-cart-recovery')));
+	}
+
+	/**
+	 * Parse and sanitize all settings from $_POST.
+	 *
+	 * @return array<string, mixed>
+	 */
+	private function parse_posted_settings(): array
+	{
+		$locales        = $this->locale_resolver->get_available_locales();
+		$default_locale = $this->locale_resolver->get_default_locale();
+
 		$settings = array(
 			'abandon_after_minutes' => absint($_POST['abandon_after_minutes'] ?? 60),
 			'cleanup_days'          => absint($_POST['cleanup_days'] ?? 90),
@@ -69,8 +101,6 @@ final class WCCR_Settings_Page
 			'excluded_term_ids'     => $this->exclusion_translation_service->expand_term_ids($this->collect_id_list($_POST['excluded_term_ids'] ?? array())),
 			'steps'                 => array(),
 		);
-		$locales  = $this->locale_resolver->get_available_locales();
-		$default_locale = $this->locale_resolver->get_default_locale();
 
 		foreach (array(1, 2, 3) as $step) {
 			$settings['steps'][$step] = array(
@@ -87,8 +117,7 @@ final class WCCR_Settings_Page
 			$settings['steps'][$step]['body']    = is_array($default_translation) ? (string) ($default_translation['body'] ?? '') : '';
 		}
 
-		$this->settings_repository->save($settings);
-		add_settings_error('wccr_settings', 'wccr_saved', __('Settings saved.', 'vfwoo_woocommerce-cart-recovery'), 'updated');
+		return $settings;
 	}
 
 	/**
@@ -218,7 +247,7 @@ final class WCCR_Settings_Page
 		$settings = $this->settings_repository->get();
 		$locales  = $this->locale_resolver->get_available_locales();
 	?>
-		<form method="post">
+		<form method="post" id="wccr-settings-form">
 			<?php wp_nonce_field('wccr_save_settings', 'wccr_settings_nonce'); ?>
 			<div class="wccr-card">
 				<div class="wccr-settings-top-grid">
@@ -231,8 +260,6 @@ final class WCCR_Settings_Page
 			<?php $this->render_exclusion_settings($settings); ?>
 			<?php $this->render_step_cards($settings); ?>
 			<?php $this->render_locale_tabs($settings, $locales); ?>
-
-			<?php submit_button(__('Save settings', 'vfwoo_woocommerce-cart-recovery')); ?>
 		</form>
 	<?php
 	}
@@ -346,7 +373,7 @@ final class WCCR_Settings_Page
 				<div class="wccr-card">
 					<div class="wccr-step-card__header">
 						<div class="wccr-card-title"><?php echo esc_html(sprintf( /* translators: %d: email step number */__('Email %d', 'vfwoo_woocommerce-cart-recovery'), $step)); ?></div>
-						<label class="wccr-step-card__toggle"><input type="checkbox" name="steps[<?php echo esc_attr($step); ?>][enabled]" value="1" <?php checked(! empty($step_settings['enabled'])); ?>> <span><?php esc_html_e('Enabled', 'vfwoo_woocommerce-cart-recovery'); ?></span></label>
+						<label class="wccr-step-card__toggle wccr-switch" aria-label="<?php esc_attr_e('Enabled', 'vfwoo_woocommerce-cart-recovery'); ?>"><input type="checkbox" name="steps[<?php echo esc_attr($step); ?>][enabled]" value="1" <?php checked(! empty($step_settings['enabled'])); ?>><span class="wccr-switch-slider"></span></label>
 					</div>
 					<p><label><?php esc_html_e('Delay minutes', 'vfwoo_woocommerce-cart-recovery'); ?> <input type="number" name="steps[<?php echo esc_attr($step); ?>][delay_minutes]" value="<?php echo esc_attr($step_settings['delay_minutes'] ?? 60); ?>"></label></p>
 					<p><label><?php esc_html_e('Discount type', 'vfwoo_woocommerce-cart-recovery'); ?>
