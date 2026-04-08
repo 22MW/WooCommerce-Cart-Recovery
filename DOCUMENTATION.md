@@ -64,10 +64,10 @@ WooCommerce Cart Recovery captura carritos abandonados y pedidos impagados, y en
 ## Qué no hace
 
 - **No captura carritos sin email.** Si el cliente no ha introducido su email en el checkout, no se registra nada.
-- **No envía emails a clientes que han completado la compra.** Una vez `recovered`, el flujo se detiene.
+- **No envía emails a clientes que han completado la compra.** Una vez `recovered`, el flujo se detiene. Tampoco se importan pedidos `pending` o `failed` de clientes que ya tienen una compra posterior en estado completado, en proceso o en espera.
 - **No gestiona SMS ni notificaciones push.** Solo email.
 - **No es compatible con WooCommerce Subscriptions** de forma nativa (no probado).
-- **No duplica carritos.** Si el cliente vuelve a añadir productos antes de que expire el intento activo, se actualiza la misma fila.
+- **No duplica carritos.** Si el cliente vuelve a añadir productos antes de que expire el intento activo, se actualiza la misma fila. En la importación de pedidos impagados, solo se crea una fila activa por email de cliente: si el mismo cliente tiene varios pedidos `failed` o `pending`, únicamente se importa el más antiguo elegible.
 - **No envía emails si el step está desactivado** o si el tipo de descuento está configurado pero no se puede generar el cupón.
 - **No modifica precios ni añade impuestos** durante la recuperación.
 
@@ -159,6 +159,8 @@ Si el sitio usa WPML o Polylang, cada step muestra pestañas por idioma. El asun
 ### Importar pedidos impagados
 
 Desde los ajustes hay un botón para importar manualmente los pedidos `pending` y `failed` existentes y añadirlos al flujo de recovery.
+
+La sincronización automática (tarea recurrente) solo procesa pedidos creados **después** de activar el plugin. El botón manual cubre el histórico completo. En ambos casos se omiten pedidos cuyo cliente ya tiene una compra posterior completada, y se importa como máximo un pedido por email de cliente.
 
 ---
 

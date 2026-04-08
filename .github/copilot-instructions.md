@@ -49,12 +49,12 @@ Si el usuario no confirma → no se ejecuta nada. Sin excepciones.
 
 - Incrementar el último número de versión salvo que el usuario indique otra estrategia.
 - Cambios en `CHANGELOG.md`: cortos, precisos, en inglés.
-- Actualizar `README.md` y `readme.txt` solo si hay funcionalidad nueva que lo requiera.
-- Commit y push solo cuando el usuario lo pida de forma explícita.
+- Actualizar `DOCUMENTATION.md` , `README.md` y `readme.txt` solo si hay funcionalidad nueva que lo requiera.
+- Commit y push solo cuando el usuario lo pida de forma explícita, todos los archivos modificados,cuando el usuario lo pida de forma explícita.
 - Flujo completo de publicación:
   1. Bump version en header del plugin y en `define('WCCR_VERSION', ...)`
   2. Entrada en `CHANGELOG.md`
-  3. Actualizar `README.md` / `readme.txt` si aplica
+  3. Actualizar `DOCUMENTATION.md` , `README.md` y `readme.txt` si aplica
   4. `php -l` + `git diff --check`
   5. Commit + push a `dev`
   6. Merge `dev` → `main` + push `main`
