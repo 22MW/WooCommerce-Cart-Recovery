@@ -24,9 +24,9 @@ final class WCCR_Recovery_Service
 	/**
 	 * Build the public recovery URL for a cart and optional coupon.
 	 */
-	public function build_recovery_url(int $cart_id, ?string $coupon_code = null, int $step = 0): string
+	public function build_recovery_url(int $cart_id, ?string $coupon_code = null, int $step = 0, int $expiry_days = 30): string
 	{
-		$expires = time() + (30 * DAY_IN_SECONDS);
+		$expires = time() + ($expiry_days * DAY_IN_SECONDS);
 		$token   = wp_hash($cart_id . '|' . $expires . '|' . wp_salt('auth'));
 		$args    = array(
 			'wccr_recover' => $cart_id,

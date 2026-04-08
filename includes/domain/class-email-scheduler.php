@@ -57,7 +57,7 @@ final class WCCR_Email_Scheduler
 
 		try {
 			$coupon_code  = $this->coupon_service->maybe_generate_coupon($cart, $step_settings, $coupon_expiry_days);
-			$recovery_url = $this->recovery_service->build_recovery_url(absint($cart['id']), $coupon_code, $step);
+			$recovery_url = $this->recovery_service->build_recovery_url(absint($cart['id']), $coupon_code, $step, $coupon_expiry_days);
 			$email        = $this->email_renderer->render($cart, $step_settings, $recovery_url, $coupon_code);
 			$subject      = sanitize_text_field((string) ($email['subject'] ?? ''));
 			$message      = (string) ($email['message'] ?? '');
