@@ -102,7 +102,7 @@
 	 */
 	function activateLocaleTab( button ) {
 		var locale = button.getAttribute( 'data-locale-tab' );
-		var container = button.closest( '.wccr-locale-tabs' );
+		var container = button.closest( '.wccr-settings-layout' );
 
 		if ( ! locale || ! container ) {
 			return;
