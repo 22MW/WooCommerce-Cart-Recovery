@@ -4,7 +4,21 @@ All notable changes to this project should be documented in this file.
 
 The format is based on Keep a Changelog, and this project follows a simple `MAJOR.MINOR.PATCH` versioning scheme.
 
-## [0.1.39] - 2026-04-08
+## [0.1.40] - 2026-04-08
+
+### Fixed
+
+- Sincroniza expiración del enlace de recuperación con el ajuste `coupon_expiry_days` (antes fijo a 30 días).
+
+### Added
+
+- Settings: auto-guardado AJAX con debounce, sin botón submit. Toast de confirmación.
+- Settings: switch toggle reemplaza checkbox en tarjetas de email. Campos deshabilitados (opacity + pointer-events) cuando el step está OFF.
+- Settings: layout 2 columnas — idiomas en sidebar izquierda, sub-tabs Email 1/2/3 a la derecha por locale.
+- Settings: tab de email deshabilitado cuando su step está OFF.
+- Settings: texto de referencia de minutos bajo el campo "Marcar carrito abandonado".
+
+
 
 ### Improved
 
