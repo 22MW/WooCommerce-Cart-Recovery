@@ -16,6 +16,11 @@ final class WCCR_Settings_Repository
 	public static function default_settings(): array
 	{
 		$default_locale = self::get_default_locale();
+		$switched       = self::switch_to_settings_locale($default_locale);
+		$default_steps  = self::get_default_steps($default_locale);
+		if ($switched) {
+			WCCR_Plugin_Locale_Switcher::restore_previous_locale();
+		}
 
 		return array(
 			'abandon_after_minutes' => 60,
@@ -24,7 +29,7 @@ final class WCCR_Settings_Repository
 			'from_name'             => get_bloginfo('name'),
 			'excluded_product_ids'  => array(),
 			'excluded_term_ids'     => array(),
-			'steps'                 => self::get_default_steps($default_locale),
+			'steps'                 => $default_steps,
 		);
 	}
 
@@ -88,7 +93,11 @@ final class WCCR_Settings_Repository
 	private function normalize_settings(array $settings): array
 	{
 		$default_locale = self::get_default_locale();
+		$switched       = self::switch_to_settings_locale($default_locale);
 		$default_steps  = self::get_default_steps($default_locale);
+		if ($switched) {
+			WCCR_Plugin_Locale_Switcher::restore_previous_locale();
+		}
 
 		$settings['excluded_product_ids'] = $this->normalize_id_list($settings['excluded_product_ids'] ?? array());
 		$settings['excluded_term_ids']    = $this->normalize_id_list($settings['excluded_term_ids'] ?? array());
@@ -286,20 +295,20 @@ final class WCCR_Settings_Repository
 			2 => array(
 				'enabled'         => 1,
 				'delay_minutes'   => 1440,
-				'discount_type'   => 'percent',
-				'discount_amount' => 5,
+				'discount_type'   => 'none',
+				'discount_amount' => 0,
 				'min_cart_total'  => 0,
 				'subject'         => __('{customer_name}, your cart is waiting for you', 'vfwoo_woocommerce-cart-recovery'),
-				'body'            => __('Hi {customer_name}, your cart at {site_name} is still waiting. We have added a special discount for you — use the code {coupon_code} at checkout. Don\'t wait too long!', 'vfwoo_woocommerce-cart-recovery'),
+				'body'            => __('Hi {customer_name}, your cart at {site_name} is still waiting. Everything you selected is still available — come back and complete your order before it is gone.', 'vfwoo_woocommerce-cart-recovery'),
 			),
 			3 => array(
 				'enabled'         => 1,
 				'delay_minutes'   => 2880,
-				'discount_type'   => 'percent',
-				'discount_amount' => 10,
+				'discount_type'   => 'none',
+				'discount_amount' => 0,
 				'min_cart_total'  => 0,
 				'subject'         => __('{customer_name}, last reminder for your cart', 'vfwoo_woocommerce-cart-recovery'),
-				'body'            => __('Hi {customer_name}, this is your last reminder. Your cart at {site_name} is about to expire, and so is your exclusive discount code {coupon_code}. Complete your order today before it is too late.', 'vfwoo_woocommerce-cart-recovery'),
+				'body'            => __('Hi {customer_name}, this is your last reminder. Your cart at {site_name} is about to expire. Don\'t miss out — complete your order today.', 'vfwoo_woocommerce-cart-recovery'),
 			),
 		);
 

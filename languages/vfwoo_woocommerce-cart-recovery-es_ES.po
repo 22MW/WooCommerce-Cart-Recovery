@@ -492,16 +492,16 @@ msgid "{customer_name}, your cart is waiting for you"
 msgstr "{customer_name}, tu carrito te está esperando"
 
 #: includes/repositories/class-settings-repository.php:278
-msgid "Hi {customer_name}, your cart at {site_name} is still waiting. We have added a special discount for you — use the code {coupon_code} at checkout. Don't wait too long!"
-msgstr "Hola {customer_name}, tu carrito en {site_name} sigue esperándote. Hemos añadido un descuento especial para ti — usa el código {coupon_code} al finalizar tu compra. ¡No lo dejes para más tarde!"
+msgid "Hi {customer_name}, your cart at {site_name} is still waiting. Everything you selected is still available — come back and complete your order before it is gone."
+msgstr "Hola {customer_name}, tu carrito en {site_name} sigue esperándote. Todo lo que seleccionaste sigue disponible — vuelve y completa tu pedido antes de que desaparezca."
 
 #: includes/repositories/class-settings-repository.php:286
 msgid "{customer_name}, last reminder for your cart"
 msgstr "{customer_name}, último recordatorio para tu carrito"
 
 #: includes/repositories/class-settings-repository.php:287
-msgid "Hi {customer_name}, this is your last reminder. Your cart at {site_name} is about to expire, and so is your exclusive discount code {coupon_code}. Complete your order today before it is too late."
-msgstr "Hola {customer_name}, este es tu último recordatorio. Tu carrito en {site_name} está a punto de caducar, al igual que tu código de descuento exclusivo {coupon_code}. Completa tu pedido hoy antes de que sea demasiado tarde."
+msgid "Hi {customer_name}, this is your last reminder. Your cart at {site_name} is about to expire. Don't miss out — complete your order today."
+msgstr "Hola {customer_name}, este es tu último recordatorio. Tu carrito en {site_name} está a punto de caducar. No te lo pierdas — completa tu pedido hoy."
 
 #. translators: %s: customer name
 #: templates/emails/base-email.php:9

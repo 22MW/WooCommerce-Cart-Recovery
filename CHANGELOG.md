@@ -4,9 +4,18 @@ All notable changes to this project should be documented in this file.
 
 The format is based on Keep a Changelog, and this project follows a simple `MAJOR.MINOR.PATCH` versioning scheme.
 
+## [0.1.45] - 2026-04-08
+
+### Fixed
+
+- Default step settings now switch locale before resolving translated strings, so defaults load in the correct language on fresh installs
+- Default discount type for steps 2 and 3 changed to none; removed coupon references from default email body text
+- GitHub Release now includes the matching CHANGELOG entry as release body, so the changelog is visible in the WP plugin modal
+
 ## [0.1.44] - 2026-04-08
 
 ### Fixed
+
 - Strip stale `_booking_id` from WooCommerce Bookings cart items before saving the payload, so a fresh booking is created on recovery instead of failing with a missing/expired booking
 
 ## [0.1.43] - 2026-04-08
