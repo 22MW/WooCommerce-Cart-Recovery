@@ -336,7 +336,7 @@ final class WCCR_Cart_Repository
 
 		$rows = $wpdb->get_results(
 			$wpdb->prepare(
-				"SELECT * FROM {$this->table} WHERE status = 'abandoned' AND email IS NOT NULL AND email != '' ORDER BY abandoned_at_gmt ASC LIMIT %d",
+				"SELECT * FROM {$this->table} WHERE status IN ('abandoned', 'clicked') AND email IS NOT NULL AND email != '' ORDER BY abandoned_at_gmt ASC LIMIT %d",
 				$limit
 			),
 			ARRAY_A
