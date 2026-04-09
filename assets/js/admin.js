@@ -719,7 +719,7 @@
 
 		if ( bulkDeleteBtn ) {
 			bulkDeleteBtn.addEventListener( 'click', function ( e ) {
-				var msg = getLabel( 'bulkConfirm', 'Are you sure you want to delete the selected carts? This action cannot be undone.' );
+				var msg = getLabel( 'bulkConfirm', 'Are you sure you want to delete the selected carts?' );
 				if ( ! window.confirm( msg ) ) {
 					e.preventDefault();
 				}

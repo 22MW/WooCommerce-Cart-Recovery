@@ -542,12 +542,12 @@ msgid "Bulk Delete"
 msgstr "Massenlöschung"
 
 #: includes/admin/class-abandoned-carts-page.php
-msgid "Recovery emails will not be sent to deleted carts. This action cannot be undone."
-msgstr "An gelöschte Warenkörbe werden keine Wiederherstellungs-E-Mails gesendet. Diese Aktion kann nicht rückgängig gemacht werden."
+msgid "Recovery emails will not be sent to deleted carts."
+msgstr "An gelöschte Warenkörbe werden keine Wiederherstellungs-E-Mails gesendet."
 
 #: includes/admin/class-admin-menu.php
-msgid "Are you sure you want to delete the selected carts? This action cannot be undone."
-msgstr "Möchten Sie die ausgewählten Warenkörbe wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden."
+msgid "Are you sure you want to delete the selected carts?"
+msgstr "Möchten Sie die ausgewählten Warenkörbe wirklich löschen?"
 
 #: includes/admin/class-abandoned-carts-page.php
 msgid "Select all"

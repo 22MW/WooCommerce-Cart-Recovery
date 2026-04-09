@@ -140,7 +140,7 @@ final class WCCR_Admin_Menu
 				'savingLabel'     => __('Guardando…', 'vfwoo_woocommerce-cart-recovery'),
 				'savedLabel'      => __('Guardado', 'vfwoo_woocommerce-cart-recovery'),
 				'saveErrorLabel'  => __('Error al guardar', 'vfwoo_woocommerce-cart-recovery'),
-				'bulkConfirm'        => __('Are you sure you want to delete the selected carts? This action cannot be undone.', 'vfwoo_woocommerce-cart-recovery'),
+				'bulkConfirm'        => __('Are you sure you want to delete the selected carts?', 'vfwoo_woocommerce-cart-recovery'),
 				'selectAllLabel'     => __('Select all', 'vfwoo_woocommerce-cart-recovery'),
 				'deselectAllLabel'   => __('Deselect all', 'vfwoo_woocommerce-cart-recovery'),
 			)

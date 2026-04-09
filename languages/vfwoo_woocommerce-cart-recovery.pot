@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-04-09T09:56:05+00:00\n"
+"POT-Creation-Date: 2026-04-09T10:19:03+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.6.0\n"
 "X-Domain: vfwoo_woocommerce-cart-recovery\n"
@@ -75,7 +75,7 @@ msgid "Delete selected"
 msgstr ""
 
 #: includes/admin/class-abandoned-carts-page.php:195
-msgid "Recovery emails will not be sent to deleted carts. This action cannot be undone."
+msgid "Recovery emails will not be sent to deleted carts."
 msgstr ""
 
 #: includes/admin/class-abandoned-carts-page.php:210
@@ -349,7 +349,7 @@ msgid "Error al guardar"
 msgstr ""
 
 #: includes/admin/class-admin-menu.php:143
-msgid "Are you sure you want to delete the selected carts? This action cannot be undone."
+msgid "Are you sure you want to delete the selected carts?"
 msgstr ""
 
 #: includes/admin/class-admin-menu.php:145

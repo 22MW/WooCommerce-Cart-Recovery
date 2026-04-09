@@ -542,12 +542,12 @@ msgid "Bulk Delete"
 msgstr "Bulk Delete"
 
 #: includes/admin/class-abandoned-carts-page.php
-msgid "Recovery emails will not be sent to deleted carts. This action cannot be undone."
-msgstr "Recovery emails will not be sent to deleted carts. This action cannot be undone."
+msgid "Recovery emails will not be sent to deleted carts."
+msgstr "Recovery emails will not be sent to deleted carts."
 
 #: includes/admin/class-admin-menu.php
-msgid "Are you sure you want to delete the selected carts? This action cannot be undone."
-msgstr "Are you sure you want to delete the selected carts? This action cannot be undone."
+msgid "Are you sure you want to delete the selected carts?"
+msgstr "Are you sure you want to delete the selected carts?"
 
 #: includes/admin/class-abandoned-carts-page.php
 msgid "Select all"

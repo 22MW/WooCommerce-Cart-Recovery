@@ -974,6 +974,19 @@
 	display: none !important;
 }
 
+#wccr-bulk-delete-btn {
+	background: var(--vfwoo-red);
+	color: var(--vfwoo-white);
+	border-color: var(--vfwoo-red);
+}
+
+#wccr-bulk-delete-btn:hover {
+	background: var(--vfwoo-red);
+	color: var(--vfwoo-white);
+	border-color: var(--vfwoo-red);
+	opacity: .92;
+}
+
 .wccr-admin .wccr-bulk-description {
 	width: 100%;
 	margin: 0;
