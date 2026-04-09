@@ -192,7 +192,7 @@ final class WCCR_Abandoned_Carts_Page
 				</button>
 			</div>
 			<p class="description wccr-bulk-description">
-				<?php esc_html_e('Recovery emails will not be sent to deleted carts. This action cannot be undone.', 'vfwoo_woocommerce-cart-recovery'); ?>
+				<?php esc_html_e('Recovery emails will not be sent to deleted carts.', 'vfwoo_woocommerce-cart-recovery'); ?>
 			</p>
 		</div>
 	<?php

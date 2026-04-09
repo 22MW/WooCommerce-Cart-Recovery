@@ -4,6 +4,15 @@ All notable changes to this project should be documented in this file.
 
 The format is based on Keep a Changelog, and this project follows a simple `MAJOR.MINOR.PATCH` versioning scheme.
 
+## [0.1.48] - 2026-04-09
+
+### Changed
+
+- "Delete selected" button styled red to match individual delete button.
+- Removed "This action cannot be undone." from bulk delete warning and confirm dialog.
+- Bulk Delete button and filters toolbar order swapped: Bulk Delete now above filters.
+- Updated `.pot` and all translation catalogs with `Order date` string.
+
 ## [0.1.47] - 2026-04-09
 
 ### Fixed

@@ -50,15 +50,16 @@ Si el usuario no confirma → no se ejecuta nada. Sin excepciones.
 - Incrementar el último número de versión salvo que el usuario indique otra estrategia.
 - Cambios en `CHANGELOG.md`: cortos, precisos, en inglés.
 - Actualizar `DOCUMENTATION.md` , `README.md` y `readme.txt` solo si hay funcionalidad nueva que lo requiera.
-- Commit y push solo cuando el usuario lo pida de forma explícita, todos los archivos modificados,cuando el usuario lo pida de forma explícita.
+- Commit y push  todos los archivos modificados,cuando el usuario lo pida de forma explícita.
 - Flujo completo de publicación:
   1. Bump version en header del plugin y en `define('WCCR_VERSION', ...)`
   2. Entrada en `CHANGELOG.md`
   3. Actualizar `DOCUMENTATION.md` , `README.md` y `readme.txt` si aplica
-  4. `php -l` + `git diff --check`
-  5. Commit + push a `dev`
-  6. Merge `dev` → `main` + push `main`
-  7. Tag `vX.Y.Z` + push tag → GitHub Action crea el Release con el ZIP
+  4. Regenerar `.pot` con `wp i18n make-pot` y compilar `.mo` con `wp i18n make-mo`
+  5. `php -l` + `git diff --check`
+  6. Commit + push a `dev`
+  7. Merge `dev` → `main` + push `main`
+  8. Tag `vX.Y.Z` + push tag → GitHub Action crea el Release con el ZIP
 
 ## Reporte Final
 

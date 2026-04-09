@@ -140,6 +140,10 @@ msgstr "Últim error"
 msgid "Abandoned cart created"
 msgstr "Carret abandonat creat"
 
+#: includes/admin/class-abandoned-carts-page.php:359
+msgid "Order date"
+msgstr "Data de la comanda"
+
 #: includes/admin/class-abandoned-carts-page.php:260
 msgid "Last update"
 msgstr "Última actualització"
@@ -538,12 +542,12 @@ msgid "Bulk Delete"
 msgstr "Eliminar en massa"
 
 #: includes/admin/class-abandoned-carts-page.php
-msgid "Recovery emails will not be sent to deleted carts. This action cannot be undone."
-msgstr "No s'enviaran correus de recuperació als carrets eliminats. Aquesta acció no es pot desfer."
+msgid "Recovery emails will not be sent to deleted carts."
+msgstr "No s'enviaran correus de recuperació als carrets eliminats."
 
 #: includes/admin/class-admin-menu.php
-msgid "Are you sure you want to delete the selected carts? This action cannot be undone."
-msgstr "Esteu segur que voleu eliminar els carrets seleccionats? Aquesta acció no es pot desfer."
+msgid "Are you sure you want to delete the selected carts?"
+msgstr "Esteu segur que voleu eliminar els carrets seleccionats?"
 
 #: includes/admin/class-abandoned-carts-page.php
 msgid "Select all"
