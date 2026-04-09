@@ -4,6 +4,21 @@ All notable changes to this project should be documented in this file.
 
 The format is based on Keep a Changelog, and this project follows a simple `MAJOR.MINOR.PATCH` versioning scheme.
 
+## [0.1.47] - 2026-04-09
+
+### Fixed
+
+- `abandoned_at_gmt` for imported order-backed carts is now always set to the import time so the email scheduler starts counting from capture, not from the original order date.
+- `created_at_gmt` carries the real order date for display purposes only.
+- Data migration (`wccr_db_version 0.1.47`) corrects `abandoned_at_gmt` on rows inserted with the wrong date in v0.1.46.
+
+### Changed
+
+- Cart card label "Abandoned at" renamed to "Abandoned cart created".
+- Cart card now shows "Order date" (`created_at_gmt`) for imported orders only.
+- Introduced `wccr_db_version` option to track and gate future data migrations.
+- Added bulk delete: select individual carts or all at once via the checkbox bar and delete them in one action.
+
 ## [0.1.46] - 2026-04-08
 
 ### Fixed

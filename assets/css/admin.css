@@ -518,6 +518,10 @@
 	flex-shrink: 0;
 }
 
+.wccr-admin .wccr-switch[hidden] {
+	display: none !important;
+}
+
 .wccr-admin .wccr-switch input {
 	opacity: 0;
 	width: 0;
@@ -950,4 +954,41 @@
 	.wccr-layout__header-brand img {
 		max-width: 150px;
 	}
+}
+
+/* ==========================================================================
+   Bulk delete
+   ========================================================================== */
+
+.wccr-admin .wccr-bulk-bar {
+	margin-top: 0;
+}
+
+#wccr-bulk-controls:not([hidden]) {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+
+#wccr-bulk-delete-btn[hidden] {
+	display: none !important;
+}
+
+.wccr-admin .wccr-bulk-description {
+	width: 100%;
+	margin: 0;
+}
+
+.wccr-admin .wccr-cart-switch {
+	position: absolute;
+	top: 12px;
+	left: 14px;
+}
+
+.wccr-admin .wccr-recovery-item {
+	position: relative;
+}
+
+.wccr-admin .wccr-recovery-item__header {
+	padding-left: 70px;
 }

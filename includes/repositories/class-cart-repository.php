@@ -504,12 +504,10 @@ final class WCCR_Cart_Repository
 	{
 		global $wpdb;
 
-		$date_to_use = ('' !== $order_date_gmt) ? $order_date_gmt : $now_gmt;
-
 		$data['status']            = 'abandoned';
-		$data['last_activity_gmt'] = $date_to_use;
-		$data['abandoned_at_gmt']  = $date_to_use;
-		$data['created_at_gmt']    = $date_to_use;
+		$data['last_activity_gmt'] = $now_gmt;
+		$data['abandoned_at_gmt']  = $now_gmt;
+		$data['created_at_gmt']    = ('' !== $order_date_gmt) ? $order_date_gmt : $now_gmt;
 
 		$wpdb->insert($this->table, $data);
 	}

@@ -136,9 +136,9 @@ msgstr "Bestellung"
 msgid "Last error"
 msgstr "Letzter Fehler"
 
-#: includes/admin/class-abandoned-carts-page.php:259
-msgid "Abandoned at"
-msgstr "Abgebrochen am"
+#: includes/admin/class-abandoned-carts-page.php
+msgid "Abandoned cart created"
+msgstr "Verlassener Warenkorb erstellt"
 
 #: includes/admin/class-abandoned-carts-page.php:260
 msgid "Last update"
@@ -532,3 +532,37 @@ msgstr "Preis"
 #: templates/emails/base-email.php:90
 msgid "Recover your cart"
 msgstr "Warenkorb wiederherstellen"
+
+#: includes/admin/class-abandoned-carts-page.php
+msgid "Bulk Delete"
+msgstr "Massenlöschung"
+
+#: includes/admin/class-abandoned-carts-page.php
+msgid "Recovery emails will not be sent to deleted carts. This action cannot be undone."
+msgstr "An gelöschte Warenkörbe werden keine Wiederherstellungs-E-Mails gesendet. Diese Aktion kann nicht rückgängig gemacht werden."
+
+#: includes/admin/class-admin-menu.php
+msgid "Are you sure you want to delete the selected carts? This action cannot be undone."
+msgstr "Möchten Sie die ausgewählten Warenkörbe wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden."
+
+#: includes/admin/class-abandoned-carts-page.php
+msgid "Select all"
+msgstr "Alle auswählen"
+
+#: includes/admin/class-admin-menu.php
+msgid "Deselect all"
+msgstr "Alle abwählen"
+
+#: includes/admin/class-abandoned-carts-page.php
+msgid "Delete selected"
+msgstr "Ausgewählte löschen"
+
+#: includes/admin/class-abandoned-carts-page.php
+msgid "Select item"
+msgstr "Element auswählen"
+
+#: includes/admin/class-abandoned-carts-page.php
+msgid "%d item deleted."
+msgid_plural "%d items deleted."
+msgstr[0] "%d Element gelöscht."
+msgstr[1] "%d Elemente gelöscht."

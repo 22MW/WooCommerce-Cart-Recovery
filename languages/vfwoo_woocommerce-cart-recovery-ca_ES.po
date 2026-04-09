@@ -136,9 +136,9 @@ msgstr "Comanda"
 msgid "Last error"
 msgstr "Últim error"
 
-#: includes/admin/class-abandoned-carts-page.php:259
-msgid "Abandoned at"
-msgstr "Abandonat a"
+#: includes/admin/class-abandoned-carts-page.php
+msgid "Abandoned cart created"
+msgstr "Carret abandonat creat"
 
 #: includes/admin/class-abandoned-carts-page.php:260
 msgid "Last update"
@@ -532,3 +532,37 @@ msgstr "Preu"
 #: templates/emails/base-email.php:90
 msgid "Recover your cart"
 msgstr "Recupera el teu carret"
+
+#: includes/admin/class-abandoned-carts-page.php
+msgid "Bulk Delete"
+msgstr "Eliminar en massa"
+
+#: includes/admin/class-abandoned-carts-page.php
+msgid "Recovery emails will not be sent to deleted carts. This action cannot be undone."
+msgstr "No s'enviaran correus de recuperació als carrets eliminats. Aquesta acció no es pot desfer."
+
+#: includes/admin/class-admin-menu.php
+msgid "Are you sure you want to delete the selected carts? This action cannot be undone."
+msgstr "Esteu segur que voleu eliminar els carrets seleccionats? Aquesta acció no es pot desfer."
+
+#: includes/admin/class-abandoned-carts-page.php
+msgid "Select all"
+msgstr "Seleccionar tots"
+
+#: includes/admin/class-admin-menu.php
+msgid "Deselect all"
+msgstr "Deseleccionar tots"
+
+#: includes/admin/class-abandoned-carts-page.php
+msgid "Delete selected"
+msgstr "Eliminar seleccionats"
+
+#: includes/admin/class-abandoned-carts-page.php
+msgid "Select item"
+msgstr "Seleccionar element"
+
+#: includes/admin/class-abandoned-carts-page.php
+msgid "%d item deleted."
+msgid_plural "%d items deleted."
+msgstr[0] "%d element eliminat."
+msgstr[1] "%d elements eliminats."

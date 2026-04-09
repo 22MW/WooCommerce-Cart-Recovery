@@ -136,9 +136,9 @@ msgstr "Order"
 msgid "Last error"
 msgstr "Last error"
 
-#: includes/admin/class-abandoned-carts-page.php:259
-msgid "Abandoned at"
-msgstr "Abandoned at"
+#: includes/admin/class-abandoned-carts-page.php
+msgid "Abandoned cart created"
+msgstr "Abandoned cart created"
 
 #: includes/admin/class-abandoned-carts-page.php:260
 msgid "Last update"
@@ -532,3 +532,37 @@ msgstr "Price"
 #: templates/emails/base-email.php:90
 msgid "Recover your cart"
 msgstr "Recover your cart"
+
+#: includes/admin/class-abandoned-carts-page.php
+msgid "Bulk Delete"
+msgstr "Bulk Delete"
+
+#: includes/admin/class-abandoned-carts-page.php
+msgid "Recovery emails will not be sent to deleted carts. This action cannot be undone."
+msgstr "Recovery emails will not be sent to deleted carts. This action cannot be undone."
+
+#: includes/admin/class-admin-menu.php
+msgid "Are you sure you want to delete the selected carts? This action cannot be undone."
+msgstr "Are you sure you want to delete the selected carts? This action cannot be undone."
+
+#: includes/admin/class-abandoned-carts-page.php
+msgid "Select all"
+msgstr "Select all"
+
+#: includes/admin/class-admin-menu.php
+msgid "Deselect all"
+msgstr "Deselect all"
+
+#: includes/admin/class-abandoned-carts-page.php
+msgid "Delete selected"
+msgstr "Delete selected"
+
+#: includes/admin/class-abandoned-carts-page.php
+msgid "Select item"
+msgstr "Select item"
+
+#: includes/admin/class-abandoned-carts-page.php
+msgid "%d item deleted."
+msgid_plural "%d items deleted."
+msgstr[0] "%d item deleted."
+msgstr[1] "%d items deleted."
