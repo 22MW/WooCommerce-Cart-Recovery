@@ -140,6 +140,10 @@ msgstr "Último error"
 msgid "Abandoned cart created"
 msgstr "Carrito abandonado creado"
 
+#: includes/admin/class-abandoned-carts-page.php:359
+msgid "Order date"
+msgstr "Fecha del pedido"
+
 #: includes/admin/class-abandoned-carts-page.php:260
 msgid "Last update"
 msgstr "Última actualización"
