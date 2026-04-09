@@ -44,6 +44,7 @@ final class WCCR_Abandoned_Carts_Page
 		}
 
 		$this->maybe_handle_delete();
+		$this->maybe_handle_bulk_delete();
 
 		$sort     = $this->get_current_sort();
 		$view     = $this->get_current_view();
@@ -55,9 +56,52 @@ final class WCCR_Abandoned_Carts_Page
 		<?php $this->render_deleted_notice(); ?>
 		<?php $this->render_stats_grid($stats); ?>
 		<?php $this->render_dashboard_actions(); ?>
+		<form id="wccr-bulk-form" method="post">
+			<?php wp_nonce_field('wccr_bulk_delete', 'wccr_bulk_nonce'); ?>
+			<?php $this->render_bulk_bar(); ?>
+		</form>
 		<?php $this->render_toolbar($sort, $view); ?>
 		<?php $this->render_cards_grid($carts, $settings, $view); ?>
 	<?php
+	}
+
+	/**
+	 * Delete multiple recovery items after nonce and capability validation.
+	 */
+	private function maybe_handle_bulk_delete(): void
+	{
+		if (! isset($_POST['wccr_bulk_nonce'], $_POST['wccr_cart_ids'])) {
+			return;
+		}
+
+		if (! current_user_can('manage_woocommerce')) {
+			return;
+		}
+
+		if (! wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['wccr_bulk_nonce'])), 'wccr_bulk_delete')) {
+			return;
+		}
+
+		$ids   = array_map('absint', (array) wp_unslash($_POST['wccr_cart_ids']));
+		$count = 0;
+		foreach ($ids as $cart_id) {
+			if ($cart_id <= 0) {
+				continue;
+			}
+			$cart = $this->cart_repository->find_by_id($cart_id);
+			if (! $cart) {
+				continue;
+			}
+			$this->delete_plugin_owned_order(absint($cart['linked_order_id'] ?? 0));
+			$this->stats_repository->archive_cart_metrics($cart, $this->email_log_repository->count_sent_for_cart($cart_id));
+			$this->email_log_repository->delete_for_cart($cart_id);
+			$this->cart_repository->delete_by_id($cart_id);
+			$this->audit_logger->log('cart_deleted', 'cart', $cart_id);
+			++$count;
+		}
+
+		wp_safe_redirect($this->get_dashboard_url(array('wccr_deleted' => 'bulk', 'wccr_deleted_count' => $count)));
+		exit;
 	}
 
 	/**
@@ -107,12 +151,48 @@ final class WCCR_Abandoned_Carts_Page
 		<div class="notice notice-success is-dismissible">
 			<p>
 				<?php
-				echo esc_html(
-					'order' === $deleted
-						? __('Recovery item and linked unpaid order deleted.', 'vfwoo_woocommerce-cart-recovery')
-						: __('Recovery item deleted.', 'vfwoo_woocommerce-cart-recovery')
-				);
+				if ('bulk' === $deleted) {
+					$bulk_count = absint($_GET['wccr_deleted_count'] ?? 0);
+					echo esc_html(
+						/* translators: %d: number of deleted items */
+						sprintf(_n('%d item deleted.', '%d items deleted.', $bulk_count, 'vfwoo_woocommerce-cart-recovery'), $bulk_count)
+					);
+				} else {
+					echo esc_html(
+						'order' === $deleted
+							? __('Recovery item and linked unpaid order deleted.', 'vfwoo_woocommerce-cart-recovery')
+							: __('Recovery item deleted.', 'vfwoo_woocommerce-cart-recovery')
+					);
+				}
 				?>
+			</p>
+		</div>
+	<?php
+	}
+
+	/**
+	 * Render the bulk actions bar.
+	 *
+	 * Phase 1 (normal): "Bulk Delete" button + warning text.
+	 * Phase 2 (bulk mode, revealed by JS): buttons visible, Bulk Delete hidden.
+	 */
+	private function render_bulk_bar(): void
+	{
+	?>
+		<div class="wccr-bulk-bar wccr-toolbar">
+			<button type="button" id="wccr-bulk-mode-btn" class="button">
+				<?php esc_html_e('Bulk Delete', 'vfwoo_woocommerce-cart-recovery'); ?>
+			</button>
+			<div id="wccr-bulk-controls" hidden>
+				<button type="button" id="wccr-select-all" class="button button-secondary">
+					<?php esc_html_e('Select all', 'vfwoo_woocommerce-cart-recovery'); ?>
+				</button>
+				<button type="submit" name="wccr_bulk_action" value="delete" id="wccr-bulk-delete-btn" class="button button-link-delete" hidden>
+					<?php esc_html_e('Delete selected', 'vfwoo_woocommerce-cart-recovery'); ?>
+				</button>
+			</div>
+			<p class="description wccr-bulk-description">
+				<?php esc_html_e('Recovery emails will not be sent to deleted carts. This action cannot be undone.', 'vfwoo_woocommerce-cart-recovery'); ?>
 			</p>
 		</div>
 	<?php
@@ -214,6 +294,10 @@ final class WCCR_Abandoned_Carts_Page
 	{
 	?>
 		<article class="wccr-recovery-item">
+			<label class="wccr-switch wccr-cart-switch" aria-label="<?php esc_attr_e('Select item', 'vfwoo_woocommerce-cart-recovery'); ?>" hidden>
+				<input type="checkbox" class="wccr-cart-checkbox" name="wccr_cart_ids[]" value="<?php echo esc_attr(absint($cart['id'])); ?>" form="wccr-bulk-form">
+				<span class="wccr-switch-slider"></span>
+			</label>
 			<?php $this->render_card_header($cart); ?>
 			<div class="wccr-recovery-item__body">
 				<?php $this->render_card_meta($cart); ?>
@@ -271,7 +355,8 @@ final class WCCR_Abandoned_Carts_Page
 				$this->build_meta_item(__('Linked order', 'vfwoo_woocommerce-cart-recovery'), $this->get_order_link_html(absint($cart['linked_order_id'] ?? 0))),
 				$this->build_meta_item(__('Order', 'vfwoo_woocommerce-cart-recovery'), $this->get_order_link_html(absint($cart['recovered_order_id'] ?? 0))),
 				$this->build_meta_item(__('Last error', 'vfwoo_woocommerce-cart-recovery'), $this->get_last_error_label($cart)),
-				$this->build_meta_item(__('Abandoned at', 'vfwoo_woocommerce-cart-recovery'), $this->email_eligibility_service->format_gmt_for_display((string) ($cart['abandoned_at_gmt'] ?? ''))),
+				$this->build_meta_item(__('Abandoned cart created', 'vfwoo_woocommerce-cart-recovery'), $this->email_eligibility_service->format_gmt_for_display((string) ($cart['abandoned_at_gmt'] ?? ''))),
+				'order' === ($cart['primary_source'] ?? '') ? $this->build_meta_item(__('Order date', 'vfwoo_woocommerce-cart-recovery'), $this->email_eligibility_service->format_gmt_for_display((string) ($cart['created_at_gmt'] ?? ''))) : null,
 				$this->build_meta_item(__('Last update', 'vfwoo_woocommerce-cart-recovery'), $this->email_eligibility_service->format_gmt_for_display((string) ($cart['updated_at_gmt'] ?? ''))),
 			)
 		);

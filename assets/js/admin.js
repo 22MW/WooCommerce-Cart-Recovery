@@ -661,4 +661,69 @@
 	}() );
 
 	WCCRSettingsSaver.init();
+
+	// -------------------------------------------------------------------------
+	// Bulk select / bulk delete
+	// -------------------------------------------------------------------------
+	( function () {
+		var bulkModeBtn  = document.getElementById( 'wccr-bulk-mode-btn' );
+		var bulkControls = document.getElementById( 'wccr-bulk-controls' );
+		var selectAllBtn = document.getElementById( 'wccr-select-all' );
+		var bulkDeleteBtn = document.getElementById( 'wccr-bulk-delete-btn' );
+
+		function updateDeleteButton() {
+			if ( ! bulkDeleteBtn ) {
+				return;
+			}
+			var checked = document.querySelectorAll( '.wccr-cart-checkbox:checked' );
+			bulkDeleteBtn.hidden = checked.length === 0;
+		}
+
+		if ( bulkModeBtn ) {
+			bulkModeBtn.addEventListener( 'click', function () {
+				bulkModeBtn.hidden = true;
+				bulkModeBtn.style.display = 'none';
+				if ( bulkControls ) {
+					bulkControls.hidden = false;
+				}
+				document.querySelectorAll( '.wccr-cart-switch' ).forEach( function ( sw ) {
+					sw.hidden = false;
+				} );
+			} );
+		}
+
+		if ( selectAllBtn ) {
+			selectAllBtn.addEventListener( 'click', function () {
+				var allChecked = document.querySelectorAll( '.wccr-cart-checkbox:checked' ).length ===
+					document.querySelectorAll( '.wccr-cart-checkbox' ).length;
+				var newState = ! allChecked;
+
+				document.querySelectorAll( '.wccr-cart-checkbox' ).forEach( function ( cb ) {
+					cb.checked = newState;
+				} );
+
+				selectAllBtn.textContent = newState
+					? getLabel( 'deselectAllLabel', 'Deselect all' )
+					: getLabel( 'selectAllLabel', 'Select all' );
+
+				updateDeleteButton();
+			} );
+		}
+
+		document.addEventListener( 'change', function ( e ) {
+			if ( ! e.target || ! e.target.classList.contains( 'wccr-cart-checkbox' ) ) {
+				return;
+			}
+			updateDeleteButton();
+		} );
+
+		if ( bulkDeleteBtn ) {
+			bulkDeleteBtn.addEventListener( 'click', function ( e ) {
+				var msg = getLabel( 'bulkConfirm', 'Are you sure you want to delete the selected carts? This action cannot be undone.' );
+				if ( ! window.confirm( msg ) ) {
+					e.preventDefault();
+				}
+			} );
+		}
+	}() );
 }() );

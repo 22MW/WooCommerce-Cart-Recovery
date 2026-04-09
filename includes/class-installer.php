@@ -111,9 +111,40 @@ final class WCCR_Installer
 		);
 
 		add_option('wccr_settings', WCCR_Settings_Repository::default_settings());
-                add_option('wccr_first_activated_at', gmdate('Y-m-d H:i:s'));
+		add_option('wccr_first_activated_at', gmdate('Y-m-d H:i:s'));
 		$wpdb->query($wpdb->prepare("UPDATE {$carts_table} SET status = %s, recovered_at_gmt = NULL WHERE status = %s AND (recovered_order_id IS NULL OR recovered_order_id = 0)", 'clicked', 'recovered'));
 
 		WCCR_Cart_Repository::migrate_encrypt_pii();
+
+		self::run_migrations();
+	}
+
+	/**
+	 * Run versioned data migrations.
+	 */
+	private static function run_migrations(): void
+	{
+		$current = (string) get_option('wccr_db_version', '0');
+
+		if (version_compare($current, '0.1.47', '<')) {
+			self::migrate_0147_fix_abandoned_at();
+			update_option('wccr_db_version', '0.1.47');
+		}
+	}
+
+	/**
+	 * Fix abandoned_at_gmt for order-backed carts inserted with the wrong date in v0.1.46.
+	 */
+	private static function migrate_0147_fix_abandoned_at(): void
+	{
+		global $wpdb;
+
+		$table = $wpdb->prefix . 'wccr_abandoned_carts';
+		$wpdb->query(
+			"UPDATE {$table}
+			 SET abandoned_at_gmt = updated_at_gmt
+			 WHERE primary_source = 'order'
+			   AND abandoned_at_gmt < '2026-01-01 00:00:00'"
+		);
 	}
 }

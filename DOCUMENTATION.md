@@ -162,6 +162,11 @@ Desde los ajustes hay un botón para importar manualmente los pedidos `pending` 
 
 La sincronización automática (tarea recurrente) solo procesa pedidos creados **después** de activar el plugin. El botón manual cubre el histórico completo. En ambos casos se omiten pedidos cuyo cliente ya tiene una compra posterior completada, y se importa como máximo un pedido por email de cliente.
 
+Los carritos importados desde pedidos muestran en el panel dos fechas diferenciadas:
+
+- **Carrito abandonado creado** — fecha en que el carrito entró en el flujo de recovery (momento de la importación). Es el punto de partida para los delays de email.
+- **Fecha del pedido** — fecha original del pedido en WooCommerce (puede ser de años atrás). Solo informativa, no afecta al envío de emails.
+
 ---
 
 ## Casos de uso rápidos
